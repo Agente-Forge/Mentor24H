@@ -938,3 +938,32 @@
   filter: blur(8px);
   background: inherit;
 }
+
+/* ═══════════════════════════════════════════════════════════
+   MOBILE — correções de valores e layout
+═══════════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+  /* Dashboard: health gauge menor */
+  .health-row { flex-wrap: wrap; gap: var(--s-4); }
+  .health-gauge { width: 140px; height: 140px; }
+  .health-gauge-text .num { font-size: 40px; }
+
+  /* Calculadora: número hero menor para não cortar */
+  .calc-hero .number { font-size: var(--t-2xl); }
+
+  /* Metas: 1 por linha */
+  .metas-grid { grid-template-columns: 1fr; }
+
+  /* Meta: valores monetários */
+  .meta-current { font-size: var(--t-xl); }
+  .ritmo-box .value { font-size: var(--t-lg); }
+
+  /* Calc stats: fonte menor em tela apertada */
+  .calc-stat .value {
+    font-size: 11px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+

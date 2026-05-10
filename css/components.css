@@ -977,3 +977,89 @@
   color: var(--text-1);
   box-shadow: 0 1px 0 var(--line-3);
 }
+
+/* ═══════════════════════════════════════════════════════════
+   CORREÇÕES — Valores monetários e layout responsivo
+═══════════════════════════════════════════════════════════ */
+
+/* .num — classe usada nos KPIs de contas e transações */
+.num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: -0.01em;
+}
+
+/* Garante que list-amount nunca some */
+.list-amount {
+  min-width: 90px;
+  white-space: nowrap;
+}
+
+/* FAB — sobe acima do bottom nav no mobile */
+@media (max-width: 640px) {
+  .fab {
+    bottom: calc(64px + var(--s-5));
+    right: var(--s-5);
+    width: 50px;
+    height: 50px;
+  }
+
+  /* KPIs de contas: 2x2 em vez de 4x1 */
+  #contas-kpis {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* KPIs de transações: 1 por linha */
+  #tx-kpis {
+    grid-template-columns: repeat(1, 1fr) !important;
+  }
+
+  /* list-item em mobile: valor sobe para a direita do título */
+  .list-item {
+    grid-template-columns: 38px 1fr auto;
+    grid-template-rows: auto auto;
+  }
+
+  .list-item .list-icon {
+    grid-row: 1 / 3;
+  }
+
+  .list-item .list-info {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .list-item .list-amount {
+    grid-column: 3;
+    grid-row: 1;
+    font-size: var(--t-sm);
+    min-width: 80px;
+    text-align: right;
+  }
+
+  .list-item .list-actions {
+    grid-column: 2 / 4;
+    grid-row: 2;
+    justify-content: flex-end;
+    padding-top: 4px;
+  }
+
+  /* filter-bar: inputs ocupam linha inteira */
+  .filter-bar {
+    gap: var(--s-2);
+  }
+
+  .filter-bar input,
+  .filter-bar select {
+    flex: 1 1 100%;
+    max-width: 100%;
+  }
+
+  /* bento-card com num: garante que o número caiba */
+  .bento-card .num {
+    font-size: var(--t-lg) !important;
+  }
+}
