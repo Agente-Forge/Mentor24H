@@ -1,0 +1,248 @@
+/* ═══════════════════════════════════════════════════════════
+   AURORA — Design Token System v2.0
+   Premium fintech aesthetic · Bento + Glass + Editorial
+═══════════════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap');
+
+:root {
+  /* ─── Typography ─── */
+  --font-display: 'Instrument Serif', 'Times New Roman', serif;
+  --font-body: 'Geist', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-mono: 'Geist Mono', 'SF Mono', Menlo, monospace;
+
+  /* Type scale (modular, refined) */
+  --t-xs:  11px;
+  --t-sm:  12.5px;
+  --t-base: 14px;
+  --t-md:  16px;
+  --t-lg:  19px;
+  --t-xl:  24px;
+  --t-2xl: 32px;
+  --t-3xl: 44px;
+  --t-4xl: 64px;
+  --t-hero: 88px;
+
+  /* Letter spacing for premium feel */
+  --tracking-tight: -0.02em;
+  --tracking-snug:  -0.015em;
+  --tracking-base:  0;
+  --tracking-wide:  0.04em;
+  --tracking-wider: 0.08em;
+
+  /* Line heights */
+  --leading-tight: 1.1;
+  --leading-snug:  1.3;
+  --leading-base:  1.55;
+  --leading-loose: 1.75;
+
+  /* ─── Spacing (Geometric) ─── */
+  --s-1:  4px;
+  --s-2:  8px;
+  --s-3:  12px;
+  --s-4:  16px;
+  --s-5:  20px;
+  --s-6:  24px;
+  --s-7:  32px;
+  --s-8:  40px;
+  --s-9:  48px;
+  --s-10: 64px;
+  --s-11: 80px;
+  --s-12: 120px;
+
+  /* ─── Radius ─── */
+  --r-xs:   6px;
+  --r-sm:   10px;
+  --r-md:   14px;
+  --r-lg:   20px;
+  --r-xl:   28px;
+  --r-2xl:  36px;
+  --r-full: 999px;
+
+  /* ─── Easing ─── */
+  --ease-out:    cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-back:   cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ─── Durations ─── */
+  --d-fast:    160ms;
+  --d-base:    260ms;
+  --d-slow:    420ms;
+  --d-slower:  640ms;
+
+  /* ─── Z-index ─── */
+  --z-aurora:    -1;
+  --z-base:      1;
+  --z-sticky:    50;
+  --z-sidebar:   80;
+  --z-topbar:    90;
+  --z-overlay:  100;
+  --z-modal:    200;
+  --z-toast:    300;
+
+  /* ─── Layout ─── */
+  --sidebar-w: 248px;
+  --sidebar-w-collapsed: 76px;
+  --topbar-h: 72px;
+  --content-pad: var(--s-7);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   THEME — DARK (default)
+═══════════════════════════════════════════════════════════ */
+[data-theme="dark"] {
+  /* Surfaces */
+  --base:      #08080F;
+  --surface-1: #0D0D17;
+  --surface-2: #131322;
+  --surface-3: #1A1A2E;
+  --surface-4: #22223D;
+  --surface-5: #2C2C4D;
+
+  /* Glass surfaces */
+  --glass-1: rgba(20, 20, 36, 0.58);
+  --glass-2: rgba(28, 28, 50, 0.72);
+  --glass-blur: blur(28px) saturate(180%);
+
+  /* Lines */
+  --line-1: rgba(255, 255, 255, 0.04);
+  --line-2: rgba(255, 255, 255, 0.07);
+  --line-3: rgba(255, 255, 255, 0.12);
+  --line-4: rgba(255, 255, 255, 0.18);
+
+  /* Aurora accent palette */
+  --violet:        #A78BFA;
+  --violet-2:      #8B5CF6;
+  --violet-3:      #6D28D9;
+  --violet-glow:   rgba(167, 139, 250, 0.18);
+  --violet-glow-2: rgba(167, 139, 250, 0.35);
+
+  --magenta:       #F472B6;
+  --magenta-2:     #EC4899;
+
+  --amber:         #FBBF24;
+  --amber-2:       #F59E0B;
+  --amber-glow:    rgba(251, 191, 36, 0.15);
+
+  --gold:          #D4A843;
+  --gold-bright:   #F0C060;
+
+  /* Semantic */
+  --green:    #5EE39A;
+  --green-2:  #34D399;
+  --green-bg: rgba(94, 227, 154, 0.1);
+
+  --red:      #FF6B7A;
+  --red-2:    #F87171;
+  --red-bg:   rgba(255, 107, 122, 0.1);
+
+  --orange:   #FB923C;
+  --orange-bg: rgba(251, 146, 60, 0.1);
+
+  --blue:     #7BB6FF;
+  --blue-2:   #60A5FA;
+  --blue-bg:  rgba(123, 182, 255, 0.1);
+
+  /* Text */
+  --text-1: #F8F8FB;
+  --text-2: #C0C2DD;
+  --text-3: #8085A8;
+  --text-4: #4F5378;
+  --text-5: #2E3155;
+
+  /* Aurora background gradient (decorative) */
+  --aurora-1: radial-gradient(ellipse 80% 60% at 20% 0%, rgba(167, 139, 250, 0.15), transparent 60%);
+  --aurora-2: radial-gradient(ellipse 60% 50% at 80% 100%, rgba(251, 191, 36, 0.08), transparent 60%);
+  --aurora-3: radial-gradient(ellipse 40% 40% at 50% 50%, rgba(244, 114, 182, 0.05), transparent 70%);
+
+  /* Shadows */
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-2: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --shadow-3: 0 8px 32px rgba(0, 0, 0, 0.5);
+  --shadow-4: 0 24px 64px rgba(0, 0, 0, 0.6);
+  --shadow-glow: 0 0 32px rgba(167, 139, 250, 0.25);
+
+  /* Special effects */
+  --noise-opacity: 0.025;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   THEME — LIGHT  ·  Silver Steel Premium
+   Prata escura, como aço polido de relógio de luxo.
+   Contrastes nítidos, bordas visíveis, app de milionário.
+═══════════════════════════════════════════════════════════ */
+[data-theme="light"] {
+  /* Surfaces — Aço polido, gradiente do escuro para o claro */
+  --base:      #B8BAC8;        /* Fundo principal: prata média-escura */
+  --surface-1: #C8CAD8;        /* Cards nível 1 */
+  --surface-2: #D4D6E2;        /* Cards nível 2 */
+  --surface-3: #DDDFE9;        /* Hover / tertiary */
+  --surface-4: #C2C4D2;        /* Pressed / active */
+  --surface-5: #AAADB8;        /* Fundos deep */
+
+  /* Glass — Vidro fosco sobre aço */
+  --glass-1: rgba(200, 202, 216, 0.88);
+  --glass-2: rgba(212, 214, 226, 0.96);
+  --glass-blur: blur(28px) saturate(160%);
+
+  /* Lines — VISÍVEIS e definidas — chave do visual premium */
+  --line-1: rgba(60, 62, 90, 0.14);
+  --line-2: rgba(50, 52, 80, 0.22);
+  --line-3: rgba(40, 42, 70, 0.34);
+  --line-4: rgba(30, 32, 60, 0.48);
+
+  /* Violet — rico sobre fundo aço */
+  --violet:        #5B21B6;
+  --violet-2:      #4C1D95;
+  --violet-3:      #3B1578;
+  --violet-glow:   rgba(91, 33, 182, 0.14);
+  --violet-glow-2: rgba(91, 33, 182, 0.28);
+
+  --magenta:       #BE185D;
+  --magenta-2:     #9D174D;
+
+  --amber:         #B45309;
+  --amber-2:       #92400E;
+  --amber-glow:    rgba(180, 83, 9, 0.12);
+
+  --gold:          #92680A;
+  --gold-bright:   #B8860B;
+
+  /* Semantic — Saturados, nítidos no fundo aço */
+  --green:    #047857;
+  --green-2:  #065F46;
+  --green-bg: rgba(4, 120, 87, 0.12);
+
+  --red:      #B91C1C;
+  --red-2:    #991B1B;
+  --red-bg:   rgba(185, 28, 28, 0.10);
+
+  --orange:   #C2410C;
+  --orange-bg: rgba(194, 65, 12, 0.10);
+
+  --blue:     #1D4ED8;
+  --blue-2:   #1E40AF;
+  --blue-bg:  rgba(29, 78, 216, 0.10);
+
+  /* Text — alto contraste sobre fundo aço */
+  --text-1: #0C0C18;           /* Preto profundo */
+  --text-2: #1E1E32;           /* Secundário rich */
+  --text-3: #3C3E5A;           /* Terciário */
+  --text-4: #636585;           /* Quaternário */
+  --text-5: #9496B2;           /* Muted */
+
+  /* Aurora — reflexos metálicos frios */
+  --aurora-1: radial-gradient(ellipse 80% 55% at 15% 0%,  rgba(91, 33, 182, 0.09), transparent 65%);
+  --aurora-2: radial-gradient(ellipse 60% 50% at 85% 100%, rgba(180, 83, 9, 0.07),  transparent 60%);
+  --aurora-3: radial-gradient(ellipse 50% 45% at 50% 55%,  rgba(190, 24, 93, 0.05), transparent 70%);
+
+  /* Shadows — nítidas como relevo de metal */
+  --shadow-1: 0 1px 3px  rgba(20, 22, 50, 0.18), 0 1px 0 rgba(255,255,255,0.25) inset;
+  --shadow-2: 0 4px 16px rgba(20, 22, 50, 0.22);
+  --shadow-3: 0 8px 32px rgba(20, 22, 50, 0.28);
+  --shadow-4: 0 24px 64px rgba(20, 22, 50, 0.35);
+  --shadow-glow: 0 0 32px rgba(91, 33, 182, 0.22);
+
+  --noise-opacity: 0.022;
+}

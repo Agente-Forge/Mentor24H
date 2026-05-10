@@ -1,0 +1,545 @@
+/* ═══════════════════════════════════════════════════════════
+   DB — LocalStorage data layer
+═══════════════════════════════════════════════════════════ */
+
+const DB = (() => {
+  const KEY = {
+    config:    'finflow.config',
+    contas:    'finflow.contas',
+    cats:      'finflow.cats',
+    txs:       'finflow.txs',
+    metas:     'finflow.metas',
+    movs:      'finflow.movs',
+    kanban:    'finflow.kanban',
+    seeded:    'finflow.seeded',
+  };
+
+  function read(k, def = []) {
+    try {
+      const v = localStorage.getItem(k);
+      return v ? JSON.parse(v) : def;
+    } catch {
+      return def;
+    }
+  }
+
+  function write(k, v) {
+    try {
+      localStorage.setItem(k, JSON.stringify(v));
+      return true;
+    } catch (e) {
+      console.error('Storage error:', e);
+      return false;
+    }
+  }
+
+  /* ═══ CONFIG ═══ */
+  function getConfig() {
+    return Object.assign({
+      tema: 'dark', moeda: 'BRL',
+      nomeUsuario: 'Você',
+      saldoInicial: 0,
+      avatarCor: '#A78BFA',
+    }, read(KEY.config, null) || {});
+  }
+
+  function saveConfig(patch) {
+    const merged = Object.assign(getConfig(), patch || {});
+    write(KEY.config, merged);
+    return merged;
+  }
+
+  /* ═══ CATEGORIAS ═══ */
+  const CATS_DEFAULT = [
+    { id: 'moradia',     nome: 'Moradia',      cor: '#A78BFA', icone: 'home', ordem: 0 },
+    { id: 'alimentacao', nome: 'Alimentação',  cor: '#F472B6', icone: 'utensils', ordem: 1 },
+    { id: 'transporte',  nome: 'Transporte',   cor: '#FB923C', icone: 'car', ordem: 2 },
+    { id: 'saude',       nome: 'Saúde',        cor: '#5EE39A', icone: 'heart-pulse', ordem: 3 },
+    { id: 'educacao',    nome: 'Educação',      cor: '#7BB6FF', icone: 'graduation-cap', ordem: 4 },
+    { id: 'lazer',       nome: 'Lazer',         cor: '#FBBF24', icone: 'gamepad-2', ordem: 5 },
+    { id: 'servicos',    nome: 'Serviços',      cor: '#22D3EE', icone: 'wifi', ordem: 6 },
+    { id: 'investimento',nome: 'Investimento',  cor: '#D4A843', icone: 'trending-up', ordem: 7 },
+    { id: 'outros',      nome: 'Outros',        cor: '#8085A8', icone: 'circle-dot', ordem: 8 },
+  ];
+
+  function getCategorias() {
+    const stored = read(KEY.cats, null);
+    return (stored && stored.length) ? stored : CATS_DEFAULT;
+  }
+
+  function getCategoria(id) {
+    return getCategorias().find(c => c.id === id) || CATS_DEFAULT[CATS_DEFAULT.length - 1];
+  }
+
+  function saveCategoria(data) {
+    const cats = getCategorias().slice();
+    if (data.id) {
+      const idx = cats.findIndex(c => c.id === data.id);
+      if (idx >= 0) {
+        cats[idx] = Object.assign({}, cats[idx], data);
+      } else {
+        cats.push(Object.assign({ ordem: cats.length }, data));
+      }
+    } else {
+      cats.push(Object.assign({ id: Utils.uid(), ordem: cats.length }, data));
+    }
+    write(KEY.cats, cats);
+    return cats;
+  }
+
+  function deleteCategoria(id) {
+    if (CATS_DEFAULT.find(c => c.id === id)) return false;
+    const cats = getCategorias().filter(c => c.id !== id);
+    write(KEY.cats, cats);
+    return true;
+  }
+
+  /* ═══ CONTAS ═══ */
+  function getContas(filtros = {}) {
+    let arr = read(KEY.contas, []);
+    if (filtros.status && filtros.status !== 'todas') arr = arr.filter(c => c.status === filtros.status);
+    if (filtros.categoria && filtros.categoria !== 'todas') arr = arr.filter(c => c.categoria === filtros.categoria);
+    if (filtros.tipo && filtros.tipo !== 'todas') {
+      if (filtros.tipo === 'recorrente') arr = arr.filter(c => c.recorrente);
+      else if (filtros.tipo === 'parcelada') arr = arr.filter(c => c.parcelado);
+      else if (filtros.tipo === 'normal') arr = arr.filter(c => !c.recorrente && !c.parcelado);
+    }
+    if (filtros.dataInicio) arr = arr.filter(c => !c.dataVencimento || c.dataVencimento >= filtros.dataInicio);
+    if (filtros.dataFim)    arr = arr.filter(c => !c.dataVencimento || c.dataVencimento <= filtros.dataFim);
+    if (filtros.busca) {
+      const q = filtros.busca.toLowerCase();
+      arr = arr.filter(c =>
+        (c.descricao || '').toLowerCase().includes(q) ||
+        (c.observacoes || '').toLowerCase().includes(q)
+      );
+    }
+    return arr.sort((a, b) => {
+      if (!a.dataVencimento && !b.dataVencimento) return 0;
+      if (!a.dataVencimento) return 1;
+      if (!b.dataVencimento) return -1;
+      return a.dataVencimento.localeCompare(b.dataVencimento);
+    });
+  }
+
+  function getConta(id) {
+    return read(KEY.contas, []).find(c => c.id === id) || null;
+  }
+
+  function saveConta(data) {
+    const arr = read(KEY.contas, []);
+    const now = new Date().toISOString();
+    if (data.id) {
+      const idx = arr.findIndex(c => c.id === data.id);
+      if (idx >= 0) {
+        arr[idx] = Object.assign({}, arr[idx], data, { atualizadoEm: now });
+        write(KEY.contas, arr);
+        return arr[idx];
+      }
+    }
+    const novo = Object.assign({
+      id: Utils.uid(),
+      descricao: '', valor: 0,
+      dataVencimento: null, dataPagamento: null,
+      categoria: 'outros', observacoes: '',
+      status: 'pendente',
+      recorrente: false, intervaloRecorrencia: null, recorrenciaAtiva: false,
+      parcelado: false, totalParcelas: null, parcelaAtual: null, grupoParcelamento: null,
+      criadoEm: now, atualizadoEm: now,
+    }, data, { id: Utils.uid() });
+    arr.push(novo);
+    write(KEY.contas, arr);
+    return novo;
+  }
+
+  function gerarParcelas(base, n) {
+    const grupo = Utils.uid();
+    const valorPorParcela = +(base.valor / n).toFixed(2);
+    const startDate = base.dataVencimento || todayISO();
+    const out = [];
+    for (let i = 1; i <= n; i++) {
+      const d = Utils.parseISO(startDate);
+      d.setMonth(d.getMonth() + (i - 1));
+      const venc = d.toISOString().split('T')[0];
+      out.push(saveConta({
+        descricao: base.descricao,
+        valor: valorPorParcela,
+        dataVencimento: venc,
+        categoria: base.categoria,
+        observacoes: base.observacoes || '',
+        parcelado: true,
+        totalParcelas: n,
+        parcelaAtual: i,
+        grupoParcelamento: grupo,
+        status: 'pendente',
+      }));
+    }
+    return out;
+  }
+
+  function pagarConta(id, data, metodo, obs) {
+    const arr = read(KEY.contas, []);
+    const idx = arr.findIndex(c => c.id === id);
+    if (idx < 0) return null;
+    const c = arr[idx];
+    c.status = 'paga';
+    c.dataPagamento = data || todayISO();
+    c.atualizadoEm = new Date().toISOString();
+    write(KEY.contas, arr);
+
+    saveTransacao({
+      contaId: id,
+      tipo: 'saida',
+      valor: c.valor,
+      data: c.dataPagamento,
+      descricao: c.descricao,
+      categoria: c.categoria,
+      metodo: metodo || 'outros',
+      observacao: obs || '',
+    });
+
+    if (c.recorrente && c.recorrenciaAtiva && c.intervaloRecorrencia) {
+      saveConta({
+        descricao: c.descricao,
+        valor: c.valor,
+        categoria: c.categoria,
+        observacoes: c.observacoes,
+        recorrente: true,
+        intervaloRecorrencia: c.intervaloRecorrencia,
+        recorrenciaAtiva: true,
+        dataVencimento: Utils.nextRecurrence(c.dataVencimento || c.dataPagamento, c.intervaloRecorrencia),
+        status: 'pendente',
+      });
+    }
+    return c;
+  }
+
+  function deleteConta(id) {
+    write(KEY.contas, read(KEY.contas, []).filter(c => c.id !== id));
+  }
+
+  function deleteGrupoParcelamento(grupo) {
+    write(KEY.contas, read(KEY.contas, []).filter(c => c.grupoParcelamento !== grupo));
+  }
+
+  function updateStatusContas() {
+    const today = todayISO();
+    const arr = read(KEY.contas, []);
+    let dirty = false;
+    arr.forEach(c => {
+      if (c.status === 'pendente' && c.dataVencimento && c.dataVencimento < today) {
+        c.status = 'atrasada';
+        dirty = true;
+      }
+    });
+    if (dirty) write(KEY.contas, arr);
+  }
+
+  /* ═══ TRANSAÇÕES ═══ */
+  function getTransacoes(filtros = {}) {
+    let arr = read(KEY.txs, []);
+    if (filtros.tipo && filtros.tipo !== 'todas') arr = arr.filter(t => t.tipo === filtros.tipo);
+    if (filtros.dataInicio) arr = arr.filter(t => t.data >= filtros.dataInicio);
+    if (filtros.dataFim)    arr = arr.filter(t => t.data <= filtros.dataFim);
+    if (filtros.categoria && filtros.categoria !== 'todas') arr = arr.filter(t => t.categoria === filtros.categoria);
+    return arr.sort((a, b) => {
+      const cmp = (b.data || '').localeCompare(a.data || '');
+      return cmp !== 0 ? cmp : (b.criadoEm || '').localeCompare(a.criadoEm || '');
+    });
+  }
+
+  function saveTransacao(data) {
+    const arr = read(KEY.txs, []);
+    const novo = Object.assign({
+      id: Utils.uid(),
+      contaId: null, tipo: 'saida',
+      valor: 0, data: todayISO(),
+      descricao: '', categoria: null,
+      metodo: 'outros',
+      criadoEm: new Date().toISOString(),
+    }, data, { id: Utils.uid() });
+    arr.push(novo);
+    write(KEY.txs, arr);
+    return novo;
+  }
+
+  function deleteTransacao(id) {
+    write(KEY.txs, read(KEY.txs, []).filter(t => t.id !== id));
+  }
+
+  /* ═══ METAS ═══ */
+  function getMetas() {
+    return read(KEY.metas, []).slice().sort((a, b) => (a.criadoEm || '').localeCompare(b.criadoEm || ''));
+  }
+
+  function getMeta(id) {
+    return read(KEY.metas, []).find(m => m.id === id) || null;
+  }
+
+  function saveMeta(data) {
+    const arr = read(KEY.metas, []);
+    const now = new Date().toISOString();
+    if (data.id) {
+      const idx = arr.findIndex(m => m.id === data.id);
+      if (idx >= 0) {
+        arr[idx] = Object.assign({}, arr[idx], data, { atualizadoEm: now });
+        write(KEY.metas, arr);
+        return arr[idx];
+      }
+    }
+    const novo = Object.assign({
+      id: Utils.uid(),
+      nome: '', descricao: '',
+      icone: 'piggy-bank', cor: '#A78BFA',
+      valorAlvo: 0, prazo: null,
+      status: 'ativa',
+      criadoEm: now, atualizadoEm: now,
+    }, data, { id: Utils.uid() });
+    arr.push(novo);
+    write(KEY.metas, arr);
+    return novo;
+  }
+
+  function deleteMeta(id) {
+    write(KEY.metas, read(KEY.metas, []).filter(m => m.id !== id));
+    write(KEY.movs, read(KEY.movs, []).filter(m => m.metaId !== id));
+  }
+
+  function getValorMeta(metaId) {
+    return getMovimentos(metaId).reduce((s, m) => s + (m.tipo === 'deposito' ? m.valor : -m.valor), 0);
+  }
+
+  function getMovimentos(metaId) {
+    return read(KEY.movs, [])
+      .filter(m => m.metaId === metaId)
+      .sort((a, b) => (b.data || '').localeCompare(a.data || ''));
+  }
+
+  function saveMovimento(data) {
+    const arr = read(KEY.movs, []);
+    const novo = Object.assign({
+      id: Utils.uid(),
+      metaId: '', tipo: 'deposito',
+      valor: 0, descricao: '',
+      data: todayISO(),
+      criadoEm: new Date().toISOString(),
+    }, data, { id: Utils.uid() });
+    arr.push(novo);
+    write(KEY.movs, arr);
+
+    const meta = getMeta(novo.metaId);
+    if (meta && meta.status === 'ativa') {
+      const total = getValorMeta(novo.metaId);
+      if (total >= meta.valorAlvo) {
+        saveMeta({ id: meta.id, status: 'concluida' });
+      }
+    }
+    return novo;
+  }
+
+  function deleteMovimento(id) {
+    write(KEY.movs, read(KEY.movs, []).filter(m => m.id !== id));
+  }
+
+  /* ═══ KANBAN ═══ */
+  function getKanban(coluna) {
+    let arr = read(KEY.kanban, []);
+    if (coluna) arr = arr.filter(c => c.coluna === coluna);
+    return arr.slice().sort((a, b) => (a.ordem ?? 0) - (b.ordem ?? 0));
+  }
+
+  function getKanbanCard(id) {
+    return read(KEY.kanban, []).find(c => c.id === id) || null;
+  }
+
+  function saveKanbanCard(data) {
+    const arr = read(KEY.kanban, []);
+    const now = new Date().toISOString();
+    if (data.id) {
+      const idx = arr.findIndex(c => c.id === data.id);
+      if (idx >= 0) {
+        arr[idx] = Object.assign({}, arr[idx], data);
+        write(KEY.kanban, arr);
+        return arr[idx];
+      }
+    }
+    const colCount = arr.filter(c => c.coluna === (data.coluna || 'todo')).length;
+    const novo = Object.assign({
+      id: Utils.uid(),
+      coluna: 'todo', titulo: '', descricao: null,
+      prioridade: null, etiquetas: [],
+      ordem: colCount,
+      criadoEm: now,
+    }, data, { id: Utils.uid() });
+    arr.push(novo);
+    write(KEY.kanban, arr);
+    return novo;
+  }
+
+  function moveKanbanCard(id, novaColuna) {
+    const arr = read(KEY.kanban, []);
+    const idx = arr.findIndex(c => c.id === id);
+    if (idx < 0) return;
+    arr[idx].coluna = novaColuna;
+    arr[idx].ordem = arr.filter(c => c.coluna === novaColuna && c.id !== id).length;
+    write(KEY.kanban, arr);
+  }
+
+  function deleteKanbanCard(id) {
+    write(KEY.kanban, read(KEY.kanban, []).filter(c => c.id !== id));
+  }
+
+  /* ═══ STATS ═══ */
+  function getStats(start, end) {
+    const contas = getContas({ dataInicio: start, dataFim: end });
+    const total      = contas.reduce((s, c) => s + c.valor, 0);
+    const pagas      = contas.filter(c => c.status === 'paga');
+    const totalPago  = pagas.reduce((s, c) => s + c.valor, 0);
+    const pendentes  = contas.filter(c => c.status === 'pendente');
+    const atrasadas  = contas.filter(c => c.status === 'atrasada');
+    const txs        = getTransacoes({ dataInicio: start, dataFim: end });
+    const entradas   = txs.filter(t => t.tipo === 'entrada').reduce((s, t) => s + t.valor, 0);
+    const saidas     = txs.filter(t => t.tipo === 'saida').reduce((s, t) => s + t.valor, 0);
+    const cfg        = getConfig();
+    const saldo      = (cfg.saldoInicial || 0) + entradas - saidas;
+    const health     = healthScore(total, totalPago, atrasadas.length, pendentes.length);
+    return { total, totalPago, totalPendente: total - totalPago, pagas, pendentes, atrasadas, entradas, saidas, saldo, health, contas };
+  }
+
+  function healthScore(total, pago, nAtrasadas, nPendentes) {
+    if (total === 0) return 100;
+    const pctPago = pago / total;
+    let score = pctPago * 70;
+    score += Math.max(0, 30 - nAtrasadas * 12);
+    return Utils.clamp(Math.round(score), 0, 100);
+  }
+
+  /* ═══ EXPORT/IMPORT ═══ */
+  function exportAll() {
+    return {
+      version: 2,
+      exportedAt: new Date().toISOString(),
+      config:    getConfig(),
+      categorias: getCategorias(),
+      contas:    read(KEY.contas, []),
+      transacoes: read(KEY.txs, []),
+      metas:     read(KEY.metas, []),
+      movimentos: read(KEY.movs, []),
+      kanban:    read(KEY.kanban, []),
+    };
+  }
+
+  function importAll(data) {
+    if (!data || typeof data !== 'object') return false;
+    if (data.config)     write(KEY.config, data.config);
+    if (data.categorias) write(KEY.cats, data.categorias);
+    if (data.contas)     write(KEY.contas, data.contas);
+    if (data.transacoes) write(KEY.txs, data.transacoes);
+    if (data.metas)      write(KEY.metas, data.metas);
+    if (data.movimentos) write(KEY.movs, data.movimentos);
+    if (data.kanban)     write(KEY.kanban, data.kanban);
+    return true;
+  }
+
+  function clearAll() {
+    Object.values(KEY).forEach(k => localStorage.removeItem(k));
+  }
+
+  /* ═══ SEED ═══ */
+  function isSeeded() { return localStorage.getItem(KEY.seeded) === '1'; }
+
+  function seed() {
+    if (isSeeded()) return;
+    const off = (n) => Utils.addDays(todayISO(), n);
+
+    write(KEY.cats, CATS_DEFAULT);
+
+    const contasBase = [
+      { descricao: 'Aluguel', valor: 1850, dataVencimento: off(5), categoria: 'moradia', recorrente: true, intervaloRecorrencia: 'mensal', recorrenciaAtiva: true },
+      { descricao: 'Internet 500MB', valor: 119.90, dataVencimento: off(3), categoria: 'servicos', recorrente: true, intervaloRecorrencia: 'mensal', recorrenciaAtiva: true },
+      { descricao: 'Conta de Luz', valor: 245.30, dataVencimento: off(8), categoria: 'moradia' },
+      { descricao: 'Academia', valor: 129.90, dataVencimento: off(2), categoria: 'saude', recorrente: true, intervaloRecorrencia: 'mensal', recorrenciaAtiva: true },
+      { descricao: 'Mercado', valor: 384.50, dataVencimento: off(1), categoria: 'alimentacao', status: 'paga', dataPagamento: off(-1) },
+      { descricao: 'Combustível', valor: 230.00, dataVencimento: off(-3), categoria: 'transporte', status: 'atrasada' },
+      { descricao: 'Spotify Family', valor: 21.90, dataVencimento: off(10), categoria: 'lazer', recorrente: true, intervaloRecorrencia: 'mensal', recorrenciaAtiva: true },
+      { descricao: 'Netflix', valor: 55.90, dataVencimento: off(12), categoria: 'lazer', recorrente: true, intervaloRecorrencia: 'mensal', recorrenciaAtiva: true },
+      { descricao: 'Farmácia', valor: 145.00, dataVencimento: off(-2), categoria: 'saude', status: 'paga', dataPagamento: off(-2) },
+      { descricao: 'Plano de Saúde', valor: 487.00, dataVencimento: off(15), categoria: 'saude', recorrente: true, intervaloRecorrencia: 'mensal', recorrenciaAtiva: true },
+      { descricao: 'Aporte Tesouro', valor: 500, dataVencimento: off(20), categoria: 'investimento', recorrente: true, intervaloRecorrencia: 'mensal', recorrenciaAtiva: true },
+    ];
+    contasBase.forEach(c => saveConta(c));
+
+    // Parcelamento: TV em 12x
+    const grupo = Utils.uid();
+    for (let i = 1; i <= 12; i++) {
+      const d = new Date();
+      d.setMonth(d.getMonth() + (i - 3));
+      saveConta({
+        descricao: 'Smart TV 65"',
+        valor: 419.90,
+        categoria: 'lazer',
+        parcelado: true, totalParcelas: 12, parcelaAtual: i,
+        grupoParcelamento: grupo,
+        dataVencimento: d.toISOString().split('T')[0],
+        status: i <= 3 ? 'paga' : 'pendente',
+        dataPagamento: i <= 3 ? d.toISOString().split('T')[0] : null,
+      });
+    }
+
+    const txsBase = [
+      { tipo: 'entrada', valor: 6500, data: off(-5), descricao: 'Salário', metodo: 'ted' },
+      { tipo: 'entrada', valor: 1200, data: off(-12), descricao: 'Freelance design', metodo: 'pix' },
+      { tipo: 'entrada', valor: 380, data: off(-18), descricao: 'Venda Marketplace', metodo: 'pix' },
+      { tipo: 'saida', valor: 145, data: off(-2), descricao: 'Farmácia', categoria: 'saude', metodo: 'pix' },
+      { tipo: 'saida', valor: 384.50, data: off(-1), descricao: 'Mercado semanal', categoria: 'alimentacao', metodo: 'cartao_debito' },
+      { tipo: 'saida', valor: 89.90, data: off(-6), descricao: 'Restaurante', categoria: 'alimentacao', metodo: 'pix' },
+      { tipo: 'saida', valor: 1850, data: off(-30), descricao: 'Aluguel', categoria: 'moradia', metodo: 'ted' },
+    ];
+    txsBase.forEach(t => saveTransacao(t));
+
+    const metasBase = [
+      { nome: 'Viagem Europa', descricao: 'Portugal, Espanha e Itália — 21 dias', icone: 'plane', cor: '#A78BFA', valorAlvo: 18000, prazo: off(330) },
+      { nome: 'Carro Novo', descricao: 'Trocar por um SUV compacto', icone: 'car', cor: '#5EE39A', valorAlvo: 45000, prazo: off(720) },
+      { nome: 'Reserva de Emergência', descricao: '6 meses de despesas', icone: 'shield', cor: '#FBBF24', valorAlvo: 24000, prazo: off(180) },
+      { nome: 'Notebook M4', descricao: 'MacBook Pro 14" novo', icone: 'laptop', cor: '#F472B6', valorAlvo: 14000, prazo: off(120) },
+    ];
+    metasBase.forEach(m => {
+      const meta = saveMeta(m);
+      const initialDeposit = m.valorAlvo * (0.15 + Math.random() * 0.25);
+      saveMovimento({ metaId: meta.id, tipo: 'deposito', valor: Math.round(initialDeposit / 2), descricao: 'Depósito inicial', data: off(-30) });
+      saveMovimento({ metaId: meta.id, tipo: 'deposito', valor: Math.round(initialDeposit / 2), descricao: 'Aporte mensal', data: off(-7) });
+    });
+
+    const kanbanBase = [
+      { coluna: 'todo', titulo: 'Comparar planos de saúde', prioridade: 'alta', etiquetas: ['saúde', 'pesquisa'] },
+      { coluna: 'todo', titulo: 'Renegociar internet', prioridade: 'media', etiquetas: ['economia'] },
+      { coluna: 'todo', titulo: 'Estudar sobre Tesouro Direto', prioridade: 'baixa', etiquetas: ['investimento'] },
+      { coluna: 'doing', titulo: 'Organizar documentos do IR', descricao: 'Reunir comprovantes e fazer declaração até abril', prioridade: 'alta', etiquetas: ['imposto'] },
+      { coluna: 'doing', titulo: 'Revisar assinaturas', prioridade: 'media', etiquetas: ['economia'] },
+      { coluna: 'done', titulo: 'Abrir conta no banco digital', prioridade: 'baixa', etiquetas: ['banco'] },
+      { coluna: 'done', titulo: 'Cancelar assinatura jornal', prioridade: 'baixa', etiquetas: ['economia'] },
+    ];
+    kanbanBase.forEach((k, i) => saveKanbanCard(Object.assign({ ordem: i }, k)));
+
+    saveConfig({
+      tema: 'dark', moeda: 'BRL',
+      nomeUsuario: 'Léo', saldoInicial: 3500,
+      avatarCor: '#A78BFA',
+    });
+
+    localStorage.setItem(KEY.seeded, '1');
+  }
+
+  return {
+    getConfig, saveConfig,
+    getCategorias, getCategoria, saveCategoria, deleteCategoria,
+    getContas, getConta, saveConta, gerarParcelas, pagarConta,
+    deleteConta, deleteGrupoParcelamento, updateStatusContas,
+    getTransacoes, saveTransacao, deleteTransacao,
+    getMetas, getMeta, saveMeta, deleteMeta, getValorMeta,
+    getMovimentos, saveMovimento, deleteMovimento,
+    getKanban, getKanbanCard, saveKanbanCard, moveKanbanCard, deleteKanbanCard,
+    getStats,
+    exportAll, importAll, clearAll,
+    seed, isSeeded,
+  };
+})();

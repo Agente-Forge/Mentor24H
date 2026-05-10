@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#08080F">
+  <title>FinFlow — Editorial Finance</title>
+  <meta name="description" content="Controle financeiro premium com bento grid, glassmorphism e tipografia editorial.">
+
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/bento.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages.css">
+  <link rel="stylesheet" href="css/motion.css">
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ═══ SIDEBAR ═══ -->
+  <aside id="sidebar">
+    <div class="sidebar-header">
+      <div class="brand-logo"><span>F</span></div>
+      <div class="brand-text">
+        <span class="name">Fin<em>Flow</em></span>
+        <span class="tag">Editorial Finance</span>
+      </div>
+    </div>
+
+    <div class="sidebar-user">
+      <div class="avatar" id="side-avatar" style="background:#A78BFA">V</div>
+      <div class="user-info">
+        <span class="name" id="side-nome">Você</span>
+        <span class="greet">bem-vindo de volta</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section">Principal</div>
+      <div class="nav-item active" data-nav="dashboard">
+        <span data-icon="layout-dashboard"></span>
+        <span class="nav-label">Dashboard</span>
+      </div>
+      <div class="nav-item" data-nav="contas">
+        <span data-icon="receipt"></span>
+        <span class="nav-label">Contas</span>
+        <span class="nav-badge" id="nav-badge-contas"></span>
+      </div>
+      <div class="nav-item" data-nav="transacoes">
+        <span data-icon="arrow-left-right"></span>
+        <span class="nav-label">Transações</span>
+      </div>
+
+      <div class="nav-section">Organização</div>
+      <div class="nav-item" data-nav="metas">
+        <span data-icon="target"></span>
+        <span class="nav-label">Metas</span>
+      </div>
+      <div class="nav-item" data-nav="kanban">
+        <span data-icon="columns-3"></span>
+        <span class="nav-label">Kanban</span>
+      </div>
+      <div class="nav-item" data-nav="categorias">
+        <span data-icon="folder-open"></span>
+        <span class="nav-label">Categorias</span>
+      </div>
+
+      <div class="nav-section">Sistema</div>
+      <div class="nav-item" data-nav="config">
+        <span data-icon="settings-2"></span>
+        <span class="nav-label">Configurações</span>
+      </div>
+    </nav>
+
+    <div class="sidebar-foot">
+      <div class="theme-toggle-row">
+        <span data-icon="moon" data-size="14"></span>
+        <span class="theme-label">Tema</span>
+      </div>
+      <label class="theme-switch">
+        <input type="checkbox" id="theme-input">
+        <span class="theme-track"></span>
+      </label>
+      <button class="collapse-btn" id="btn-collapse" title="Recolher menu">
+        <span data-icon="panel-left-close"></span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ═══ MAIN ═══ -->
+  <main id="main">
+
+    <header id="topbar">
+      <div class="topbar-title">
+        <span class="crumb" id="topbar-crumb">dashboard</span>
+        <h1 class="title">
+          <span id="topbar-title-text">Visão geral </span>
+          <em class="display-italic" id="topbar-title-em">financeira</em>
+        </h1>
+      </div>
+      <div class="topbar-actions">
+
+        <!-- Caixinha 1: Relógio -->
+        <div class="tb-widget tb-clock-widget">
+          <div class="tb-clock" id="topbar-clock">
+            <span class="tc-h">00</span><span class="tc-sep">:</span><span class="tc-m">00</span><span class="tc-sep tc-sep-s">:</span><span class="tc-s">00</span>
+          </div>
+        </div>
+
+        <!-- Caixinha 2: Data -->
+        <div class="tb-widget tb-date-widget">
+          <div class="tb-date" id="topbar-date">domingo, 10 mai. 2026</div>
+        </div>
+
+        <!-- Caixinha 3: Alarme -->
+        <div class="tb-widget tb-alarm-widget" id="alarm-widget">
+          <button class="tb-alarm-btn" id="alarm-toggle" title="Alarme/Timer">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2"/><path d="M5 3 2 6m20 0-3-3"/><path d="M6.38 18.7 4 21m16-2.3L17.64 21"/>
+            </svg>
+            <span class="alarm-countdown" id="alarm-countdown"></span>
+          </button>
+          <div class="alarm-panel" id="alarm-panel">
+            <div class="alarm-panel-title">Timer rápido</div>
+            <div class="alarm-presets">
+              <button class="alarm-preset" data-min="1">1m</button>
+              <button class="alarm-preset" data-min="2">2m</button>
+              <button class="alarm-preset" data-min="3">3m</button>
+              <button class="alarm-preset" data-min="5">5m</button>
+              <button class="alarm-preset" data-min="10">10m</button>
+              <button class="alarm-preset" data-min="15">15m</button>
+              <button class="alarm-preset" data-min="30">30m</button>
+            </div>
+            <div class="alarm-custom-row">
+              <input type="number" class="alarm-custom-input" id="alarm-custom-min" min="1" max="999" placeholder="min" value="">
+              <button class="alarm-custom-go" id="alarm-custom-go">Iniciar</button>
+            </div>
+            <div class="alarm-running" id="alarm-running" style="display:none">
+              <div class="alarm-running-bar"><div class="alarm-running-fill" id="alarm-fill"></div></div>
+              <div class="alarm-running-info">
+                <span class="alarm-running-label">Restam</span>
+                <span class="alarm-running-time" id="alarm-remain">—</span>
+              </div>
+              <button class="alarm-cancel-btn" id="alarm-cancel">Cancelar</button>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn btn-primary btn-sm" onclick="handleGlobalAdd()">
+          <span data-icon="plus" data-size="14"></span>
+          <span>Adicionar</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- ─── DASHBOARD ─── -->
+    <section class="page active" data-page="dashboard">
+      <div class="bento stagger">
+
+        <!-- Hero Health Card (span 5, row 2) -->
+        <div class="bento-card hero span-5 row-2" id="hero-card"></div>
+
+        <!-- KPI 1 -->
+        <div class="bento-card span-4" id="kpi-1"></div>
+
+        <!-- KPI 2 -->
+        <div class="bento-card span-3" id="kpi-2"></div>
+
+        <!-- KPI 3 -->
+        <div class="bento-card span-3" id="kpi-3"></div>
+
+        <!-- Calculadora -->
+        <div class="bento-card accent-violet span-4" id="calc-card"></div>
+
+        <!-- Chart Donut Categorias -->
+        <div class="bento-card span-5">
+          <div class="card-head">
+            <div>
+              <span class="card-eyebrow">Distribuição</span>
+              <div class="card-title display">Despesas por <em style="font-style:italic;color:var(--violet)">categoria</em></div>
+            </div>
+            <div class="period-tabs">
+              <button class="period-tab" data-period-chart="semana" onclick="Dashboard.setChartPeriod('semana')">Semana</button>
+              <button class="period-tab active" data-period-chart="mes" onclick="Dashboard.setChartPeriod('mes')">Mês</button>
+              <button class="period-tab" data-period-chart="ano" onclick="Dashboard.setChartPeriod('ano')">Ano</button>
+            </div>
+          </div>
+          <div class="chart-wrap" id="chart-donut"></div>
+          <div class="chart-legend" id="chart-donut-legend"></div>
+        </div>
+
+        <!-- Chart Bars -->
+        <div class="bento-card span-7">
+          <div class="card-head">
+            <div>
+              <span class="card-eyebrow">Fluxo de caixa</span>
+              <div class="card-title display">Últimos <em style="font-style:italic;color:var(--violet)">6 meses</em></div>
+            </div>
+            <div style="display:flex;gap:var(--s-3);font-size:var(--t-xs);color:var(--text-3)">
+              <span><span class="dot" style="background:var(--green)"></span> Entradas</span>
+              <span><span class="dot" style="background:var(--red)"></span> Saídas</span>
+            </div>
+          </div>
+          <div class="chart-wrap tall" id="chart-bars"></div>
+        </div>
+
+        <!-- Próximas Contas -->
+        <div class="bento-card span-7">
+          <div class="card-head">
+            <div>
+              <span class="card-eyebrow">14 dias</span>
+              <div class="card-title display">Próximas <em style="font-style:italic;color:var(--violet)">contas</em></div>
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="Router.navigate('contas')">
+              Ver todas <span data-icon="arrow-right" data-size="13"></span>
+            </button>
+          </div>
+          <div id="proximas-list"></div>
+        </div>
+
+        <!-- Atividade Recente -->
+        <div class="bento-card span-5">
+          <div class="card-head">
+            <div>
+              <span class="card-eyebrow">Histórico</span>
+              <div class="card-title display">Atividade <em style="font-style:italic;color:var(--violet)">recente</em></div>
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="Router.navigate('transacoes')">
+              Ver tudo <span data-icon="arrow-right" data-size="13"></span>
+            </button>
+          </div>
+          <div id="atividade-list"></div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ─── CONTAS ─── -->
+    <section class="page" data-page="contas">
+      <div class="bento stagger" id="contas-kpis" style="margin-bottom:var(--s-5);grid-template-columns:repeat(4,1fr);gap:var(--s-4)"></div>
+      <div class="filter-bar" id="contas-filtros"></div>
+      <div id="contas-lista"></div>
+      <button class="fab" onclick="Modal.novaConta()" title="Nova conta">
+        <span data-icon="plus"></span>
+      </button>
+    </section>
+
+    <!-- ─── TRANSAÇÕES ─── -->
+    <section class="page" data-page="transacoes">
+      <div class="bento stagger" id="tx-kpis" style="margin-bottom:var(--s-5);grid-template-columns:repeat(3,1fr);gap:var(--s-4)"></div>
+      <div class="filter-bar" id="tx-filtros"></div>
+      <div class="bento-card" style="padding:var(--s-3)">
+        <div id="tx-lista"></div>
+      </div>
+      <button class="fab" onclick="Modal.novaTransacao()" title="Nova transação">
+        <span data-icon="plus"></span>
+      </button>
+    </section>
+
+    <!-- ─── METAS ─── -->
+    <section class="page" data-page="metas">
+      <div class="page-head">
+        <div>
+          <h2 class="page-title">Caixinhas <em>de poupança</em></h2>
+          <div class="page-sub">Guarde dinheiro para seus objetivos</div>
+        </div>
+        <button class="btn btn-primary" onclick="Modal.novaMeta()">
+          <span data-icon="plus" data-size="14"></span>
+          Nova caixinha
+        </button>
+      </div>
+      <div class="metas-grid" id="metas-grid"></div>
+    </section>
+
+    <!-- ─── KANBAN ─── -->
+    <section class="page" data-page="kanban">
+      <div class="page-head">
+        <div>
+          <h2 class="page-title">Quadro <em>kanban</em></h2>
+          <div class="page-sub">Organize suas tarefas e anotações</div>
+        </div>
+        <button class="btn btn-primary" onclick="Modal.novoKanban()">
+          <span data-icon="plus" data-size="14"></span>
+          Novo card
+        </button>
+      </div>
+      <div class="kanban-board">
+        <div class="kanban-col col-todo" data-col="todo">
+          <div class="kanban-col-head">
+            <div class="dot"></div>
+            <div class="title">A Fazer</div>
+            <span class="count" id="kb-count-todo">0</span>
+            <button class="add" onclick="Modal.novoKanban('todo')">
+              <span data-icon="plus"></span>
+            </button>
+          </div>
+          <div class="kanban-cards" id="kb-todo"></div>
+        </div>
+        <div class="kanban-col col-doing" data-col="doing">
+          <div class="kanban-col-head">
+            <div class="dot"></div>
+            <div class="title">Em Andamento</div>
+            <span class="count" id="kb-count-doing">0</span>
+            <button class="add" onclick="Modal.novoKanban('doing')">
+              <span data-icon="plus"></span>
+            </button>
+          </div>
+          <div class="kanban-cards" id="kb-doing"></div>
+        </div>
+        <div class="kanban-col col-done" data-col="done">
+          <div class="kanban-col-head">
+            <div class="dot"></div>
+            <div class="title">Concluído</div>
+            <span class="count" id="kb-count-done">0</span>
+            <button class="add" onclick="Modal.novoKanban('done')">
+              <span data-icon="plus"></span>
+            </button>
+          </div>
+          <div class="kanban-cards" id="kb-done"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── CATEGORIAS ─── -->
+    <section class="page" data-page="categorias">
+      <div class="page-head">
+        <div>
+          <h2 class="page-title">Suas <em>categorias</em></h2>
+          <div class="page-sub">Organize seus gastos por tipo</div>
+        </div>
+        <button class="btn btn-primary" onclick="Modal.novaCategoria()">
+          <span data-icon="plus" data-size="14"></span>
+          Nova categoria
+        </button>
+      </div>
+      <div class="cat-grid" id="cats-grid"></div>
+    </section>
+
+    <!-- ─── CONFIG ─── -->
+    <section class="page" data-page="config">
+      <div class="page-head">
+        <div>
+          <h2 class="page-title">Ajustar <em>preferências</em></h2>
+          <div class="page-sub">Personalize sua experiência</div>
+        </div>
+      </div>
+
+      <div class="config-stack">
+
+        <div class="config-section">
+          <div class="config-section-head">
+            <div class="card-pill violet"><span data-icon="user" data-size="16"></span></div>
+            <h3>Perfil</h3>
+          </div>
+
+          <div class="avatar-edit-row">
+            <div class="avatar-preview" id="avatar-prev" style="background:#A78BFA">V</div>
+            <div class="flex-1">
+              <div class="field" style="margin-bottom:var(--s-3)">
+                <label class="field-label">Seu nome</label>
+                <input type="text" id="cfg-nome" placeholder="Como quer ser chamado?" oninput="Config.updatePreview()">
+              </div>
+              <div class="field" style="margin-bottom:0">
+                <label class="field-label">Cor do avatar</label>
+                <input type="color" id="cfg-cor" oninput="Config.updatePreview()" style="height:38px;cursor:pointer">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="config-section">
+          <div class="config-section-head">
+            <div class="card-pill amber"><span data-icon="sliders-horizontal" data-size="16"></span></div>
+            <h3>Preferências</h3>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label class="field-label">Moeda</label>
+              <select id="cfg-moeda">
+                <option value="BRL">R$ — Real Brasileiro</option>
+                <option value="USD">$ — Dólar Americano</option>
+                <option value="EUR">€ — Euro</option>
+              </select>
+            </div>
+            <div class="field">
+              <label class="field-label">Saldo Inicial (R$)</label>
+              <input type="number" id="cfg-saldo" min="0" step="0.01" placeholder="0,00">
+              <div class="field-hint">Base para calcular saldo disponível</div>
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="Config.salvar()" style="margin-top:var(--s-3)">
+            <span data-icon="save" data-size="14"></span>
+            Salvar preferências
+          </button>
+        </div>
+
+        <div class="config-section">
+          <div class="config-section-head">
+            <div class="card-pill blue"><span data-icon="database" data-size="16"></span></div>
+            <h3>Dados</h3>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:var(--s-2)">
+            <button class="btn btn-secondary" onclick="Config.exportar()">
+              <span data-icon="download" data-size="14"></span>
+              Exportar backup (JSON)
+            </button>
+            <label class="btn btn-secondary" style="cursor:pointer">
+              <span data-icon="upload" data-size="14"></span>
+              Importar backup
+              <input type="file" accept=".json" style="display:none" onchange="Config.importar(this.files[0])">
+            </label>
+            <button class="btn btn-danger" onclick="Config.limparTudo()">
+              <span data-icon="trash-2" data-size="14"></span>
+              Apagar todos os dados
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ═══ MODAL ═══ -->
+<div id="modal-root">
+  <div class="modal" id="modal-body-wrap"></div>
+</div>
+
+<!-- ═══ TOAST ═══ -->
+<div id="toast-root"></div>
+
+<!-- ═══ SCRIPTS (order matters) ═══ -->
+<script src="js/icons.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/db.js"></script>
+<script src="js/toast.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/router.js"></script>
+<script src="js/charts.js"></script>
+<script src="js/modal.js"></script>
+<script src="js/dashboard.js"></script>
+<script src="js/contas.js"></script>
+<script src="js/transacoes.js"></script>
+<script src="js/metas.js"></script>
+<script src="js/kanban.js"></script>
+<script src="js/categorias.js"></script>
+<script src="js/config.js"></script>
+<script src="js/leo-data.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>
