@@ -346,13 +346,15 @@
   gap: var(--s-3);
   padding: 12px var(--s-4);
   border-radius: var(--r-md);
-  transition: background var(--d-fast), border-color var(--d-fast);
-  border: 1px solid transparent;
+  transition: background var(--d-fast), border-color var(--d-fast), box-shadow var(--d-fast);
+  background: var(--surface-2);
+  border: 1px solid var(--line-2);
 }
 
 .list-item:hover {
   background: var(--surface-3);
-  border-color: var(--line-2);
+  border-color: var(--line-3);
+  box-shadow: var(--shadow-1);
 }
 
 .list-item.dim { opacity: 0.5; }
