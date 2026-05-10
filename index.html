@@ -93,6 +93,11 @@
   <main id="main">
 
     <header id="topbar">
+      <!-- Botão hamburguer (só aparece no mobile) -->
+      <button class="mobile-menu-btn" id="btn-mobile-menu" title="Menu">
+        <span data-icon="menu" data-size="20"></span>
+      </button>
+
       <div class="topbar-title">
         <span class="crumb" id="topbar-crumb">dashboard</span>
         <h1 class="title">
@@ -423,6 +428,33 @@
 
   </main>
 </div>
+
+<!-- ═══ SIDEBAR OVERLAY (mobile) ═══ -->
+<div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+<!-- ═══ BOTTOM NAV (mobile) ═══ -->
+<nav id="bottom-nav" class="bottom-nav">
+  <button class="bnav-item active" data-nav="dashboard">
+    <span data-icon="layout-dashboard" data-size="20"></span>
+    <span class="bnav-label">Início</span>
+  </button>
+  <button class="bnav-item" data-nav="contas">
+    <span data-icon="receipt" data-size="20"></span>
+    <span class="bnav-label">Contas</span>
+  </button>
+  <button class="bnav-item" data-nav="transacoes">
+    <span data-icon="arrow-left-right" data-size="20"></span>
+    <span class="bnav-label">Transações</span>
+  </button>
+  <button class="bnav-item" data-nav="metas">
+    <span data-icon="target" data-size="20"></span>
+    <span class="bnav-label">Metas</span>
+  </button>
+  <button class="bnav-item" data-nav="config">
+    <span data-icon="settings-2" data-size="20"></span>
+    <span class="bnav-label">Config</span>
+  </button>
+</nav>
 
 <!-- ═══ MODAL ═══ -->
 <div id="modal-root">

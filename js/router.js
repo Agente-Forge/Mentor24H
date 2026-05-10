@@ -40,6 +40,9 @@ const Router = (() => {
 
     current = page;
 
+    /* Sincroniza bottom nav mobile */
+    if (typeof App !== 'undefined' && App.syncBottomNav) App.syncBottomNav(page);
+
     requestAnimationFrame(() => {
       if (renderers[page]) {
         try { renderers[page](); } catch(e) { console.error(`Render failed for ${page}:`, e); }

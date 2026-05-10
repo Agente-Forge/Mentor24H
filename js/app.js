@@ -35,6 +35,28 @@ const App = (() => {
   function initSidebar() {
     const btn = document.getElementById('btn-collapse');
     if (btn) btn.addEventListener('click', toggleSidebar);
+
+    const mobileBtn = document.getElementById('btn-mobile-menu');
+    if (mobileBtn) mobileBtn.addEventListener('click', toggleMobileSidebar);
+
+    const overlay = document.getElementById('sidebar-overlay');
+    if (overlay) overlay.addEventListener('click', closeMobileSidebar);
+
+    /* Fechar sidebar mobile ao clicar em nav item */
+    document.querySelectorAll('#sidebar .nav-item[data-nav]').forEach(item => {
+      item.addEventListener('click', () => {
+        if (window.innerWidth <= 640) closeMobileSidebar();
+      });
+    });
+
+    /* Bottom nav */
+    document.querySelectorAll('.bnav-item[data-nav]').forEach(item => {
+      item.addEventListener('click', () => {
+        const page = item.dataset.nav;
+        Router.navigate(page);
+        closeMobileSidebar();
+      });
+    });
   }
 
   function toggleSidebar() {
@@ -45,6 +67,35 @@ const App = (() => {
     if (btn) {
       btn.innerHTML = Icons.html(sb.classList.contains('collapsed') ? 'panel-left-open' : 'panel-left-close', 16);
     }
+  }
+
+  function toggleMobileSidebar() {
+    const sb = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+    if (!sb) return;
+    const isOpen = sb.classList.contains('mobile-open');
+    if (isOpen) {
+      closeMobileSidebar();
+    } else {
+      sb.classList.add('mobile-open');
+      overlay.classList.add('visible');
+      document.body.style.overflow = 'hidden';
+    }
+  }
+
+  function closeMobileSidebar() {
+    const sb = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+    if (!sb) return;
+    sb.classList.remove('mobile-open');
+    overlay.classList.remove('visible');
+    document.body.style.overflow = '';
+  }
+
+  function syncBottomNav(page) {
+    document.querySelectorAll('.bnav-item[data-nav]').forEach(item => {
+      item.classList.toggle('active', item.dataset.nav === page);
+    });
   }
 
   function initRouter() {
@@ -104,7 +155,7 @@ const App = (() => {
 
   window.handleGlobalAdd = handleGlobalAdd;
 
-  return { init, toggleSidebar, syncUserUI };
+  return { init, toggleSidebar, syncUserUI, syncBottomNav, closeMobileSidebar };
 })();
 
 /* ═══════════════════════════════════════════════════════════
