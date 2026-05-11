@@ -944,7 +944,7 @@
 ═══════════════════════════════════════════════════════════ */
 .llm-shell {
   display: flex;
-  height: calc(100vh - var(--topbar-h) - var(--s-5) * 2);
+  height: calc(100vh - var(--topbar-h) - var(--content-pad) * 2);
   min-height: 500px;
   gap: 0;
   border-radius: var(--r-lg);
@@ -1155,7 +1155,7 @@
 ═══════════════════════════════════════════════════════════ */
 .wa-shell {
   display: flex;
-  height: calc(100vh - var(--topbar-h) - var(--s-5) * 2);
+  height: calc(100vh - var(--topbar-h) - var(--content-pad) * 2);
   min-height: 500px;
   border-radius: var(--r-lg);
   overflow: hidden;
