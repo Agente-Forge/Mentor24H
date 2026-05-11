@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#08080F">
-  <title>FinFlow — Editorial Finance</title>
-  <meta name="description" content="Controle financeiro premium com bento grid, glassmorphism e tipografia editorial.">
+  <title>Mentor24h — Seu Hub Pessoal</title>
+  <meta name="description" content="Organize sua vida pessoal e seu negócio num só lugar.">
 
   <link rel="stylesheet" href="css/tokens.css">
   <link rel="stylesheet" href="css/base.css">
@@ -22,10 +22,10 @@
   <!-- ═══ SIDEBAR ═══ -->
   <aside id="sidebar">
     <div class="sidebar-header">
-      <div class="brand-logo"><span>F</span></div>
+      <div class="brand-logo"><span>M</span></div>
       <div class="brand-text">
-        <span class="name">Fin<em>Flow</em></span>
-        <span class="tag">Editorial Finance</span>
+        <span class="name">Mentor<em>24h</em></span>
+        <span class="tag">Seu Hub Pessoal</span>
       </div>
     </div>
 
@@ -38,40 +38,116 @@
     </div>
 
     <nav class="sidebar-nav">
-      <div class="nav-section">Principal</div>
+
+      <!-- Dashboard -->
       <div class="nav-item active" data-nav="dashboard">
         <span data-icon="layout-dashboard"></span>
         <span class="nav-label">Dashboard</span>
       </div>
-      <div class="nav-item" data-nav="contas">
-        <span data-icon="receipt"></span>
-        <span class="nav-label">Contas</span>
-        <span class="nav-badge" id="nav-badge-contas"></span>
-      </div>
-      <div class="nav-item" data-nav="transacoes">
-        <span data-icon="arrow-left-right"></span>
-        <span class="nav-label">Transações</span>
+
+      <!-- Grupo: Chat -->
+      <div class="nav-group" id="group-chat">
+        <div class="nav-group-header" data-group="chat">
+          <span data-icon="message-square"></span>
+          <span class="nav-label">Chat</span>
+          <span class="nav-group-arrow" data-icon="chevron-right" data-size="14"></span>
+        </div>
+        <div class="nav-group-items">
+          <div class="nav-item nav-sub" data-nav="chat-ai">
+            <span data-icon="bot" data-size="14"></span>
+            <span class="nav-label">Chat AI</span>
+          </div>
+          <div class="nav-item nav-sub" data-nav="chat-wa">
+            <span data-icon="message-circle" data-size="14"></span>
+            <span class="nav-label">WhatsApp</span>
+          </div>
+        </div>
       </div>
 
-      <div class="nav-section">Organização</div>
-      <div class="nav-item" data-nav="metas">
-        <span data-icon="target"></span>
-        <span class="nav-label">Metas</span>
-      </div>
-      <div class="nav-item" data-nav="kanban">
-        <span data-icon="columns-3"></span>
-        <span class="nav-label">Kanban</span>
-      </div>
-      <div class="nav-item" data-nav="categorias">
-        <span data-icon="folder-open"></span>
-        <span class="nav-label">Categorias</span>
+      <!-- Grupo: Negócio -->
+      <div class="nav-group" id="group-negocio">
+        <div class="nav-group-header" data-group="negocio">
+          <span data-icon="briefcase"></span>
+          <span class="nav-label">Meu Negócio</span>
+          <span class="nav-group-arrow" data-icon="chevron-right" data-size="14"></span>
+        </div>
+        <div class="nav-group-items">
+          <div class="nav-item nav-sub" data-nav="produtos">
+            <span data-icon="package" data-size="14"></span>
+            <span class="nav-label">Produtos</span>
+          </div>
+          <div class="nav-item nav-sub" data-nav="vendas">
+            <span data-icon="shopping-cart" data-size="14"></span>
+            <span class="nav-label">Vendas</span>
+          </div>
+          <div class="nav-item nav-sub" data-nav="estoque">
+            <span data-icon="archive" data-size="14"></span>
+            <span class="nav-label">Estoque</span>
+          </div>
+          <div class="nav-item nav-sub" data-nav="clientes">
+            <span data-icon="users" data-size="14"></span>
+            <span class="nav-label">Clientes</span>
+          </div>
+        </div>
       </div>
 
-      <div class="nav-section">Sistema</div>
+      <!-- Grupo: Finanças -->
+      <div class="nav-group" id="group-financas">
+        <div class="nav-group-header" data-group="financas">
+          <span data-icon="wallet"></span>
+          <span class="nav-label">Finanças</span>
+          <span class="nav-group-arrow" data-icon="chevron-right" data-size="14"></span>
+        </div>
+        <div class="nav-group-items">
+          <div class="nav-item nav-sub" data-nav="contas">
+            <span data-icon="receipt" data-size="14"></span>
+            <span class="nav-label">Contas</span>
+            <span class="nav-badge" id="nav-badge-contas"></span>
+          </div>
+          <div class="nav-item nav-sub" data-nav="transacoes">
+            <span data-icon="arrow-left-right" data-size="14"></span>
+            <span class="nav-label">Transações</span>
+          </div>
+          <div class="nav-item nav-sub" data-nav="metas">
+            <span data-icon="target" data-size="14"></span>
+            <span class="nav-label">Metas</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Grupo: Pessoal -->
+      <div class="nav-group" id="group-pessoal">
+        <div class="nav-group-header" data-group="pessoal">
+          <span data-icon="user-circle"></span>
+          <span class="nav-label">Vida Pessoal</span>
+          <span class="nav-group-arrow" data-icon="chevron-right" data-size="14"></span>
+        </div>
+        <div class="nav-group-items">
+          <div class="nav-item nav-sub" data-nav="agenda">
+            <span data-icon="calendar" data-size="14"></span>
+            <span class="nav-label">Agenda</span>
+          </div>
+          <div class="nav-item nav-sub" data-nav="medicamentos">
+            <span data-icon="pill" data-size="14"></span>
+            <span class="nav-label">Medicamentos</span>
+          </div>
+          <div class="nav-item nav-sub" data-nav="tarefas">
+            <span data-icon="check-square" data-size="14"></span>
+            <span class="nav-label">Tarefas</span>
+          </div>
+          <div class="nav-item nav-sub" data-nav="contatos">
+            <span data-icon="address-book" data-size="14"></span>
+            <span class="nav-label">Contatos</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Configurações -->
       <div class="nav-item" data-nav="config">
         <span data-icon="settings-2"></span>
         <span class="nav-label">Configurações</span>
       </div>
+
     </nav>
 
     <div class="sidebar-foot">
@@ -93,7 +169,6 @@
   <main id="main">
 
     <header id="topbar">
-      <!-- Botão hamburguer (só aparece no mobile) -->
       <button class="mobile-menu-btn" id="btn-mobile-menu" title="Menu">
         <span data-icon="menu" data-size="20"></span>
       </button>
@@ -102,24 +177,24 @@
         <span class="crumb" id="topbar-crumb">dashboard</span>
         <h1 class="title">
           <span id="topbar-title-text">Visão geral </span>
-          <em class="display-italic" id="topbar-title-em">financeira</em>
+          <em class="display-italic" id="topbar-title-em">do dia</em>
         </h1>
       </div>
       <div class="topbar-actions">
 
-        <!-- Caixinha 1: Relógio -->
+        <!-- Relógio -->
         <div class="tb-widget tb-clock-widget">
           <div class="tb-clock" id="topbar-clock">
             <span class="tc-h">00</span><span class="tc-sep">:</span><span class="tc-m">00</span><span class="tc-sep tc-sep-s">:</span><span class="tc-s">00</span>
           </div>
         </div>
 
-        <!-- Caixinha 2: Data -->
+        <!-- Data -->
         <div class="tb-widget tb-date-widget">
           <div class="tb-date" id="topbar-date">domingo, 10 mai. 2026</div>
         </div>
 
-        <!-- Caixinha 3: Alarme -->
+        <!-- Alarme -->
         <div class="tb-widget tb-alarm-widget" id="alarm-widget">
           <button class="tb-alarm-btn" id="alarm-toggle" title="Alarme/Timer">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
@@ -153,6 +228,12 @@
           </div>
         </div>
 
+        <!-- Ctrl+K hint -->
+        <button class="btn btn-ghost btn-sm cmd-trigger-btn" id="cmd-trigger" title="Busca rápida (Ctrl+K)">
+          <span data-icon="search" data-size="14"></span>
+          <kbd class="cmd-hint">Ctrl K</kbd>
+        </button>
+
         <button class="btn btn-primary btn-sm" onclick="handleGlobalAdd()">
           <span data-icon="plus" data-size="14"></span>
           <span>Adicionar</span>
@@ -162,84 +243,73 @@
 
     <!-- ─── DASHBOARD ─── -->
     <section class="page active" data-page="dashboard">
-      <div class="bento stagger">
+      <div id="dashboard-content"></div>
+    </section>
 
-        <!-- Hero Health Card (span 5, row 2) -->
-        <div class="bento-card hero span-5 row-2" id="hero-card"></div>
+    <!-- ─── CHAT AI ─── -->
+    <section class="page" data-page="chat-ai">
+      <div id="chat-ai-content"></div>
+    </section>
 
-        <!-- KPI 1 -->
-        <div class="bento-card span-4" id="kpi-1"></div>
+    <!-- ─── CHAT WHATSAPP ─── -->
+    <section class="page" data-page="chat-wa">
+      <div id="chat-wa-content"></div>
+    </section>
 
-        <!-- KPI 2 -->
-        <div class="bento-card span-3" id="kpi-2"></div>
-
-        <!-- KPI 3 -->
-        <div class="bento-card span-3" id="kpi-3"></div>
-
-        <!-- Calculadora -->
-        <div class="bento-card accent-violet span-4" id="calc-card"></div>
-
-        <!-- Chart Donut Categorias -->
-        <div class="bento-card span-5">
-          <div class="card-head">
-            <div>
-              <span class="card-eyebrow">Distribuição</span>
-              <div class="card-title display">Despesas por <em style="font-style:italic;color:var(--violet)">categoria</em></div>
-            </div>
-            <div class="period-tabs">
-              <button class="period-tab" data-period-chart="semana" onclick="Dashboard.setChartPeriod('semana')">Semana</button>
-              <button class="period-tab active" data-period-chart="mes" onclick="Dashboard.setChartPeriod('mes')">Mês</button>
-              <button class="period-tab" data-period-chart="ano" onclick="Dashboard.setChartPeriod('ano')">Ano</button>
-            </div>
-          </div>
-          <div class="chart-wrap" id="chart-donut"></div>
-          <div class="chart-legend" id="chart-donut-legend"></div>
+    <!-- ─── PRODUTOS ─── -->
+    <section class="page" data-page="produtos">
+      <div class="page-head">
+        <div>
+          <h2 class="page-title">Meus <em>produtos</em></h2>
+          <div class="page-sub">Gerencie seu cardápio e catálogo</div>
         </div>
-
-        <!-- Chart Bars -->
-        <div class="bento-card span-7">
-          <div class="card-head">
-            <div>
-              <span class="card-eyebrow">Fluxo de caixa</span>
-              <div class="card-title display">Últimos <em style="font-style:italic;color:var(--violet)">6 meses</em></div>
-            </div>
-            <div style="display:flex;gap:var(--s-3);font-size:var(--t-xs);color:var(--text-3)">
-              <span><span class="dot" style="background:var(--green)"></span> Entradas</span>
-              <span><span class="dot" style="background:var(--red)"></span> Saídas</span>
-            </div>
-          </div>
-          <div class="chart-wrap tall" id="chart-bars"></div>
-        </div>
-
-        <!-- Próximas Contas -->
-        <div class="bento-card span-7">
-          <div class="card-head">
-            <div>
-              <span class="card-eyebrow">14 dias</span>
-              <div class="card-title display">Próximas <em style="font-style:italic;color:var(--violet)">contas</em></div>
-            </div>
-            <button class="btn btn-ghost btn-sm" onclick="Router.navigate('contas')">
-              Ver todas <span data-icon="arrow-right" data-size="13"></span>
-            </button>
-          </div>
-          <div id="proximas-list"></div>
-        </div>
-
-        <!-- Atividade Recente -->
-        <div class="bento-card span-5">
-          <div class="card-head">
-            <div>
-              <span class="card-eyebrow">Histórico</span>
-              <div class="card-title display">Atividade <em style="font-style:italic;color:var(--violet)">recente</em></div>
-            </div>
-            <button class="btn btn-ghost btn-sm" onclick="Router.navigate('transacoes')">
-              Ver tudo <span data-icon="arrow-right" data-size="13"></span>
-            </button>
-          </div>
-          <div id="atividade-list"></div>
-        </div>
-
+        <button class="btn btn-primary" onclick="Produtos && Produtos.novo && Produtos.novo()">
+          <span data-icon="plus" data-size="14"></span>
+          Novo produto
+        </button>
       </div>
+      <div id="produtos-content"><div class="empty-state"><span data-icon="package" data-size="32"></span><p>Módulo em breve</p></div></div>
+    </section>
+
+    <!-- ─── VENDAS ─── -->
+    <section class="page" data-page="vendas">
+      <div class="page-head">
+        <div>
+          <h2 class="page-title">Minhas <em>vendas</em></h2>
+          <div class="page-sub">Registre e acompanhe suas vendas</div>
+        </div>
+        <button class="btn btn-primary" onclick="Vendas && Vendas.nova && Vendas.nova()">
+          <span data-icon="plus" data-size="14"></span>
+          Nova venda
+        </button>
+      </div>
+      <div id="vendas-content"><div class="empty-state"><span data-icon="shopping-cart" data-size="32"></span><p>Módulo em breve</p></div></div>
+    </section>
+
+    <!-- ─── ESTOQUE ─── -->
+    <section class="page" data-page="estoque">
+      <div class="page-head">
+        <div>
+          <h2 class="page-title">Controle de <em>estoque</em></h2>
+          <div class="page-sub">Entradas, saídas e alertas</div>
+        </div>
+      </div>
+      <div id="estoque-content"><div class="empty-state"><span data-icon="archive" data-size="32"></span><p>Módulo em breve</p></div></div>
+    </section>
+
+    <!-- ─── CLIENTES ─── -->
+    <section class="page" data-page="clientes">
+      <div class="page-head">
+        <div>
+          <h2 class="page-title">Meus <em>clientes</em></h2>
+          <div class="page-sub">CRM simples para seu negócio</div>
+        </div>
+        <button class="btn btn-primary" onclick="Clientes && Clientes.novo && Clientes.novo()">
+          <span data-icon="plus" data-size="14"></span>
+          Novo cliente
+        </button>
+      </div>
+      <div id="clientes-content"><div class="empty-state"><span data-icon="users" data-size="32"></span><p>Módulo em breve</p></div></div>
     </section>
 
     <!-- ─── CONTAS ─── -->
@@ -279,6 +349,26 @@
       <div class="metas-grid" id="metas-grid"></div>
     </section>
 
+    <!-- ─── AGENDA ─── -->
+    <section class="page" data-page="agenda">
+      <div id="agenda-content"></div>
+    </section>
+
+    <!-- ─── MEDICAMENTOS ─── -->
+    <section class="page" data-page="medicamentos">
+      <div id="medicamentos-content"></div>
+    </section>
+
+    <!-- ─── TAREFAS ─── -->
+    <section class="page" data-page="tarefas">
+      <div id="tarefas-content"></div>
+    </section>
+
+    <!-- ─── CONTATOS ─── -->
+    <section class="page" data-page="contatos">
+      <div id="contatos-content"></div>
+    </section>
+
     <!-- ─── KANBAN ─── -->
     <section class="page" data-page="kanban">
       <div class="page-head">
@@ -297,9 +387,7 @@
             <div class="dot"></div>
             <div class="title">A Fazer</div>
             <span class="count" id="kb-count-todo">0</span>
-            <button class="add" onclick="Modal.novoKanban('todo')">
-              <span data-icon="plus"></span>
-            </button>
+            <button class="add" onclick="Modal.novoKanban('todo')"><span data-icon="plus"></span></button>
           </div>
           <div class="kanban-cards" id="kb-todo"></div>
         </div>
@@ -308,9 +396,7 @@
             <div class="dot"></div>
             <div class="title">Em Andamento</div>
             <span class="count" id="kb-count-doing">0</span>
-            <button class="add" onclick="Modal.novoKanban('doing')">
-              <span data-icon="plus"></span>
-            </button>
+            <button class="add" onclick="Modal.novoKanban('doing')"><span data-icon="plus"></span></button>
           </div>
           <div class="kanban-cards" id="kb-doing"></div>
         </div>
@@ -319,9 +405,7 @@
             <div class="dot"></div>
             <div class="title">Concluído</div>
             <span class="count" id="kb-count-done">0</span>
-            <button class="add" onclick="Modal.novoKanban('done')">
-              <span data-icon="plus"></span>
-            </button>
+            <button class="add" onclick="Modal.novoKanban('done')"><span data-icon="plus"></span></button>
           </div>
           <div class="kanban-cards" id="kb-done"></div>
         </div>
@@ -351,7 +435,6 @@
           <div class="page-sub">Personalize sua experiência</div>
         </div>
       </div>
-
       <div class="config-stack">
 
         <div class="config-section">
@@ -359,7 +442,6 @@
             <div class="card-pill violet"><span data-icon="user" data-size="16"></span></div>
             <h3>Perfil</h3>
           </div>
-
           <div class="avatar-edit-row">
             <div class="avatar-preview" id="avatar-prev" style="background:#A78BFA">V</div>
             <div class="flex-1">
@@ -401,6 +483,9 @@
           </button>
         </div>
 
+        <!-- Seção LLM (renderizada por LLM.renderConfig) -->
+        <div id="config-llm-section"></div>
+
         <div class="config-section">
           <div class="config-section-head">
             <div class="card-pill blue"><span data-icon="database" data-size="16"></span></div>
@@ -438,23 +523,41 @@
     <span data-icon="layout-dashboard" data-size="20"></span>
     <span class="bnav-label">Início</span>
   </button>
+  <button class="bnav-item" data-nav="chat-ai">
+    <span data-icon="bot" data-size="20"></span>
+    <span class="bnav-label">Chat AI</span>
+  </button>
+  <button class="bnav-item" data-nav="vendas">
+    <span data-icon="briefcase" data-size="20"></span>
+    <span class="bnav-label">Negócio</span>
+  </button>
   <button class="bnav-item" data-nav="contas">
-    <span data-icon="receipt" data-size="20"></span>
-    <span class="bnav-label">Contas</span>
+    <span data-icon="wallet" data-size="20"></span>
+    <span class="bnav-label">Finanças</span>
   </button>
-  <button class="bnav-item" data-nav="transacoes">
-    <span data-icon="arrow-left-right" data-size="20"></span>
-    <span class="bnav-label">Transações</span>
-  </button>
-  <button class="bnav-item" data-nav="metas">
-    <span data-icon="target" data-size="20"></span>
-    <span class="bnav-label">Metas</span>
-  </button>
-  <button class="bnav-item" data-nav="config">
-    <span data-icon="settings-2" data-size="20"></span>
-    <span class="bnav-label">Config</span>
+  <button class="bnav-item" data-nav="tarefas">
+    <span data-icon="user-circle" data-size="20"></span>
+    <span class="bnav-label">Pessoal</span>
   </button>
 </nav>
+
+<!-- ═══ COMMAND PALETTE ═══ -->
+<div id="cmd-palette" class="cmd-palette">
+  <div class="cmd-backdrop"></div>
+  <div class="cmd-panel">
+    <div class="cmd-input-row">
+      <span data-icon="search" data-size="16" class="cmd-search-icon"></span>
+      <input id="cmd-input" type="text" placeholder="O que você quer fazer?" autocomplete="off" spellcheck="false">
+      <kbd class="cmd-esc-key">ESC</kbd>
+    </div>
+    <div id="cmd-results" class="cmd-results"></div>
+    <div class="cmd-footer">
+      <span>↑↓ navegar</span>
+      <span>Enter confirmar</span>
+      <span>ESC fechar</span>
+    </div>
+  </div>
+</div>
 
 <!-- ═══ MODAL ═══ -->
 <div id="modal-root">
@@ -464,7 +567,7 @@
 <!-- ═══ TOAST ═══ -->
 <div id="toast-root"></div>
 
-<!-- ═══ SCRIPTS (order matters) ═══ -->
+<!-- ═══ SCRIPTS (ordem importa) ═══ -->
 <script src="js/icons.js"></script>
 <script src="js/utils.js"></script>
 <script src="js/db.js"></script>
@@ -480,6 +583,13 @@
 <script src="js/kanban.js"></script>
 <script src="js/categorias.js"></script>
 <script src="js/config.js"></script>
+<script src="js/llm.js"></script>
+<script src="js/chat-wa.js"></script>
+<script src="js/agenda.js"></script>
+<script src="js/medicamentos.js"></script>
+<script src="js/tarefas.js"></script>
+<script src="js/contatos.js"></script>
+<script src="js/command-palette.js"></script>
 <script src="js/leo-data.js"></script>
 <script src="js/app.js"></script>
 

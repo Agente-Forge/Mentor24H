@@ -4,13 +4,23 @@
 
 const Router = (() => {
   const PAGES = {
-    dashboard:  { title: 'Visão geral',     em: 'financeira',     icon: 'layout-dashboard' },
-    contas:     { title: 'Suas',            em: 'contas',         icon: 'receipt' },
-    transacoes: { title: 'Histórico de',    em: 'transações',     icon: 'arrow-left-right' },
-    metas:      { title: 'Caixinhas de',    em: 'poupança',       icon: 'target' },
-    kanban:     { title: 'Quadro',          em: 'kanban',         icon: 'columns-3' },
-    categorias: { title: 'Suas',            em: 'categorias',     icon: 'folder-open' },
-    config:     { title: 'Ajustar',         em: 'preferências',   icon: 'settings-2' },
+    dashboard:      { title: 'Visão geral do',  em: 'dia',            icon: 'layout-dashboard' },
+    'chat-ai':      { title: 'Chat',            em: 'inteligente',    icon: 'bot' },
+    'chat-wa':      { title: 'Chat',            em: 'WhatsApp',       icon: 'message-circle' },
+    produtos:       { title: 'Meus',            em: 'produtos',       icon: 'package' },
+    vendas:         { title: 'Minhas',          em: 'vendas',         icon: 'shopping-cart' },
+    estoque:        { title: 'Controle de',     em: 'estoque',        icon: 'archive' },
+    clientes:       { title: 'Meus',            em: 'clientes',       icon: 'users' },
+    contas:         { title: 'Suas',            em: 'contas',         icon: 'receipt' },
+    transacoes:     { title: 'Histórico de',    em: 'transações',     icon: 'arrow-left-right' },
+    metas:          { title: 'Caixinhas de',    em: 'poupança',       icon: 'target' },
+    agenda:         { title: 'Minha',           em: 'agenda',         icon: 'calendar' },
+    medicamentos:   { title: 'Meus',            em: 'medicamentos',   icon: 'pill' },
+    tarefas:        { title: 'Minhas',          em: 'tarefas',        icon: 'check-square' },
+    contatos:       { title: 'Meus',            em: 'contatos',       icon: 'users' },
+    kanban:         { title: 'Quadro',          em: 'kanban',         icon: 'columns-3' },
+    categorias:     { title: 'Suas',            em: 'categorias',     icon: 'folder-open' },
+    config:         { title: 'Ajustar',         em: 'preferências',   icon: 'settings-2' },
   };
 
   let current = 'dashboard';
@@ -55,9 +65,9 @@ const Router = (() => {
 
   function init() {
     document.querySelectorAll('[data-nav]').forEach(el => {
-      el.addEventListener('click', () => navigate(el.dataset.nav));
+      el.addEventListener('click', () => Router.navigate(el.dataset.nav));
     });
-    navigate('dashboard');
+    Router.navigate('dashboard');
   }
 
   return { register, navigate, getCurrent, init, PAGES };

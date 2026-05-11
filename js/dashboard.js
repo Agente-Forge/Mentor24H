@@ -7,6 +7,7 @@ const Dashboard = (() => {
   let calcPeriod  = 'semana';
 
   function render() {
+    ensureBentoStructure();
     DB.updateStatusContas();
     const monthRange = Utils.getMonthRange();
     const stats = DB.getStats(monthRange.start, monthRange.end);
@@ -18,6 +19,73 @@ const Dashboard = (() => {
     renderProximas();
     renderAtividade();
     updateBadges();
+  }
+
+  function ensureBentoStructure() {
+    const wrapper = document.getElementById('dashboard-content');
+    if (!wrapper) return;
+    if (wrapper.querySelector('.bento')) return;
+    wrapper.innerHTML = `
+      <div class="bento stagger">
+        <div class="bento-card hero span-5 row-2" id="hero-card"></div>
+        <div class="bento-card span-4" id="kpi-1"></div>
+        <div class="bento-card span-3" id="kpi-2"></div>
+        <div class="bento-card span-3" id="kpi-3"></div>
+        <div class="bento-card accent-violet span-4" id="calc-card"></div>
+        <div class="bento-card span-5">
+          <div class="card-head">
+            <div>
+              <span class="card-eyebrow">Distribuição</span>
+              <div class="card-title display">Despesas por <em style="font-style:italic;color:var(--violet)">categoria</em></div>
+            </div>
+            <div class="period-tabs">
+              <button class="period-tab" data-period-chart="semana" onclick="Dashboard.setChartPeriod('semana')">Semana</button>
+              <button class="period-tab active" data-period-chart="mes" onclick="Dashboard.setChartPeriod('mes')">Mês</button>
+              <button class="period-tab" data-period-chart="ano" onclick="Dashboard.setChartPeriod('ano')">Ano</button>
+            </div>
+          </div>
+          <div class="chart-wrap" id="chart-donut"></div>
+          <div class="chart-legend" id="chart-donut-legend"></div>
+        </div>
+        <div class="bento-card span-7">
+          <div class="card-head">
+            <div>
+              <span class="card-eyebrow">Fluxo de caixa</span>
+              <div class="card-title display">Últimos <em style="font-style:italic;color:var(--violet)">6 meses</em></div>
+            </div>
+            <div style="display:flex;gap:var(--s-3);font-size:var(--t-xs);color:var(--text-3)">
+              <span><span class="dot" style="background:var(--green)"></span> Entradas</span>
+              <span><span class="dot" style="background:var(--red)"></span> Saídas</span>
+            </div>
+          </div>
+          <div class="chart-wrap tall" id="chart-bars"></div>
+        </div>
+        <div class="bento-card span-7">
+          <div class="card-head">
+            <div>
+              <span class="card-eyebrow">14 dias</span>
+              <div class="card-title display">Próximas <em style="font-style:italic;color:var(--violet)">contas</em></div>
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="Router.navigate('contas')">
+              Ver todas <span data-icon="arrow-right" data-size="13"></span>
+            </button>
+          </div>
+          <div id="proximas-list"></div>
+        </div>
+        <div class="bento-card span-5">
+          <div class="card-head">
+            <div>
+              <span class="card-eyebrow">Histórico</span>
+              <div class="card-title display">Atividade <em style="font-style:italic;color:var(--violet)">recente</em></div>
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="Router.navigate('transacoes')">
+              Ver tudo <span data-icon="arrow-right" data-size="13"></span>
+            </button>
+          </div>
+          <div id="atividade-list"></div>
+        </div>
+      </div>
+    `;
   }
 
   function renderHero(stats) {

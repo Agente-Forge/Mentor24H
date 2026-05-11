@@ -4,14 +4,26 @@
 
 const DB = (() => {
   const KEY = {
-    config:    'finflow.config',
-    contas:    'finflow.contas',
-    cats:      'finflow.cats',
-    txs:       'finflow.txs',
-    metas:     'finflow.metas',
-    movs:      'finflow.movs',
-    kanban:    'finflow.kanban',
-    seeded:    'finflow.seeded',
+    config:       'finflow.config',
+    contas:       'finflow.contas',
+    cats:         'finflow.cats',
+    txs:          'finflow.txs',
+    metas:        'finflow.metas',
+    movs:         'finflow.movs',
+    kanban:       'finflow.kanban',
+    seeded:       'finflow.seeded',
+    agenda:       'mentor24h.agenda',
+    medicamentos: 'mentor24h.medicamentos',
+    medDoses:     'mentor24h.med-doses',
+    tarefas:      'mentor24h.tarefas',
+    contatos:     'mentor24h.contatos',
+    produtos:     'mentor24h.produtos',
+    vendas:       'mentor24h.vendas',
+    clientesNeg:  'mentor24h.clientes-neg',
+    chatContatos: 'mentor24h.chat-contatos',
+    chatMsgs:     'mentor24h.chat-msgs',
+    llmConfig:    'mentor24h.llm-config',
+    llmConversas: 'mentor24h.llm-conversas',
   };
 
   function read(k, def = []) {
@@ -529,6 +541,183 @@ const DB = (() => {
     localStorage.setItem(KEY.seeded, '1');
   }
 
+  /* ═══ AGENDA ═══ */
+  function getAgenda(filtros = {}) {
+    let arr = read(KEY.agenda, []);
+    if (filtros.data) arr = arr.filter(e => e.data === filtros.data);
+    return arr.sort((a, b) => (a.data + a.hora).localeCompare(b.data + b.hora));
+  }
+  function saveEvento(data) {
+    const arr = read(KEY.agenda, []);
+    const now = new Date().toISOString();
+    if (data.id) {
+      const idx = arr.findIndex(e => e.id === data.id);
+      if (idx >= 0) { arr[idx] = Object.assign({}, arr[idx], data); write(KEY.agenda, arr); return arr[idx]; }
+    }
+    const novo = Object.assign({ id: Utils.uid(), titulo: '', data: todayISO(), hora: '09:00', tipo: 'pessoal', descricao: '', recorrente: false, criadoEm: now }, data, { id: Utils.uid() });
+    arr.push(novo); write(KEY.agenda, arr); return novo;
+  }
+  function deleteEvento(id) { write(KEY.agenda, read(KEY.agenda, []).filter(e => e.id !== id)); }
+
+  /* ═══ MEDICAMENTOS ═══ */
+  function getMedicamentos() { return read(KEY.medicamentos, []); }
+  function saveMedicamento(data) {
+    const arr = read(KEY.medicamentos, []);
+    const now = new Date().toISOString();
+    if (data.id) {
+      const idx = arr.findIndex(m => m.id === data.id);
+      if (idx >= 0) { arr[idx] = Object.assign({}, arr[idx], data); write(KEY.medicamentos, arr); return arr[idx]; }
+    }
+    const novo = Object.assign({ id: Utils.uid(), nome: '', dosagem: '', horarios: [], frequencia: 'diario', estoque: 0, estoqueMinimo: 5, criadoEm: now }, data, { id: Utils.uid() });
+    arr.push(novo); write(KEY.medicamentos, arr); return novo;
+  }
+  function deleteMedicamento(id) { write(KEY.medicamentos, read(KEY.medicamentos, []).filter(m => m.id !== id)); }
+  function registrarDose(medId, data) {
+    const doses = read(KEY.medDoses, []);
+    doses.push({ id: Utils.uid(), medId, data: data || todayISO(), hora: new Date().toTimeString().slice(0, 5) });
+    write(KEY.medDoses, doses);
+  }
+  function getDoses(medId, data) {
+    const doses = read(KEY.medDoses, []);
+    return doses.filter(d => (!medId || d.medId === medId) && (!data || d.data === data));
+  }
+
+  /* ═══ TAREFAS ═══ */
+  function getTarefas(filtros = {}) {
+    let arr = read(KEY.tarefas, []);
+    if (filtros.status) arr = arr.filter(t => t.status === filtros.status);
+    if (filtros.prioridade) arr = arr.filter(t => t.prioridade === filtros.prioridade);
+    return arr.sort((a, b) => {
+      const p = { alta: 0, media: 1, baixa: 2 };
+      return (p[a.prioridade] || 1) - (p[b.prioridade] || 1);
+    });
+  }
+  function saveTarefa(data) {
+    const arr = read(KEY.tarefas, []);
+    const now = new Date().toISOString();
+    if (data.id) {
+      const idx = arr.findIndex(t => t.id === data.id);
+      if (idx >= 0) { arr[idx] = Object.assign({}, arr[idx], data); write(KEY.tarefas, arr); return arr[idx]; }
+    }
+    const novo = Object.assign({ id: Utils.uid(), titulo: '', descricao: '', prioridade: 'media', status: 'pendente', data: null, hora: null, recorrente: false, subtarefas: [], criadoEm: now }, data, { id: Utils.uid() });
+    arr.push(novo); write(KEY.tarefas, arr); return novo;
+  }
+  function deleteTarefa(id) { write(KEY.tarefas, read(KEY.tarefas, []).filter(t => t.id !== id)); }
+
+  /* ═══ CONTATOS ═══ */
+  function getContatos(busca) {
+    let arr = read(KEY.contatos, []);
+    if (busca) { const q = busca.toLowerCase(); arr = arr.filter(c => (c.nome + c.telefone + c.email).toLowerCase().includes(q)); }
+    return arr.sort((a, b) => a.nome.localeCompare(b.nome));
+  }
+  function saveContato(data) {
+    const arr = read(KEY.contatos, []);
+    const now = new Date().toISOString();
+    if (data.id) {
+      const idx = arr.findIndex(c => c.id === data.id);
+      if (idx >= 0) { arr[idx] = Object.assign({}, arr[idx], data); write(KEY.contatos, arr); return arr[idx]; }
+    }
+    const novo = Object.assign({ id: Utils.uid(), nome: '', telefone: '', email: '', tags: [], aniversario: null, notas: '', criadoEm: now }, data, { id: Utils.uid() });
+    arr.push(novo); write(KEY.contatos, arr); return novo;
+  }
+  function deleteContato(id) { write(KEY.contatos, read(KEY.contatos, []).filter(c => c.id !== id)); }
+
+  /* ═══ PRODUTOS ═══ */
+  function getProdutos(filtros = {}) {
+    let arr = read(KEY.produtos, []);
+    if (filtros.status) arr = arr.filter(p => p.status === filtros.status);
+    if (filtros.busca) { const q = filtros.busca.toLowerCase(); arr = arr.filter(p => p.nome.toLowerCase().includes(q)); }
+    return arr.sort((a, b) => a.nome.localeCompare(b.nome));
+  }
+  function saveProduto(data) {
+    const arr = read(KEY.produtos, []);
+    const now = new Date().toISOString();
+    if (data.id) {
+      const idx = arr.findIndex(p => p.id === data.id);
+      if (idx >= 0) { arr[idx] = Object.assign({}, arr[idx], data); write(KEY.produtos, arr); return arr[idx]; }
+    }
+    const novo = Object.assign({ id: Utils.uid(), nome: '', descricao: '', preco: 0, custo: 0, categoria: '', estoque: 0, estoqueMinimo: 5, status: 'disponivel', criadoEm: now }, data, { id: Utils.uid() });
+    arr.push(novo); write(KEY.produtos, arr); return novo;
+  }
+  function deleteProduto(id) { write(KEY.produtos, read(KEY.produtos, []).filter(p => p.id !== id)); }
+
+  /* ═══ VENDAS ═══ */
+  function getVendas(filtros = {}) {
+    let arr = read(KEY.vendas, []);
+    if (filtros.dataInicio) arr = arr.filter(v => v.data >= filtros.dataInicio);
+    if (filtros.dataFim)    arr = arr.filter(v => v.data <= filtros.dataFim);
+    if (filtros.clienteId)  arr = arr.filter(v => v.clienteId === filtros.clienteId);
+    return arr.sort((a, b) => b.data.localeCompare(a.data));
+  }
+  function saveVenda(data) {
+    const arr = read(KEY.vendas, []);
+    const now = new Date().toISOString();
+    const novo = Object.assign({ id: Utils.uid(), data: todayISO(), clienteId: null, clienteNome: '', itens: [], total: 0, formaPagamento: 'dinheiro', status: 'paga', criadoEm: now }, data, { id: Utils.uid() });
+    arr.push(novo); write(KEY.vendas, arr); return novo;
+  }
+  function deleteVenda(id) { write(KEY.vendas, read(KEY.vendas, []).filter(v => v.id !== id)); }
+
+  /* ═══ CLIENTES NEGÓCIO ═══ */
+  function getClientesNeg(busca) {
+    let arr = read(KEY.clientesNeg, []);
+    if (busca) { const q = busca.toLowerCase(); arr = arr.filter(c => (c.nome + c.telefone).toLowerCase().includes(q)); }
+    return arr.sort((a, b) => a.nome.localeCompare(b.nome));
+  }
+  function saveClienteNeg(data) {
+    const arr = read(KEY.clientesNeg, []);
+    const now = new Date().toISOString();
+    if (data.id) {
+      const idx = arr.findIndex(c => c.id === data.id);
+      if (idx >= 0) { arr[idx] = Object.assign({}, arr[idx], data); write(KEY.clientesNeg, arr); return arr[idx]; }
+    }
+    const novo = Object.assign({ id: Utils.uid(), nome: '', telefone: '', email: '', aniversario: null, notas: '', saldoDevedor: 0, criadoEm: now }, data, { id: Utils.uid() });
+    arr.push(novo); write(KEY.clientesNeg, arr); return novo;
+  }
+
+  /* ═══ CHAT CONTATOS (WhatsApp) ═══ */
+  function getChatContatos() { return read(KEY.chatContatos, []); }
+  function saveChatContato(data) {
+    const arr = read(KEY.chatContatos, []);
+    if (data.id) {
+      const idx = arr.findIndex(c => c.id === data.id);
+      if (idx >= 0) { arr[idx] = Object.assign({}, arr[idx], data); write(KEY.chatContatos, arr); return arr[idx]; }
+    }
+    const novo = Object.assign({ id: Utils.uid(), nome: '', tel: '', avatar: '', tags: [], ultimaMensagem: '', naoLidas: 0 }, data, { id: Utils.uid() });
+    arr.push(novo); write(KEY.chatContatos, arr); return novo;
+  }
+
+  /* ═══ CHAT MSGS (WhatsApp) ═══ */
+  function getChatMsgs(contatoId) {
+    return read(KEY.chatMsgs, []).filter(m => m.contatoId === contatoId);
+  }
+  function saveChatMsg(data) {
+    const arr = read(KEY.chatMsgs, []);
+    const novo = Object.assign({ id: Utils.uid(), contatoId: '', texto: '', de: 'eu', hora: new Date().toTimeString().slice(0, 5), status: 'enviado', criadoEm: new Date().toISOString() }, data, { id: Utils.uid() });
+    arr.push(novo); write(KEY.chatMsgs, arr); return novo;
+  }
+
+  /* ═══ LLM CONFIG ═══ */
+  function getLlmConfig() {
+    return Object.assign({ provider: 'openrouter', apiKey: '', model: 'anthropic/claude-3.5-sonnet', systemPrompt: 'Você é o Mentor24h, um assistente pessoal e empresarial. Responda sempre em português brasileiro.' }, read(KEY.llmConfig, null) || {});
+  }
+  function saveLlmConfig(patch) {
+    const merged = Object.assign(getLlmConfig(), patch || {});
+    write(KEY.llmConfig, merged); return merged;
+  }
+
+  /* ═══ LLM CONVERSAS ═══ */
+  function getLlmConversas() { return read(KEY.llmConversas, []); }
+  function saveLlmConversa(data) {
+    const arr = read(KEY.llmConversas, []);
+    if (data.id) {
+      const idx = arr.findIndex(c => c.id === data.id);
+      if (idx >= 0) { arr[idx] = Object.assign({}, arr[idx], data); write(KEY.llmConversas, arr); return arr[idx]; }
+    }
+    const novo = Object.assign({ id: Utils.uid(), titulo: 'Nova conversa', msgs: [], criadoEm: new Date().toISOString() }, data, { id: Utils.uid() });
+    arr.push(novo); write(KEY.llmConversas, arr); return novo;
+  }
+  function deleteLlmConversa(id) { write(KEY.llmConversas, read(KEY.llmConversas, []).filter(c => c.id !== id)); }
+
   return {
     getConfig, saveConfig,
     getCategorias, getCategoria, saveCategoria, deleteCategoria,
@@ -539,6 +728,17 @@ const DB = (() => {
     getMovimentos, saveMovimento, deleteMovimento,
     getKanban, getKanbanCard, saveKanbanCard, moveKanbanCard, deleteKanbanCard,
     getStats,
+    getAgenda, saveEvento, deleteEvento,
+    getMedicamentos, saveMedicamento, deleteMedicamento, registrarDose, getDoses,
+    getTarefas, saveTarefa, deleteTarefa,
+    getContatos, saveContato, deleteContato,
+    getProdutos, saveProduto, deleteProduto,
+    getVendas, saveVenda, deleteVenda,
+    getClientesNeg, saveClienteNeg,
+    getChatContatos, saveChatContato,
+    getChatMsgs, saveChatMsg,
+    getLlmConfig, saveLlmConfig,
+    getLlmConversas, saveLlmConversa, deleteLlmConversa,
     exportAll, importAll, clearAll,
     seed, isSeeded,
   };

@@ -8,11 +8,48 @@ const App = (() => {
     DB.updateStatusContas();
     Theme.init();
     initSidebar();
+    initNavGroups();   /* precisa ser antes de initRouter para o navigate wrapper estar pronto */
     initRouter();
     syncUserUI();
     startClock();
     Alarm.init();
+    CommandPalette.init();
     Icons.render();
+  }
+
+  function initNavGroups() {
+    document.querySelectorAll('.nav-group-header').forEach(header => {
+      header.addEventListener('click', () => {
+        const group = header.closest('.nav-group');
+        if (!group) return;
+        const wasOpen = group.classList.contains('open');
+        /* Fechar todos os grupos */
+        document.querySelectorAll('.nav-group').forEach(g => g.classList.remove('open'));
+        /* Abrir o clicado se estava fechado */
+        if (!wasOpen) group.classList.add('open');
+      });
+    });
+
+    /* Abrir automaticamente o grupo da página ativa */
+    const openGroupFor = (page) => {
+      const groupMap = {
+        'chat-ai': 'group-chat', 'chat-wa': 'group-chat',
+        'produtos': 'group-negocio', 'vendas': 'group-negocio', 'estoque': 'group-negocio', 'clientes': 'group-negocio',
+        'contas': 'group-financas', 'transacoes': 'group-financas', 'metas': 'group-financas',
+        'agenda': 'group-pessoal', 'medicamentos': 'group-pessoal', 'tarefas': 'group-pessoal', 'contatos': 'group-pessoal',
+      };
+      const groupId = groupMap[page];
+      if (groupId) {
+        document.querySelectorAll('.nav-group').forEach(g => g.classList.remove('open'));
+        document.getElementById(groupId)?.classList.add('open');
+      }
+    };
+
+    const originalNavigate = Router.navigate;
+    Router.navigate = function(page) {
+      openGroupFor(page);
+      return originalNavigate.call(Router, page);
+    };
   }
 
   /* ─── Importação automática dos dados do Léo (única vez) ─── */
@@ -105,7 +142,17 @@ const App = (() => {
     Router.register('metas',      () => Metas.render());
     Router.register('kanban',     () => Kanban.render());
     Router.register('categorias', () => Categorias.render());
-    Router.register('config',     () => Config.render());
+    Router.register('config',     () => { Config.render(); LLM.renderConfig(); });
+    Router.register('chat-ai',    () => LLM.render());
+    Router.register('chat-wa',    () => ChatWA.render());
+    Router.register('agenda',     () => Agenda.render());
+    Router.register('medicamentos', () => Medicamentos.render());
+    Router.register('tarefas',    () => Tarefas.render());
+    Router.register('contatos',   () => Contatos.render());
+    Router.register('produtos',   () => {});
+    Router.register('vendas',     () => {});
+    Router.register('estoque',    () => {});
+    Router.register('clientes',   () => {});
     Router.init();
   }
 
@@ -142,15 +189,21 @@ const App = (() => {
   function handleGlobalAdd() {
     const page = Router.getCurrent();
     const map = {
-      dashboard:  () => Modal.novaConta(),
-      contas:     () => Modal.novaConta(),
-      transacoes: () => Modal.novaTransacao(),
-      metas:      () => Modal.novaMeta(),
-      kanban:     () => Modal.novoKanban(),
-      categorias: () => Modal.novaCategoria(),
-      config:     () => Toast.info('Use os botões na página', ''),
+      dashboard:    () => CommandPalette.open(),
+      contas:       () => Modal.novaConta(),
+      transacoes:   () => Modal.novaTransacao(),
+      metas:        () => Modal.novaMeta(),
+      kanban:       () => Modal.novoKanban(),
+      categorias:   () => Modal.novaCategoria(),
+      'chat-ai':    () => LLM.novaConversa(),
+      agenda:       () => document.getElementById('agenda-novo-btn')?.click(),
+      medicamentos: () => document.getElementById('med-novo-btn')?.click(),
+      tarefas:      () => document.getElementById('trf-nova-btn')?.click(),
+      contatos:     () => document.getElementById('ctto-novo-btn')?.click(),
+      config:       () => Toast.info('Use os botões na página', ''),
     };
     if (map[page]) map[page]();
+    else CommandPalette.open();
   }
 
   window.handleGlobalAdd = handleGlobalAdd;
