@@ -154,6 +154,7 @@
 | 2026-05-13 | 7.1 | skill-devops (Sonnet 4.6): `.github/workflows/deploy.yml` (GitHub Actions → GitHub Pages), `.nojekyll`, `.gitignore` atualizado com `leo-data.js`/`leo-import.json`. Remote: `Leozinhobh77/controle-financeiro-v2`. |
 | 2026-05-13 | Add-on | Groq adicionado aos provedores de LLM: 4 modelos (Llama 3.3 70B, Llama 3.1 70B, Mixtral, Gemma 2), função `callGroq()` em `llm.js`, switch case configurado. |
 | 2026-05-13 | Hotfix-LLM | 3 bugs críticos na configuração de LLM corrigidos: (1) CSP `connect-src` bloqueava `api.groq.com` — adicionado; (2) Schema antigo tinha `apiKey` única compartilhada entre todos os provedores — refatorado para `apiKeys: {provider: key}` e `models: {provider: model}` em `db.js` com migração automática v1→v2; (3) `renderConfig` em `llm.js` agora escapa XSS, mostra placeholder específico por provedor, auto-salva chave anterior ao trocar provider e indica status "✓ chave preenchida". |
+| 2026-05-13 | RAG-Contexto | IA agora tem acesso aos dados do app: `buildUserContext()` em `llm.js` coleta snapshot fresco (contas, vendas, tarefas, agenda, metas, clientes, estoque) a cada mensagem e injeta no systemPrompt. systemPrompt padrão atualizado em `db.js` com migração automática. Welcome screen ganhou 6 sugestões clicáveis ("Quanto eu devo este mês?", etc.) com CSS `.llm-suggestion-chip` em `pages.css`. |
 
 ---
 

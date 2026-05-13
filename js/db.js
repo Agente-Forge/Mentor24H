@@ -748,11 +748,18 @@ const DB = (() => {
       delete raw.model;
     }
 
+    /* Migração: systemPrompt antigo padrão → novo (com contexto).
+       Só substitui se for o EXATO antigo. Customizações do usuário ficam intactas. */
+    const SYSTEM_PROMPT_V1 = 'Você é o Mentor24h, um assistente pessoal e empresarial. Responda sempre em português brasileiro.';
+    if (raw.systemPrompt === SYSTEM_PROMPT_V1) {
+      delete raw.systemPrompt;
+    }
+
     const cfg = Object.assign({
       provider: 'openrouter',
       apiKeys: {},
       models: {},
-      systemPrompt: 'Você é o Mentor24h, um assistente pessoal e empresarial. Responda sempre em português brasileiro.',
+      systemPrompt: 'Você é o Mentor24h, assistente pessoal e empresarial do usuário. Você tem acesso aos dados do app dele (contas, vendas, tarefas, metas, agenda) e deve usar esses dados para responder perguntas como "quanto devo este mês", "quanto já paguei", "quais tarefas tenho hoje", etc. Responda sempre em português brasileiro, de forma direta e prática. Quando citar valores monetários, use o formato R$ X,XX. Se o usuário pedir uma ação (criar conta, registrar venda), explique o passo a passo de onde clicar no app.',
     }, raw);
 
     /* Getters convenientes do provider atual (usado pelas funções call*) */

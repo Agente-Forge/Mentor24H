@@ -127,14 +127,25 @@ const LLM = (() => {
   function renderWelcome() {
     const cfg = DB.getLlmConfig();
     const provider = PROVIDERS[cfg.provider];
+    const sugestoes = [
+      'Quanto eu devo este mês?',
+      'Quanto eu já paguei este mês?',
+      'Quais tarefas tenho hoje?',
+      'Resumo das minhas vendas do mês',
+      'Quais clientes estão me devendo?',
+      'Como está meu saldo?',
+    ];
     return `
       <div class="llm-welcome">
         <div class="llm-welcome-icon"><span data-icon="bot" data-size="48"></span></div>
         <h2 class="llm-welcome-title">Mentor AI</h2>
-        <p class="llm-welcome-sub">Seu assistente pessoal e empresarial.<br>Conectado via <strong>${provider ? provider.name : cfg.provider}</strong> · ${cfg.model}</p>
+        <p class="llm-welcome-sub">Seu assistente conhece seu app.<br>Conectado via <strong>${esc(provider ? provider.name : cfg.provider)}</strong> · ${esc(cfg.model)}</p>
+        <div class="llm-suggestions">
+          ${sugestoes.map(s => `<button class="llm-suggestion-chip" data-pergunta="${esc(s)}">${esc(s)}</button>`).join('')}
+        </div>
         <button class="btn btn-primary" id="llm-start-btn">
           <span data-icon="message-square" data-size="14"></span>
-          Iniciar conversa
+          Ou iniciar conversa em branco
         </button>
       </div>
     `;
@@ -237,6 +248,22 @@ const LLM = (() => {
 
     /* Conversa start */
     container.querySelector('#llm-start-btn')?.addEventListener('click', novaConversa);
+
+    /* Sugestões clicáveis — criam conversa e enviam pergunta direto */
+    container.querySelectorAll('.llm-suggestion-chip').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const pergunta = btn.dataset.pergunta;
+        if (!pergunta) return;
+        novaConversa();
+        setTimeout(() => {
+          const input = document.getElementById('llm-input');
+          if (input) {
+            input.value = pergunta;
+            sendMessage();
+          }
+        }, 100);
+      });
+    });
 
     /* Config botões */
     container.querySelector('#llm-cfg-btn')?.addEventListener('click', () => Router.navigate('config'));
@@ -346,7 +373,15 @@ const LLM = (() => {
 
     try {
       const cfg = DB.getLlmConfig();
-      const response = await callProvider(conversa.msgs, cfg);
+
+      /* Enriquece systemPrompt com snapshot atual dos dados do usuário.
+         A IA recebe contexto fresco a cada mensagem para responder perguntas
+         sobre contas, vendas, tarefas, etc. com dados reais. */
+      const cfgComContexto = Object.assign({}, cfg, {
+        systemPrompt: (cfg.systemPrompt || '') + '\n\n' + buildUserContext(),
+      });
+
+      const response = await callProvider(conversa.msgs, cfgComContexto);
 
       conversa.msgs.push({ role: 'assistant', content: response });
       DB.saveLlmConversa(conversa);
@@ -357,6 +392,157 @@ const LLM = (() => {
 
     isLoading = false;
     render();
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     CONTEXTO DO USUÁRIO — Snapshot dos dados do app
+     A IA recebe este snapshot a cada mensagem para responder
+     com base nos dados reais (contas, vendas, tarefas, etc).
+  ═══════════════════════════════════════════════════════════ */
+  function buildUserContext() {
+    const cfg = DB.getConfig();
+    const hoje = new Date();
+    const hojeISO = hoje.toISOString().slice(0, 10);
+    const mesAtual = hojeISO.slice(0, 7); // YYYY-MM
+    const daquiSeteDias = new Date(hoje.getTime() + 7 * 86400000).toISOString().slice(0, 10);
+    const inicioMes = mesAtual + '-01';
+
+    const linhas = [];
+    linhas.push('═══ DADOS ATUAIS DO USUÁRIO ═══');
+    linhas.push(`Usuário: ${cfg.nomeUsuario || 'Você'}`);
+    linhas.push(`Data: ${hojeISO} (${hoje.toLocaleDateString('pt-BR', { weekday: 'long' })})`);
+    linhas.push(`Moeda: ${cfg.moeda || 'BRL'}`);
+    linhas.push('');
+
+    /* ─── FINANCEIRO ─── */
+    try {
+      const contas = (DB.getContas && DB.getContas()) || [];
+      const txs = (DB.getTxs && DB.getTxs()) || [];
+
+      const contasMes = contas.filter(c => (c.vencimento || '').startsWith(mesAtual));
+      const pendentes = contasMes.filter(c => c.status === 'pendente' || c.status === 'atrasada');
+      const pagas     = contasMes.filter(c => c.status === 'paga');
+      const totalPendente = pendentes.reduce((s, c) => s + (c.valor || 0), 0);
+      const totalPago     = pagas.reduce((s, c) => s + (c.valor || 0), 0);
+
+      const txMes = txs.filter(t => (t.data || '').startsWith(mesAtual));
+      const receitas = txMes.filter(t => t.tipo === 'receita').reduce((s, t) => s + (t.valor || 0), 0);
+      const despesas = txMes.filter(t => t.tipo === 'despesa').reduce((s, t) => s + (t.valor || 0), 0);
+
+      linhas.push('── FINANCEIRO (mês atual) ──');
+      linhas.push(`Saldo inicial: ${fmtBRL(cfg.saldoInicial || 0)}`);
+      linhas.push(`Receitas no mês: ${fmtBRL(receitas)}`);
+      linhas.push(`Despesas no mês: ${fmtBRL(despesas)}`);
+      linhas.push(`Saldo estimado: ${fmtBRL((cfg.saldoInicial || 0) + receitas - despesas)}`);
+      linhas.push(`Contas a pagar este mês: ${pendentes.length} (total ${fmtBRL(totalPendente)})`);
+      linhas.push(`Contas já pagas este mês: ${pagas.length} (total ${fmtBRL(totalPago)})`);
+
+      if (pendentes.length) {
+        linhas.push('');
+        linhas.push('Próximas contas (até 10):');
+        pendentes.slice(0, 10).forEach(c => {
+          linhas.push(`  • ${c.descricao || c.nome || 'Conta'} — ${fmtBRL(c.valor)} (vence ${c.vencimento || 's/data'}) [${c.status}]`);
+        });
+      }
+      linhas.push('');
+    } catch (e) { /* coleção pode não existir */ }
+
+    /* ─── METAS / CAIXINHAS ─── */
+    try {
+      const metas = (DB.getMetas && DB.getMetas()) || [];
+      if (metas.length) {
+        linhas.push('── METAS / CAIXINHAS ──');
+        metas.forEach(m => {
+          const pct = m.objetivo ? Math.round((m.atual || 0) / m.objetivo * 100) : 0;
+          linhas.push(`  • ${m.nome}: ${fmtBRL(m.atual || 0)} / ${fmtBRL(m.objetivo || 0)} (${pct}%)`);
+        });
+        linhas.push('');
+      }
+    } catch (e) {}
+
+    /* ─── NEGÓCIO ─── */
+    try {
+      const produtos = (DB.getProdutos && DB.getProdutos()) || [];
+      const vendas   = (DB.getVendas   && DB.getVendas())   || [];
+      const clientes = (DB.getClientesNeg && DB.getClientesNeg()) || [];
+
+      if (produtos.length || vendas.length || clientes.length) {
+        const ativos = produtos.filter(p => p.status === 'ativo' || !p.status);
+        const baixoEstoque = produtos.filter(p => (p.estoque || 0) > 0 && (p.estoque || 0) <= (p.estoqueMin || 0));
+        const semEstoque = produtos.filter(p => (p.estoque || 0) === 0);
+
+        const vendasMes = vendas.filter(v => (v.data || '').startsWith(mesAtual));
+        const totalVendasMes = vendasMes.reduce((s, v) => s + (v.total || 0), 0);
+        const vendasPagas = vendasMes.filter(v => v.status === 'paga');
+        const vendasPendentes = vendasMes.filter(v => v.status === 'pendente' || v.status === 'fiado');
+        const totalPendenteVendas = vendasPendentes.reduce((s, v) => s + (v.total || 0), 0);
+
+        linhas.push('── NEGÓCIO ──');
+        linhas.push(`Produtos cadastrados: ${produtos.length} (${ativos.length} ativos)`);
+        if (baixoEstoque.length) linhas.push(`⚠ Produtos com estoque baixo: ${baixoEstoque.length}`);
+        if (semEstoque.length)   linhas.push(`⚠ Produtos sem estoque: ${semEstoque.length}`);
+        linhas.push(`Vendas este mês: ${vendasMes.length} (total ${fmtBRL(totalVendasMes)})`);
+        linhas.push(`  → Pagas: ${vendasPagas.length}`);
+        linhas.push(`  → Pendentes/fiado: ${vendasPendentes.length} (${fmtBRL(totalPendenteVendas)})`);
+        linhas.push(`Clientes cadastrados: ${clientes.length}`);
+
+        const clientesDevendo = clientes.filter(c => (c.saldoDevedor || 0) > 0);
+        if (clientesDevendo.length) {
+          linhas.push(`Clientes com saldo devedor: ${clientesDevendo.length}`);
+          clientesDevendo.slice(0, 5).forEach(c => {
+            linhas.push(`  • ${c.nome}: ${fmtBRL(c.saldoDevedor)}`);
+          });
+        }
+        linhas.push('');
+      }
+    } catch (e) {}
+
+    /* ─── PESSOAL ─── */
+    try {
+      const tarefas = (DB.getTarefas && DB.getTarefas()) || [];
+      const agenda = (DB.getAgenda && DB.getAgenda()) || [];
+      const meds = (DB.getMedicamentos && DB.getMedicamentos()) || [];
+
+      const tarefasPendentes = tarefas.filter(t => t.status !== 'concluida');
+      const tarefasHoje = tarefasPendentes.filter(t => t.prazo === hojeISO);
+      const tarefasAtrasadas = tarefasPendentes.filter(t => t.prazo && t.prazo < hojeISO);
+
+      const eventosSemana = agenda.filter(e => e.data >= hojeISO && e.data <= daquiSeteDias);
+
+      if (tarefasPendentes.length || eventosSemana.length || meds.length) {
+        linhas.push('── PESSOAL ──');
+        linhas.push(`Tarefas pendentes: ${tarefasPendentes.length} (hoje: ${tarefasHoje.length}, atrasadas: ${tarefasAtrasadas.length})`);
+        if (tarefasAtrasadas.length) {
+          linhas.push('Tarefas atrasadas:');
+          tarefasAtrasadas.slice(0, 5).forEach(t => {
+            linhas.push(`  • ${t.titulo} (prazo era ${t.prazo}) [${t.prioridade || 'normal'}]`);
+          });
+        }
+        if (tarefasHoje.length) {
+          linhas.push('Tarefas de hoje:');
+          tarefasHoje.slice(0, 5).forEach(t => {
+            linhas.push(`  • ${t.titulo} [${t.prioridade || 'normal'}]`);
+          });
+        }
+        linhas.push(`Eventos nos próximos 7 dias: ${eventosSemana.length}`);
+        eventosSemana.slice(0, 5).forEach(e => {
+          linhas.push(`  • ${e.data} ${e.hora || ''} — ${e.titulo}`);
+        });
+        if (meds.length) {
+          linhas.push(`Medicamentos cadastrados: ${meds.length}`);
+        }
+        linhas.push('');
+      }
+    } catch (e) {}
+
+    linhas.push('═══ FIM DOS DADOS ═══');
+    linhas.push('Instruções: use estes dados para responder perguntas sobre o app. Valores são reais e atualizados em tempo real. Se não encontrar uma informação aqui, diga que ela ainda não foi cadastrada.');
+
+    return linhas.join('\n');
+  }
+
+  function fmtBRL(v) {
+    return (Utils && Utils.formatCurrency) ? Utils.formatCurrency(v || 0) : `R$ ${(v || 0).toFixed(2)}`;
   }
 
   /* ─── CALL PROVIDERS ─── */

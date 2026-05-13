@@ -2447,3 +2447,30 @@
   margin-top: var(--s-1);
 }
 
+
+/* ─── LLM SUGESTÕES ─── */
+.llm-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  justify-content: center;
+  margin: var(--s-4) 0 var(--s-5);
+  max-width: 560px;
+}
+.llm-suggestion-chip {
+  background: var(--surface-2);
+  border: 1px solid var(--border-1);
+  color: var(--text-1);
+  padding: var(--s-2) var(--s-3);
+  border-radius: 999px;
+  font-size: var(--t-sm);
+  font-family: var(--font-ui);
+  cursor: pointer;
+  transition: all var(--d-fast);
+}
+.llm-suggestion-chip:hover {
+  background: var(--color-gold-subtle);
+  border-color: var(--color-gold);
+  color: var(--color-gold);
+  transform: translateY(-1px);
+}
