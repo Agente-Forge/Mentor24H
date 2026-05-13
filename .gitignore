@@ -26,3 +26,7 @@ yarn-error.log*
 dist/
 build/
 .cache/
+
+# Dados pessoais — não commitar (contém histórico financeiro)
+js/leo-data.js
+leo-import.json

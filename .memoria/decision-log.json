@@ -1,0 +1,224 @@
+{
+  "decisions": [
+    {
+      "id": "d001",
+      "date": "2026-05-07",
+      "title": "Transformar FinFlow em Mentor24h",
+      "context": "Projeto financeiro simples → Hub pessoal + empreendedor completo",
+      "decision": "Expandir escopo para 18 páginas (chat, agenda, medicamentos, tarefas, negócio)",
+      "rationale": "Léo precisa de ferramenta unificada para vida pessoal + negócio",
+      "impact": "Complexidade aumenta significativamente",
+      "status": "IMPLEMENTED",
+      "responsible": "Léo + Claude"
+    },
+    {
+      "id": "d002",
+      "date": "2026-05-07",
+      "title": "Manter HTML + JS puro (sem framework)",
+      "context": "Stack decision para frontend",
+      "decision": "Continuar com HTML5 + CSS3 + JavaScript puro",
+      "rationale": [
+        "Zero dependências externas",
+        "Rápido prototipagem",
+        "Perfeito para MVP",
+        "Fácil deploy em GitHub Pages"
+      ],
+      "impact": "Escalabilidade limitada a 50+ componentes",
+      "status": "CONFIRMED",
+      "migration_path": "React/Next.js possível na Fase 3 se necessário",
+      "responsible": "Léo"
+    },
+    {
+      "id": "d003",
+      "date": "2026-05-07",
+      "title": "Chat AI multi-provider (OpenRouter, OpenAI, Gemini, Claude)",
+      "context": "LLM integration strategy",
+      "decision": "Suportar 4 provedores de LLM com fallback automático",
+      "rationale": [
+        "Flexibilidade máxima para usuário",
+        "OpenRouter como default (melhor relação custo-benefício)",
+        "Sem lock-in em um provider"
+      ],
+      "impact": "Lógica LLM mais complexa, mas isolada em llm.js",
+      "status": "IMPLEMENTED",
+      "responsible": "Claude"
+    },
+    {
+      "id": "d004",
+      "date": "2026-05-07",
+      "title": "localStorage como persistência (MVP)",
+      "context": "Data storage strategy",
+      "decision": "Usar localStorage para MVP (Fase 1)",
+      "rationale": [
+        "Rápido para prototipagem",
+        "Não requer backend",
+        "Adequado para uso pessoal (1 usuário)"
+      ],
+      "impact": "Limite 5-10MB — vai precisar migrar em Fase 2 se virar multi-user",
+      "status": "CONFIRMED",
+      "migration_plan": "Fase 2: Supabase (se virar SaaS)",
+      "responsible": "Léo"
+    },
+    {
+      "id": "d005",
+      "date": "2026-05-12",
+      "title": "Design System OBSIDIAN — Quiet Intelligence",
+      "context": "Reset visual completo após DESIGN-BRIEF aprovado",
+      "decision": "Paleta OBSIDIAN (#0B0D0F + #D4A574) + Fraunces/Switzer/JetBrains Mono + filosofia Quiet Intelligence",
+      "rationale": [
+        "Diferenciação visual de SaaS genéricos",
+        "Tom editorial premium",
+        "Dourado parcimonioso aumenta impacto"
+      ],
+      "impact": "Substitui Aurora glassmorphism anterior. Requer reimplementação CSS completa.",
+      "status": "APPROVED",
+      "responsible": "Claude (proposta) + Léo (aprovação)"
+    },
+    {
+      "id": "d006",
+      "date": "2026-05-07",
+      "title": "Sidebar accordion com 4 grupos temáticos",
+      "context": "Navigation structure",
+      "decision": "Chat | Negócio | Finanças | Pessoal (+ Dashboard)",
+      "rationale": [
+        "Agrupa funcionalidades por contexto",
+        "Reduz visual clutter",
+        "Fácil expandir com novos grupos"
+      ],
+      "impact": "CSS puro accordion (sem JavaScript adicional)",
+      "status": "IMPLEMENTED",
+      "responsible": "Claude"
+    },
+    {
+      "id": "d007",
+      "date": "2026-05-07",
+      "title": "GitHub Pages como plataforma de deploy",
+      "context": "Deployment strategy",
+      "decision": "Deploy automático em GitHub Pages após git push",
+      "rationale": ["Gratuito", "Sem gerenciar servidor", "Rápido (1-2 min)"],
+      "impact": "Nenhum — apenas deploy estático",
+      "status": "IMPLEMENTED",
+      "limitations": [
+        "Sem backend possível",
+        "Sem server-side rendering",
+        "Sem database remoto (necessário Fase 2)"
+      ],
+      "responsible": "Claude"
+    },
+    {
+      "id": "d008",
+      "date": "2026-05-11",
+      "title": "Adotar metodologia FORGE para organização",
+      "context": "Project structure + workflow",
+      "decision": "Reorganizar Mentor24h seguindo FORGE System (skills + esteira)",
+      "rationale": [
+        "Profissionaliza processo",
+        "Documentação como fonte de verdade",
+        "Escalabilidade",
+        "Repetível para futuros projetos"
+      ],
+      "impact": "Adiciona Estructura-Proyecto/ + .memoria/",
+      "status": "IN_PROGRESS",
+      "next_skill": "skill-planner",
+      "responsible": "Léo + Claude"
+    },
+    {
+      "id": "d009",
+      "date": "2026-05-12",
+      "skill": "skill-consultor",
+      "fase": "Calibração de Appetite",
+      "title": "Appetite M (4-6 semanas) para MVP",
+      "decision": "MVP planejado para 4-6 semanas com 5 sprints",
+      "rationale": "Escopo realista para 1 dev (Léo), evita scope creep e queima de motivação",
+      "alternativas_consideradas": [
+        "S — 2-3 semanas (muito apertado para todas as features pessoais)",
+        "L — 8-12 semanas (escopo cresce demais, incluiria Negócio)"
+      ],
+      "appetite_impacto": "Define corte dos módulos de Negócio para Fase 2",
+      "responsible": "Léo",
+      "status": "APPROVED"
+    },
+    {
+      "id": "d010",
+      "date": "2026-05-12",
+      "skill": "skill-consultor",
+      "fase": "Definição de Público-Alvo",
+      "title": "Mentor24h é uso pessoal (1 usuário — Léo)",
+      "decision": "MVP focado em uso pessoal único. Sem auth, sem multi-tenant, sem billing.",
+      "rationale": "Léo é o único usuário no MVP. SaaS é decisão futura opcional (Fase 3).",
+      "alternativas_consideradas": [
+        "SaaS comercial (escopo cresce 3x)",
+        "Portfólio open source (foco muda para README/marketing)"
+      ],
+      "appetite_impacto": "Libera ~40% do esforço que iria para infraestrutura de produto",
+      "responsible": "Léo",
+      "status": "APPROVED",
+      "resolves_question": "q001"
+    },
+    {
+      "id": "d011",
+      "date": "2026-05-12",
+      "skill": "skill-consultor",
+      "fase": "Definição de Escopo WhatsApp",
+      "title": "WhatsApp simulado por agora (CRM interno)",
+      "decision": "Manter interface WhatsApp como CRM simulado. Integração real adiada para Fase 2.",
+      "rationale": "Interface simulada já entrega valor (notas, tags, histórico). API real adiciona custo + aprovação Meta + complexidade.",
+      "alternativas_consideradas": [
+        "WhatsApp Business API real (Twilio/Meta)",
+        "Não incluir WhatsApp no MVP"
+      ],
+      "appetite_impacto": "Cabe no appetite M sem comprometer outras features",
+      "responsible": "Léo",
+      "status": "APPROVED",
+      "resolves_question": "q002"
+    },
+    {
+      "id": "d012",
+      "date": "2026-05-12",
+      "skill": "skill-consultor",
+      "fase": "Veto Anti-Scope",
+      "title": "Cortar módulos de Negócio do MVP",
+      "decision": "Produtos, Vendas, Estoque e Clientes-neg empurrados para Fase 2",
+      "rationale": "Léo não vende ativamente hoje. Manter os 4 módulos seria inflar MVP sem necessidade real.",
+      "alternativas_consideradas": ["Manter como placeholders no MVP", "Implementar apenas Produtos no MVP"],
+      "appetite_impacto": "Economiza ~1.5 sprints. Reaproveitamento se Léo começar a vender (Fase 2).",
+      "responsible": "Auditor + Léo (aprovação)",
+      "status": "APPROVED"
+    }
+  ],
+
+  "open_questions": [],
+
+  "resolved_questions": [
+    {
+      "id": "q001",
+      "question": "Qual é o público-alvo final?",
+      "answer": "Uso pessoal (só Léo)",
+      "resolved_by": "d010",
+      "resolved_at": "2026-05-12"
+    },
+    {
+      "id": "q002",
+      "question": "WhatsApp precisa ser real ou simulado é ok?",
+      "answer": "Simulado por agora, decidir na Fase 2",
+      "resolved_by": "d011",
+      "resolved_at": "2026-05-12"
+    },
+    {
+      "id": "q003",
+      "question": "Qual é a data-alvo de 'pronto'?",
+      "answer": "Appetite M — 4 a 6 semanas",
+      "resolved_by": "d009",
+      "resolved_at": "2026-05-12"
+    }
+  ],
+
+  "metadata": {
+    "created_at": "2026-05-11",
+    "created_by": "skill-scaffolder v5.1",
+    "last_updated_at": "2026-05-12",
+    "last_updated_by": "skill-consultor v5.2",
+    "version": "1.1",
+    "forge_version": "5.2"
+  }
+}

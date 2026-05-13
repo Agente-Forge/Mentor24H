@@ -1,0 +1,154 @@
+{
+  "project": {
+    "name": "Mentor24h",
+    "version": "1.0.0",
+    "tagline": "Seu Hub Pessoal + Empreendedor",
+    "owner": "Léo",
+    "createdAt": "2026-05-11",
+    "status": "IN_PROGRESS"
+  },
+
+  "current_phase": {
+    "name": "ESTRUTURA FORGE",
+    "step": "skill-scaffolder",
+    "description": "Criando memória do projeto e padrões",
+    "startedAt": "2026-05-11"
+  },
+
+  "scope": {
+    "completed_features": [
+      "dashboard",
+      "chat-ai (LLM multi-provider)",
+      "chat-wa (WhatsApp simulado)",
+      "agenda",
+      "medicamentos",
+      "tarefas",
+      "contatos",
+      "contas (finanças)",
+      "transacoes",
+      "metas",
+      "kanban",
+      "categorias",
+      "config"
+    ],
+    "placeholder_features": [
+      "produtos",
+      "vendas",
+      "estoque",
+      "clientes"
+    ],
+    "total_pages": 17,
+    "total_js_modules": 18,
+    "total_css_files": 7
+  },
+
+  "tech_stack": {
+    "frontend": "HTML5 + CSS3 + JavaScript puro",
+    "design_system": "Aurora (glassmorphism, bento grid)",
+    "persistence": "localStorage (14 collections)",
+    "llm_providers": [
+      "OpenRouter",
+      "OpenAI",
+      "Google Gemini",
+      "Anthropic Claude"
+    ],
+    "deployment": "GitHub Pages",
+    "icons": "SVG inline (50+ custom)",
+    "dependencies": "ZERO (exceto Google Fonts)"
+  },
+
+  "complexity_level": "INTERMEDIÁRIO → AVANÇADO",
+
+  "team": {
+    "size": 1,
+    "members": ["Léo (dev iniciante/intermediário)"],
+    "skills": ["frontend", "design", "JavaScript"]
+  },
+
+  "risks": {
+    "critical": [
+      {
+        "id": "storage-limit",
+        "description": "localStorage tem limite 5-10MB — vai quebrar com 1000+ usuários",
+        "mitigation": "Migrar para banco remoto na Fase 2"
+      },
+      {
+        "id": "llm-simulated",
+        "description": "Chat AI sem API real — users não conseguem usar",
+        "mitigation": "Documentar que é simulado até Fase 2"
+      }
+    ],
+    "medium": [
+      {
+        "id": "scaling-team",
+        "description": "HTML + JS puro — difícil escalar com team > 3 pessoas",
+        "mitigation": "Documentar padrões (AGENTS.md) + testes"
+      },
+      {
+        "id": "no-tests",
+        "description": "Sem testes — refatorações perigosas",
+        "mitigation": "Adicionar unit + e2e na Fase 1"
+      }
+    ]
+  },
+
+  "roadmap": {
+    "phase_1": {
+      "name": "MVP CONSOLIDADO",
+      "duration": "1-2 semanas",
+      "goals": [
+        "Completar páginas vazias (Produtos, Vendas, Estoque, Clientes)",
+        "Testes automatizados (unit + e2e)",
+        "Documentação FORGE (PRD, SPEC, CONSTITUTION)",
+        "Security audit (SBOM, CVE, policies)",
+        "Deploy estável"
+      ],
+      "status": "NOT_STARTED"
+    },
+    "phase_2": {
+      "name": "PRODUTO ROBUSTO",
+      "duration": "1-2 meses",
+      "goals": [
+        "Integração WhatsApp Business API",
+        "LLM real (OpenRouter/OpenAI)",
+        "Banco de dados remoto",
+        "Autenticação + 2FA",
+        "Mobile otimizado"
+      ],
+      "status": "NOT_STARTED"
+    },
+    "phase_3": {
+      "name": "ESCALA",
+      "duration": "3+ meses",
+      "goals": [
+        "React/Next.js migration (opcional)",
+        "Admin dashboard",
+        "Marketplace",
+        "Integrações (Stripe, Shopify)"
+      ],
+      "status": "NOT_STARTED"
+    }
+  },
+
+  "metrics": {
+    "code_size": "~3500+ linhas",
+    "files_count": 35,
+    "modules": 18,
+    "pages": 17,
+    "design_tokens": "7 (colors, spacing, typography, shadows, etc)",
+    "test_coverage": "0% (precisa criar)"
+  },
+
+  "next_steps": {
+    "immediate": [
+      "✅ skill-scaffolder (criando memória — EM PROGRESSO)",
+      "⏳ skill-orquestrador (entrevista rediscovery)",
+      "⏳ skill-consultor (PRD + CONSTITUTION)",
+      "⏳ skill-documentador (SPEC + exemplos)"
+    ],
+    "order": "ESTEIRA FORGE (1 → 2 → 3 → ...)"
+  },
+
+  "last_updated": "2026-05-11T12:00:00Z",
+  "updated_by": "Claude (skill-scaffolder)"
+}

@@ -43,7 +43,7 @@
 .bento-card.hero {
   background:
     linear-gradient(180deg, var(--surface-2), var(--surface-1)),
-    linear-gradient(135deg, var(--violet), var(--magenta), var(--amber));
+    linear-gradient(135deg, var(--color-gold), var(--amber));
   background-clip: padding-box, border-box;
   background-origin: border-box;
   border: 1px solid transparent;
@@ -55,7 +55,7 @@
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(ellipse at top right, var(--violet-glow), transparent 60%),
+    radial-gradient(ellipse at top right, var(--color-gold-subtle), transparent 60%),
     radial-gradient(ellipse at bottom left, var(--amber-glow), transparent 60%);
   pointer-events: none;
 }
@@ -64,7 +64,7 @@
 
 /* Accent variant */
 .bento-card.accent-violet {
-  background: linear-gradient(135deg, rgba(167, 139, 250, 0.05), transparent),
+  background: linear-gradient(135deg, var(--color-gold-subtle), transparent),
     var(--surface-2);
 }
 .bento-card.accent-violet::after {
@@ -139,7 +139,8 @@
 
 .card-pill svg { width: 16px; height: 16px; stroke-width: 1.75; }
 
-.card-pill.violet { background: var(--violet-glow); color: var(--violet); }
+.card-pill.violet,
+.card-pill.gold   { background: var(--color-gold-subtle); color: var(--color-gold); }
 .card-pill.amber  { background: var(--amber-glow); color: var(--amber); }
 .card-pill.green  { background: var(--green-bg); color: var(--green); }
 .card-pill.red    { background: var(--red-bg); color: var(--red); }
@@ -204,7 +205,7 @@
 
 .spark-bar {
   flex: 1;
-  background: linear-gradient(180deg, var(--violet), var(--violet-2));
+  background: linear-gradient(180deg, var(--color-gold), var(--color-gold-muted));
   border-radius: 2px;
   opacity: 0.7;
   transition: opacity var(--d-fast);

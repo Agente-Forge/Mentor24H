@@ -1,0 +1,28 @@
+{
+  "version": "1.0",
+  "description": "Configuração padrão de Mentor24h",
+  "defaults": {
+    "theme": "dark",
+    "language": "pt-BR",
+    "timezone": "America/Sao_Paulo",
+    "dateFormat": "DD/MM/YYYY",
+    "currency": "BRL"
+  },
+  "llm": {
+    "provider": "openrouter",
+    "model": "anthropic/claude-3.5-sonnet",
+    "temperature": 0.7,
+    "maxTokens": 2048
+  },
+  "localStorage": {
+    "namespace": "mentor24h.",
+    "limit_mb": 5,
+    "warning_threshold_percent": 80
+  },
+  "ui": {
+    "animationsEnabled": true,
+    "glassmorphism": true,
+    "compactMode": false,
+    "mobileBreakpoint": 768
+  }
+}

@@ -1,5 +1,7 @@
 /* ═══════════════════════════════════════════════════════════
-   BASE — Reset, typography, utilities, scrollbar
+   BASE — Primitives, global styles
+   DEPRECATED: reset.css + typography.css substituem este arquivo.
+   Mantido para compatibilidade. Não adicionar código novo aqui.
 ═══════════════════════════════════════════════════════════ */
 
 *, *::before, *::after {

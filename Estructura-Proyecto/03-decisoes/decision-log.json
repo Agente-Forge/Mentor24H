@@ -1,0 +1,43 @@
+[
+  {
+    "id": "DEC-001",
+    "skill": "skill-construtor",
+    "sprint": "5.1",
+    "task": "5.1.1",
+    "decisao": "CSP com 'unsafe-inline' permitido em script-src e style-src",
+    "motivo": "O projeto usa onclick= inline (modal.js) e style= inline (dashboard.js, pages) — sem build tool não é possível usar nonces ou hashes. 'unsafe-inline' é necessário para manter funcionalidade. O CSP ainda bloqueia exfiltração via connect-src, o risco mais crítico.",
+    "alternativas_consideradas": [
+      "CSP estrito com nonces — requer build tool ou backend para gerar nonces por request; incompatível com file://",
+      "Sem CSP — risco máximo; qualquer XSS pode exfiltrar localStorage para qualquer origin"
+    ],
+    "appetite_impacto": "dentro do appetite — 1 linha no index.html",
+    "timestamp": "2026-05-13T00:00:00.000Z"
+  },
+  {
+    "id": "DEC-002",
+    "skill": "skill-construtor",
+    "sprint": "5.1",
+    "task": "5.1.3",
+    "decisao": "exportAll() não inclui llmConfig (API key) mas inclui llmConversas",
+    "motivo": "Exportar a API key em um arquivo JSON de backup cria risco de vazamento se o backup for compartilhado. O usuário deve re-configurar a chave após restaurar um backup. As conversas com IA (llmConversas) são dados pessoais do usuário e devem ser incluídas no backup.",
+    "alternativas_consideradas": [
+      "Incluir llmConfig no export — risco: backup com API key pode ser enviado por engano",
+      "Excluir llmConversas — perda de histórico de chat ao restaurar backup"
+    ],
+    "appetite_impacto": "dentro do appetite",
+    "timestamp": "2026-05-13T00:00:00.000Z"
+  },
+  {
+    "id": "DEC-003",
+    "skill": "skill-construtor",
+    "sprint": "5.1",
+    "task": "5.1.3",
+    "decisao": "version: 2 → version: 3 no exportAll()",
+    "motivo": "Backup version 2 não continha dados mentor24h.*. Version 3 inclui. A importAll() usa if(data.X) condicional — backups version 2 importam corretamente sem os campos mentor24h.* (campos ausentes são simplesmente ignorados).",
+    "alternativas_consideradas": [
+      "Manter version: 2 — causaria confusão ao diferenciar backups completos de incompletos"
+    ],
+    "appetite_impacto": "dentro do appetite",
+    "timestamp": "2026-05-13T00:00:00.000Z"
+  }
+]

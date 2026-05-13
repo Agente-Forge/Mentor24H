@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════
-   LLM — Multi-provider AI Chat (OpenRouter, OpenAI, Gemini, Claude)
+   LLM — Multi-provider AI Chat (OpenRouter, OpenAI, Gemini, Claude, Groq)
 ═══════════════════════════════════════════════════════════ */
 
 const LLM = (() => {
@@ -47,6 +47,17 @@ const LLM = (() => {
         { id: 'claude-opus-4-7',             label: 'Claude Opus 4.7' },
       ],
       hint: '⚠️ A API da Anthropic bloqueia chamadas diretas do browser (CORS). Use o OpenRouter para acessar Claude sem esse problema.',
+    },
+    groq: {
+      name: 'Groq',
+      url: 'https://api.groq.com/openai/v1',
+      models: [
+        { id: 'llama-3.3-70b-versatile',    label: 'Llama 3.3 70B (rápido)' },
+        { id: 'llama-3.1-70b-versatile',    label: 'Llama 3.1 70B' },
+        { id: 'mixtral-8x7b-32768',         label: 'Mixtral 8x7B' },
+        { id: 'gemma-2-9b-it',              label: 'Gemma 2 9B' },
+      ],
+      hint: 'Requer chave do Groq (console.groq.com). Rápido e tem tier gratuito.',
     },
   };
 
@@ -161,6 +172,13 @@ const LLM = (() => {
 
     return `
       <div class="llm-chat-area" id="llm-chat-area">
+        <div class="llm-chat-toolbar">
+          <span class="llm-chat-toolbar-title">${esc(conversa.titulo)}</span>
+          <button class="btn btn-ghost btn-sm" id="llm-clear-btn" title="Limpar mensagens da conversa">
+            <span data-icon="eraser" data-size="13"></span>
+            Limpar
+          </button>
+        </div>
         <div class="llm-chat-messages" id="llm-chat-messages">
           ${bubblesHtml || '<div class="llm-chat-empty">Comece digitando sua mensagem abaixo.</div>'}
         </div>
@@ -177,6 +195,31 @@ const LLM = (() => {
         </div>
       </div>
     `;
+  }
+
+  /* ─── HELPERS ─── */
+  function friendlyApiError(err) {
+    const msg = String(err.message || '');
+    if (msg.includes('401') || /unauthorized|invalid.*(key|token)|api.?key/i.test(msg))
+      return '🔑 API key inválida ou expirada. Acesse Configurações para atualizar sua chave.';
+    if (msg.includes('429') || /rate.?limit|too many/i.test(msg))
+      return '⏱️ Muitas requisições. Aguarde alguns segundos e tente novamente.';
+    if (msg.includes('403') || /forbidden|access denied/i.test(msg))
+      return '🚫 Acesso negado pelo provedor. Verifique se sua chave tem as permissões necessárias.';
+    if (/50[023456789]|server error/i.test(msg))
+      return '🔧 Erro no servidor do provedor. Tente novamente em breve.';
+    if (/failed to fetch|network|offline|ERR_/i.test(msg))
+      return '📡 Sem conexão com o provedor. Verifique sua internet e tente novamente.';
+    return `Erro: ${msg || 'Verifique sua API key e conexão.'}`;
+  }
+
+  function smartTitle(text) {
+    const clean = text.trim().replace(/[.!?,;:]+$/, '');
+    const cap = clean.charAt(0).toUpperCase() + clean.slice(1);
+    if (cap.length <= 40) return cap;
+    const cut = cap.slice(0, 40);
+    const lastSpace = cut.lastIndexOf(' ');
+    return (lastSpace > 20 ? cut.slice(0, lastSpace) : cut) + '…';
   }
 
   function formatMsgContent(text) {
@@ -230,6 +273,15 @@ const LLM = (() => {
       autoResizeTextarea(textarea);
     }
 
+    /* Limpar conversa */
+    container.querySelector('#llm-clear-btn')?.addEventListener('click', () => {
+      const conversa = DB.getLlmConversas().find(c => c.id === activeConversaId);
+      if (!conversa) return;
+      conversa.msgs = [];
+      DB.saveLlmConversa(conversa);
+      render();
+    });
+
     scrollToBottom();
   }
 
@@ -271,7 +323,7 @@ const LLM = (() => {
     if (!conversa) return;
 
     conversa.msgs.push({ role: 'user', content: text });
-    if (conversa.titulo === 'Nova conversa') conversa.titulo = text.slice(0, 40);
+    if (conversa.titulo === 'Nova conversa') conversa.titulo = smartTitle(text);
     DB.saveLlmConversa(conversa);
 
     isLoading = true;
@@ -299,8 +351,7 @@ const LLM = (() => {
       conversa.msgs.push({ role: 'assistant', content: response });
       DB.saveLlmConversa(conversa);
     } catch (err) {
-      const errMsg = `Erro ao conectar com a IA: ${err.message || 'Verifique sua API key e conexão.'}`;
-      conversa.msgs.push({ role: 'assistant', content: errMsg });
+      conversa.msgs.push({ role: 'assistant', content: friendlyApiError(err) });
       DB.saveLlmConversa(conversa);
     }
 
@@ -315,6 +366,7 @@ const LLM = (() => {
       case 'openai':     return callOpenAI(msgs, cfg);
       case 'gemini':     return callGemini(msgs, cfg);
       case 'claude':     return callClaude(msgs, cfg);
+      case 'groq':       return callGroq(msgs, cfg);
       default: throw new Error('Provedor desconhecido: ' + cfg.provider);
     }
   }
@@ -419,6 +471,29 @@ const LLM = (() => {
     return data.content?.[0]?.text || '(sem resposta)';
   }
 
+  async function callGroq(msgs, cfg) {
+    const systemPrompt = cfg.systemPrompt || '';
+    const messages = systemPrompt
+      ? [{ role: 'system', content: systemPrompt }, ...msgs]
+      : msgs;
+
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${cfg.apiKey}`,
+      },
+      body: JSON.stringify({ model: cfg.model, messages }),
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error?.message || `HTTP ${res.status}`);
+    }
+    const data = await res.json();
+    return data.choices?.[0]?.message?.content || '(sem resposta)';
+  }
+
   /* ─── CONFIG SECTION (renderizada em Config) ─── */
   function renderConfig() {
     const cfg = DB.getLlmConfig();
@@ -457,6 +532,10 @@ const LLM = (() => {
         <div class="field">
           <label class="field-label">API Key</label>
           <input type="password" id="llm-cfg-key" value="${cfg.apiKey}" placeholder="sk-... ou chave do provedor">
+          <div class="field-hint" style="color:var(--amber);margin-top:4px">
+            <span data-icon="alert-triangle" data-size="11"></span>
+            A chave fica salva no navegador. Não use em computadores compartilhados.
+          </div>
         </div>
 
         <div class="field" style="margin-top:var(--s-3)">
@@ -496,6 +575,7 @@ const LLM = (() => {
         systemPrompt: container.querySelector('#llm-cfg-system')?.value?.trim(),
       });
       Toast.success('Configuração salva!', 'Provedor de IA atualizado.');
+      Toast.warning('Lembrete de segurança', 'Sua API key está salva no navegador. Não use em computadores compartilhados.');
     });
   }
 

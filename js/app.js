@@ -66,7 +66,7 @@ const App = (() => {
   function syncUserUI() {
     const cfg = DB.getConfig();
     const initials = (cfg.nomeUsuario || 'V').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() || 'V';
-    Config.syncSidebarAvatar(initials, cfg.avatarCor || '#A78BFA', cfg.nomeUsuario || 'Você');
+    Config.syncSidebarAvatar(initials, cfg.avatarCor || '#D4A574', cfg.nomeUsuario || 'Você');
   }
 
   function initSidebar() {
@@ -129,9 +129,18 @@ const App = (() => {
     document.body.style.overflow = '';
   }
 
+  const BNAV_GROUP = {
+    'chat-ai': 'chat-ai', 'chat-wa': 'chat-ai',
+    'produtos': 'vendas', 'vendas': 'vendas', 'estoque': 'vendas', 'clientes': 'vendas',
+    'contas': 'contas', 'transacoes': 'contas', 'metas': 'contas',
+    'kanban': 'contas', 'categorias': 'contas',
+    'agenda': 'tarefas', 'medicamentos': 'tarefas', 'tarefas': 'tarefas', 'contatos': 'tarefas',
+  };
+
   function syncBottomNav(page) {
+    const activeNav = BNAV_GROUP[page] || page;
     document.querySelectorAll('.bnav-item[data-nav]').forEach(item => {
-      item.classList.toggle('active', item.dataset.nav === page);
+      item.classList.toggle('active', item.dataset.nav === activeNav);
     });
   }
 
@@ -149,10 +158,10 @@ const App = (() => {
     Router.register('medicamentos', () => Medicamentos.render());
     Router.register('tarefas',    () => Tarefas.render());
     Router.register('contatos',   () => Contatos.render());
-    Router.register('produtos',   () => {});
-    Router.register('vendas',     () => {});
-    Router.register('estoque',    () => {});
-    Router.register('clientes',   () => {});
+    Router.register('produtos',   () => Produtos.render());
+    Router.register('vendas',     () => Vendas.render());
+    Router.register('estoque',    () => Estoque.render());
+    Router.register('clientes',   () => Clientes.render());
     Router.init();
   }
 
@@ -200,6 +209,10 @@ const App = (() => {
       medicamentos: () => document.getElementById('med-novo-btn')?.click(),
       tarefas:      () => document.getElementById('trf-nova-btn')?.click(),
       contatos:     () => document.getElementById('ctto-novo-btn')?.click(),
+      produtos:     () => Produtos.novo(),
+      vendas:       () => Vendas.nova(),
+      clientes:     () => Clientes.novo(),
+      estoque:      () => Router.navigate('produtos'),
       config:       () => Toast.info('Use os botões na página', ''),
     };
     if (map[page]) map[page]();

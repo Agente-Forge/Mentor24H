@@ -1,0 +1,75 @@
+{
+  "version": "1.0",
+  "created_date": "2026-05-12",
+  "description": "Dados de demonstração para Mentor24h",
+  "demoContatos": [
+    {
+      "id": "demo-contato-1",
+      "nome": "Maria Pereira",
+      "telefone": "11987654321",
+      "tags": ["cliente"],
+      "naoLidas": 2
+    },
+    {
+      "id": "demo-contato-2",
+      "nome": "João Silva",
+      "telefone": "21912345678",
+      "tags": ["fornecedor"],
+      "naoLidas": 0
+    },
+    {
+      "id": "demo-contato-3",
+      "nome": "Bia Costa",
+      "telefone": "31998765432",
+      "tags": ["família"],
+      "naoLidas": 1
+    }
+  ],
+  "demoMensagens": [
+    {
+      "contatoId": "demo-contato-1",
+      "texto": "Olá! Tudo bem?",
+      "de": "contato",
+      "hora": "09:30"
+    },
+    {
+      "contatoId": "demo-contato-1",
+      "texto": "Oi! Tudo ótimo, obrigado!",
+      "de": "eu",
+      "hora": "09:31"
+    }
+  ],
+  "demoEventos": [
+    {
+      "id": "demo-evento-1",
+      "titulo": "Reunião de Planejamento",
+      "data": "2026-05-15",
+      "hora": "14:00",
+      "descricao": "Planejar próximas semanas"
+    },
+    {
+      "id": "demo-evento-2",
+      "titulo": "Almoço com cliente",
+      "data": "2026-05-16",
+      "hora": "12:30",
+      "descricao": "Reunião com Maria Pereira"
+    }
+  ],
+  "demoMedicamentos": [
+    {
+      "id": "demo-med-1",
+      "nome": "Vitamina C",
+      "horario": "08:00",
+      "frequencia": "diária"
+    }
+  ],
+  "demoTarefas": [
+    {
+      "id": "demo-tarefa-1",
+      "titulo": "Preparar planilha de gastos",
+      "descricao": "Atualizar gastos do mês",
+      "prioridade": "alta",
+      "status": "pendente"
+    }
+  ]
+}

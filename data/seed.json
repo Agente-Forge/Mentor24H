@@ -1,0 +1,50 @@
+{
+  "version": "1.0",
+  "created_date": "2026-05-12",
+  "description": "Seed data de demo para Mentor24h (ex: leo-import.json)",
+  "seedData": {
+    "config": {
+      "nomeUsuario": "Léo",
+      "email": "leosilvabh77@gmail.com",
+      "linguagem": "pt-BR",
+      "tema": "escuro"
+    },
+    "contas": [
+      {
+        "id": "conta-1",
+        "nome": "Conta Principal",
+        "banco": "Banco XYZ",
+        "saldo": 5000,
+        "tipo": "corrente"
+      }
+    ],
+    "transacoes": [
+      {
+        "id": "txn-1",
+        "descricao": "Almoço",
+        "valor": 45.50,
+        "categoria": "alimentacao",
+        "data": "2026-05-11",
+        "tipo": "despesa"
+      }
+    ],
+    "contatos": [
+      {
+        "id": "contato-1",
+        "nome": "Contato de Demo",
+        "telefone": "11987654321",
+        "email": "contato@demo.com"
+      }
+    ],
+    "eventos": [
+      {
+        "id": "evento-1",
+        "titulo": "Reunião de Demo",
+        "data": "2026-05-15",
+        "hora": "14:00",
+        "descricao": "Reunião demonstrativa"
+      }
+    ]
+  },
+  "notes": "Este arquivo contém dados de seed para fins de demonstração. Pode ser limpo na Fase 2 com dados reais."
+}

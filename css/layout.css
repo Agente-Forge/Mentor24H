@@ -1,5 +1,6 @@
 /* ═══════════════════════════════════════════════════════════
    LAYOUT — Shell, sidebar, topbar, main
+   OBSIDIAN Design System | Mentor24h | Forge v5.2
 ═══════════════════════════════════════════════════════════ */
 
 #app {
@@ -39,7 +40,7 @@
 
 .brand-logo {
   width: 36px; height: 36px;
-  background: linear-gradient(135deg, var(--violet), var(--magenta) 50%, var(--amber));
+  background: linear-gradient(135deg, var(--color-gold), var(--color-gold-muted));
   border-radius: var(--r-sm);
   display: flex;
   align-items: center;
@@ -64,10 +65,7 @@
   font-family: var(--font-display);
   font-style: italic;
   font-size: 18px;
-  background: linear-gradient(135deg, var(--violet), var(--amber));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: var(--base);
   font-weight: 400;
 }
 
@@ -129,7 +127,7 @@
   color: var(--base);
   letter-spacing: 0;
   position: relative;
-  background: linear-gradient(135deg, var(--violet), var(--amber));
+  background: linear-gradient(135deg, var(--color-gold), var(--color-gold-muted));
 }
 
 .avatar::after {
@@ -137,10 +135,10 @@
   position: absolute;
   inset: -2px;
   border-radius: inherit;
-  background: linear-gradient(135deg, var(--violet), var(--magenta), var(--amber));
+  background: var(--color-gold);
   z-index: -1;
-  opacity: 0.6;
-  filter: blur(6px);
+  opacity: 0.4;
+  filter: blur(8px);
 }
 
 .user-info {
@@ -231,9 +229,9 @@
   transform: translateY(-50%);
   width: 3px;
   height: 18px;
-  background: linear-gradient(180deg, var(--violet), var(--magenta));
+  background: var(--color-gold);
   border-radius: 0 var(--r-full) var(--r-full) 0;
-  box-shadow: 0 0 12px var(--violet-glow-2);
+  box-shadow: 0 0 12px var(--color-gold-glow);
 }
 
 .nav-item svg {
@@ -313,6 +311,7 @@
   max-height: 0;
   overflow: hidden;
   transition: max-height var(--d-slow) var(--ease-out);
+  will-change: max-height;
 }
 
 .nav-group.open .nav-group-items { max-height: 320px; }
@@ -399,15 +398,15 @@
   top: 2px;
   left: 2px;
   width: 18px; height: 18px;
-  background: linear-gradient(135deg, var(--violet), var(--magenta));
+  background: var(--color-gold);
   border-radius: var(--r-full);
   transition: transform var(--d-base) var(--ease-spring), background var(--d-base);
-  box-shadow: 0 2px 8px var(--violet-glow-2);
+  box-shadow: 0 2px 8px var(--color-gold-glow);
 }
 
 .theme-switch input:checked + .theme-track::after {
   transform: translateX(20px);
-  background: linear-gradient(135deg, var(--amber), var(--magenta));
+  background: var(--amber);
 }
 
 .collapse-btn {
@@ -515,7 +514,7 @@
   position: absolute;
   inset: 0 0 auto 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent, var(--violet), var(--magenta), transparent);
+  background: linear-gradient(90deg, transparent, var(--color-gold), transparent);
   opacity: 0.45;
   border-radius: var(--r-md) var(--r-md) 0 0;
   pointer-events: none;
@@ -952,7 +951,7 @@
   transform: translateX(-50%);
   width: 28px;
   height: 2px;
-  background: linear-gradient(90deg, var(--violet), var(--magenta));
+  background: var(--color-gold);
   border-radius: 0 0 var(--r-full) var(--r-full);
 }
 

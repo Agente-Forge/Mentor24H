@@ -64,17 +64,17 @@ const ChatWA = (() => {
     const ultima = msgs.length ? msgs[msgs.length - 1] : null;
     const preview = ultima ? ultima.texto.slice(0, 45) + (ultima.texto.length > 45 ? '…' : '') : 'Sem mensagens';
     const hora = ultima ? ultima.hora : '';
-    const avatar = c.avatar || c.nome.charAt(0).toUpperCase();
+    const avatar = (c.avatar || (c.nome || '?').charAt(0)).toUpperCase();
     return `
-      <div class="wa-contato-item${c.id === selectedContatoId ? ' active' : ''}" data-wa-contato="${c.id}">
-        <div class="wa-contato-avatar" style="background:${stringToColor(c.nome)}">${avatar}</div>
+      <div class="wa-contato-item${c.id === selectedContatoId ? ' active' : ''}" data-wa-contato="${esc(c.id)}">
+        <div class="wa-contato-avatar" style="background:${stringToColor(c.nome || '')}">${esc(avatar)}</div>
         <div class="wa-contato-info">
-          <div class="wa-contato-nome">${c.nome}</div>
-          <div class="wa-contato-preview">${preview}</div>
+          <div class="wa-contato-nome">${esc(c.nome)}</div>
+          <div class="wa-contato-preview">${esc(preview)}</div>
         </div>
         <div class="wa-contato-meta">
-          ${hora ? `<div class="wa-contato-hora">${hora}</div>` : ''}
-          ${c.naoLidas ? `<div class="wa-badge">${c.naoLidas}</div>` : ''}
+          ${hora ? `<div class="wa-contato-hora">${esc(hora)}</div>` : ''}
+          ${c.naoLidas ? `<div class="wa-badge">${Number(c.naoLidas) || 0}</div>` : ''}
         </div>
       </div>
     `;
@@ -101,20 +101,21 @@ const ChatWA = (() => {
 
     const bubblesHtml = msgs.map(m => `
       <div class="chat-bubble-wrap ${m.de === 'eu' ? 'from-me' : 'from-other'}">
-        <div class="chat-bubble">${escapeHtml(m.texto)}</div>
-        <div class="chat-meta">${m.hora} ${m.de === 'eu' ? '✓✓' : ''}</div>
+        <div class="chat-bubble">${esc(m.texto)}</div>
+        <div class="chat-meta">${esc(m.hora || '')} ${m.de === 'eu' ? '✓✓' : ''}</div>
       </div>
     `).join('');
 
+    const nomeFirstChar = (contato.nome || '?').charAt(0);
     return `
       <div class="wa-chat-head">
-        <div class="wa-contato-avatar sm" style="background:${stringToColor(contato.nome)}">${contato.nome.charAt(0)}</div>
+        <div class="wa-contato-avatar sm" style="background:${stringToColor(contato.nome || '')}">${esc(nomeFirstChar)}</div>
         <div>
-          <div class="wa-chat-nome">${contato.nome}</div>
-          <div class="wa-chat-sub">${contato.tel || 'Sem telefone'}</div>
+          <div class="wa-chat-nome">${esc(contato.nome)}</div>
+          <div class="wa-chat-sub">${esc(contato.tel || 'Sem telefone')}</div>
         </div>
         <div class="wa-chat-head-actions">
-          <button class="btn btn-ghost btn-sm" title="Whatsapp direto" onclick="window.open('https://wa.me/${cleanPhone(contato.tel)}','_blank')">
+          <button class="btn btn-ghost btn-sm" title="Whatsapp direto" onclick="window.open('https://wa.me/${esc(cleanPhone(contato.tel))}','_blank')">
             <span data-icon="external-link" data-size="14"></span>
           </button>
         </div>
@@ -136,21 +137,22 @@ const ChatWA = (() => {
     if (!c) return '';
     const vendas = DB.getVendas({ clienteId: contatoId });
     const total = vendas.reduce((s, v) => s + (v.total || 0), 0);
-    const tags = (c.tags || []).map(t => `<span class="crm-tag">${t}</span>`).join('');
+    const tags = (c.tags || []).map(t => `<span class="crm-tag">${esc(t)}</span>`).join('');
+    const nomeFirstChar = (c.nome || '?').charAt(0);
 
     return `
       <div class="wa-crm-inner">
-        <div class="wa-crm-avatar" style="background:${stringToColor(c.nome)}">${c.nome.charAt(0)}</div>
-        <div class="wa-crm-nome">${c.nome}</div>
-        ${c.tel ? `<a href="https://wa.me/${cleanPhone(c.tel)}" target="_blank" class="wa-crm-tel">
-          <span data-icon="phone" data-size="13"></span> ${c.tel}
+        <div class="wa-crm-avatar" style="background:${stringToColor(c.nome || '')}">${esc(nomeFirstChar)}</div>
+        <div class="wa-crm-nome">${esc(c.nome)}</div>
+        ${c.tel ? `<a href="https://wa.me/${esc(cleanPhone(c.tel))}" target="_blank" rel="noopener" class="wa-crm-tel">
+          <span data-icon="phone" data-size="13"></span> ${esc(c.tel)}
         </a>` : ''}
-        ${c.email ? `<div class="wa-crm-email"><span data-icon="mail" data-size="13"></span> ${c.email}</div>` : ''}
+        ${c.email ? `<div class="wa-crm-email"><span data-icon="mail" data-size="13"></span> ${esc(c.email)}</div>` : ''}
         ${tags ? `<div class="wa-crm-tags">${tags}</div>` : ''}
         <div class="wa-crm-section">Histórico</div>
         <div class="wa-crm-stat"><span>Compras</span><strong>${vendas.length}</strong></div>
-        <div class="wa-crm-stat"><span>Total gasto</span><strong>${Utils.formatCurrency(total)}</strong></div>
-        ${c.notas ? `<div class="wa-crm-notas">${escapeHtml(c.notas)}</div>` : ''}
+        <div class="wa-crm-stat"><span>Total gasto</span><strong>${esc(Utils.formatCurrency(total))}</strong></div>
+        ${c.notas ? `<div class="wa-crm-notas">${esc(c.notas)}</div>` : ''}
       </div>
     `;
   }
@@ -168,13 +170,17 @@ const ChatWA = (() => {
       });
     });
 
-    /* Busca */
+    /* Busca — debounce 150ms evita querySelectorAll em cada keystroke */
+    let _searchTimer = null;
     container.querySelector('#wa-search')?.addEventListener('input', e => {
-      const q = e.target.value.toLowerCase();
-      container.querySelectorAll('.wa-contato-item').forEach(el => {
-        const nome = el.querySelector('.wa-contato-nome')?.textContent.toLowerCase() || '';
-        el.style.display = nome.includes(q) ? '' : 'none';
-      });
+      clearTimeout(_searchTimer);
+      _searchTimer = setTimeout(() => {
+        const q = e.target.value.toLowerCase();
+        container.querySelectorAll('.wa-contato-item').forEach(el => {
+          const nome = el.querySelector('.wa-contato-nome')?.textContent.toLowerCase() || '';
+          el.style.display = nome.includes(q) ? '' : 'none';
+        });
+      }, 150);
     });
 
     /* Enviar mensagem */
@@ -209,11 +215,45 @@ const ChatWA = (() => {
   }
 
   function novoContato() {
-    const nome = prompt('Nome do contato:');
-    if (!nome) return;
-    const tel = prompt('Telefone (com DDD):') || '';
+    const headHtml = `
+      <div class="modal-head">
+        <div class="flex-1">
+          <h2>Novo <em>contato</em></h2>
+          <div class="sub">Adicione um contato para conversar</div>
+        </div>
+        <button class="modal-close" onclick="Modal.close()" aria-label="Fechar">${Icons.html('x', 14)}</button>
+      </div>
+    `;
+    Modal.open(`
+      ${headHtml}
+      <div class="modal-body">
+        <div class="field">
+          <label class="field-label">Nome *</label>
+          <input type="text" id="wa-new-nome" placeholder="Nome completo" data-autofocus>
+        </div>
+        <div class="field">
+          <label class="field-label">Telefone (com DDD)</label>
+          <input type="tel" id="wa-new-tel" placeholder="(11) 99999-9999">
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-ghost" onclick="Modal.close()">Cancelar</button>
+        <button class="btn btn-primary" onclick="ChatWA._salvarNovoContato()">
+          <span data-icon="check" data-size="14"></span> Salvar
+        </button>
+      </div>
+    `, 'modal-sm');
+    setTimeout(() => document.getElementById('wa-new-nome')?.focus(), 50);
+  }
+
+  function _salvarNovoContato() {
+    const nome = document.getElementById('wa-new-nome')?.value.trim();
+    if (!nome) { Toast.warning('Campo obrigatório', 'Informe o nome do contato.'); return; }
+    const tel = document.getElementById('wa-new-tel')?.value.trim() || '';
     const c = DB.saveChatContato({ nome, tel, naoLidas: 0 });
     selectedContatoId = c.id;
+    Modal.close();
+    Toast.success('Contato salvo', nome);
     render();
   }
 
@@ -235,20 +275,17 @@ const ChatWA = (() => {
   }
 
   /* ─── HELPERS ─── */
-  function escapeHtml(s) {
-    return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  }
-
   function cleanPhone(tel) {
     return (tel || '').replace(/\D/g, '');
   }
 
   function stringToColor(str) {
+    const s = str || '';
     let hash = 0;
-    for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    for (let i = 0; i < s.length; i++) hash = s.charCodeAt(i) + ((hash << 5) - hash);
     const colors = ['#A78BFA','#F472B6','#FB923C','#5EE39A','#7BB6FF','#FBBF24','#22D3EE'];
     return colors[Math.abs(hash) % colors.length];
   }
 
-  return { render };
+  return { render, _salvarNovoContato };
 })();

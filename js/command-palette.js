@@ -25,6 +25,15 @@ const CommandPalette = (() => {
     { id: 'add-tx',      label: 'Nova transação',     group: 'Criar', icon: 'plus-circle', action: () => { Router.navigate('transacoes'); setTimeout(() => Modal.novaTransacao(), 100); } },
     { id: 'add-meta',    label: 'Nova meta',          group: 'Criar', icon: 'plus-circle', action: () => { Router.navigate('metas'); setTimeout(() => Modal.novaMeta(), 100); } },
     { id: 'add-chat',    label: 'Nova conversa AI',   group: 'Criar', icon: 'bot',         action: () => { Router.navigate('chat-ai'); setTimeout(() => LLM && LLM.novaConversa && LLM.novaConversa(), 150); } },
+    /* Negócio */
+    { id: 'add-prod',    label: 'Novo produto',        group: 'Criar', icon: 'package',       action: () => { Router.navigate('produtos');    setTimeout(() => document.getElementById('prod-novo-btn')?.click(), 100); } },
+    { id: 'add-venda',   label: 'Nova venda',           group: 'Criar', icon: 'shopping-cart', action: () => { Router.navigate('vendas');       setTimeout(() => document.getElementById('venda-nova-btn')?.click(), 100); } },
+    { id: 'add-cliente', label: 'Novo cliente',         group: 'Criar', icon: 'user-plus',     action: () => { Router.navigate('clientes');     setTimeout(() => document.getElementById('cli-novo-btn')?.click(), 100); } },
+    /* Pessoal */
+    { id: 'add-evento',  label: 'Novo evento na agenda', group: 'Criar', icon: 'calendar-plus', action: () => { Router.navigate('agenda');       setTimeout(() => document.getElementById('agenda-novo-btn')?.click(), 150); } },
+    { id: 'add-tarefa',  label: 'Nova tarefa',           group: 'Criar', icon: 'check-square',  action: () => { Router.navigate('tarefas');      setTimeout(() => document.getElementById('trf-nova-btn')?.click(), 150); } },
+    { id: 'add-med',     label: 'Novo medicamento',      group: 'Criar', icon: 'pill',          action: () => { Router.navigate('medicamentos'); setTimeout(() => document.getElementById('med-novo-btn')?.click(), 150); } },
+    { id: 'add-contato', label: 'Novo contato',          group: 'Criar', icon: 'user-plus',     action: () => { Router.navigate('contatos');     setTimeout(() => document.getElementById('ctto-novo-btn')?.click(), 150); } },
   ];
 
   let selectedIdx = 0;

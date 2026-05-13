@@ -1,0 +1,12 @@
+{
+  "project_name": "Mentor24h",
+  "created_date": "2026-05-12",
+  "sprint_history": [],
+  "current_sprint": null,
+  "metadata": {
+    "format_version": "1.0",
+    "created_by": "skill-scaffolder v5.1",
+    "description": "Registro de todas as sprints executadas no projeto Mentor24h"
+  },
+  "notes": "Este arquivo será preenchido conforme sprints forem executadas por skill-planner e skill-construtor"
+}

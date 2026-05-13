@@ -428,27 +428,53 @@ const DB = (() => {
   /* ═══ EXPORT/IMPORT ═══ */
   function exportAll() {
     return {
-      version: 2,
+      version: 3,
       exportedAt: new Date().toISOString(),
-      config:    getConfig(),
-      categorias: getCategorias(),
-      contas:    read(KEY.contas, []),
-      transacoes: read(KEY.txs, []),
-      metas:     read(KEY.metas, []),
-      movimentos: read(KEY.movs, []),
-      kanban:    read(KEY.kanban, []),
+      /* finflow.* */
+      config:       getConfig(),
+      categorias:   getCategorias(),
+      contas:       read(KEY.contas, []),
+      transacoes:   read(KEY.txs, []),
+      metas:        read(KEY.metas, []),
+      movimentos:   read(KEY.movs, []),
+      kanban:       read(KEY.kanban, []),
+      /* mentor24h.* */
+      agenda:       read(KEY.agenda, []),
+      medicamentos: read(KEY.medicamentos, []),
+      medDoses:     read(KEY.medDoses, []),
+      tarefas:      read(KEY.tarefas, []),
+      contatos:     read(KEY.contatos, []),
+      produtos:     read(KEY.produtos, []),
+      vendas:       read(KEY.vendas, []),
+      clientesNeg:  read(KEY.clientesNeg, []),
+      chatContatos: read(KEY.chatContatos, []),
+      chatMsgs:     read(KEY.chatMsgs, []),
+      llmConversas: read(KEY.llmConversas, []),
     };
   }
 
   function importAll(data) {
     if (!data || typeof data !== 'object') return false;
-    if (data.config)     write(KEY.config, data.config);
-    if (data.categorias) write(KEY.cats, data.categorias);
-    if (data.contas)     write(KEY.contas, data.contas);
-    if (data.transacoes) write(KEY.txs, data.transacoes);
-    if (data.metas)      write(KEY.metas, data.metas);
-    if (data.movimentos) write(KEY.movs, data.movimentos);
-    if (data.kanban)     write(KEY.kanban, data.kanban);
+    /* finflow.* */
+    if (data.config)       write(KEY.config, data.config);
+    if (data.categorias)   write(KEY.cats, data.categorias);
+    if (data.contas)       write(KEY.contas, data.contas);
+    if (data.transacoes)   write(KEY.txs, data.transacoes);
+    if (data.metas)        write(KEY.metas, data.metas);
+    if (data.movimentos)   write(KEY.movs, data.movimentos);
+    if (data.kanban)       write(KEY.kanban, data.kanban);
+    /* mentor24h.* */
+    if (data.agenda)       write(KEY.agenda, data.agenda);
+    if (data.medicamentos) write(KEY.medicamentos, data.medicamentos);
+    if (data.medDoses)     write(KEY.medDoses, data.medDoses);
+    if (data.tarefas)      write(KEY.tarefas, data.tarefas);
+    if (data.contatos)     write(KEY.contatos, data.contatos);
+    if (data.produtos)     write(KEY.produtos, data.produtos);
+    if (data.vendas)       write(KEY.vendas, data.vendas);
+    if (data.clientesNeg)  write(KEY.clientesNeg, data.clientesNeg);
+    if (data.chatContatos) write(KEY.chatContatos, data.chatContatos);
+    if (data.chatMsgs)     write(KEY.chatMsgs, data.chatMsgs);
+    if (data.llmConversas) write(KEY.llmConversas, data.llmConversas);
     return true;
   }
 
@@ -636,7 +662,7 @@ const DB = (() => {
       const idx = arr.findIndex(p => p.id === data.id);
       if (idx >= 0) { arr[idx] = Object.assign({}, arr[idx], data); write(KEY.produtos, arr); return arr[idx]; }
     }
-    const novo = Object.assign({ id: Utils.uid(), nome: '', descricao: '', preco: 0, custo: 0, categoria: '', estoque: 0, estoqueMinimo: 5, status: 'disponivel', criadoEm: now }, data, { id: Utils.uid() });
+    const novo = Object.assign({ id: Utils.uid(), nome: '', descricao: '', preco: 0, custo: 0, categoria: '', estoque: 0, estoqueMinimo: 5, status: 'ativo', criadoEm: now }, data, { id: Utils.uid() });
     arr.push(novo); write(KEY.produtos, arr); return novo;
   }
   function deleteProduto(id) { write(KEY.produtos, read(KEY.produtos, []).filter(p => p.id !== id)); }
@@ -673,6 +699,7 @@ const DB = (() => {
     const novo = Object.assign({ id: Utils.uid(), nome: '', telefone: '', email: '', aniversario: null, notas: '', saldoDevedor: 0, criadoEm: now }, data, { id: Utils.uid() });
     arr.push(novo); write(KEY.clientesNeg, arr); return novo;
   }
+  function deleteClienteNeg(id) { write(KEY.clientesNeg, read(KEY.clientesNeg, []).filter(c => c.id !== id)); }
 
   /* ═══ CHAT CONTATOS (WhatsApp) ═══ */
   function getChatContatos() { return read(KEY.chatContatos, []); }
@@ -684,6 +711,11 @@ const DB = (() => {
     }
     const novo = Object.assign({ id: Utils.uid(), nome: '', tel: '', avatar: '', tags: [], ultimaMensagem: '', naoLidas: 0 }, data, { id: Utils.uid() });
     arr.push(novo); write(KEY.chatContatos, arr); return novo;
+  }
+
+  function deleteChatContato(id) {
+    write(KEY.chatContatos, read(KEY.chatContatos, []).filter(c => c.id !== id));
+    write(KEY.chatMsgs, read(KEY.chatMsgs, []).filter(m => m.contatoId !== id));
   }
 
   /* ═══ CHAT MSGS (WhatsApp) ═══ */
@@ -734,8 +766,8 @@ const DB = (() => {
     getContatos, saveContato, deleteContato,
     getProdutos, saveProduto, deleteProduto,
     getVendas, saveVenda, deleteVenda,
-    getClientesNeg, saveClienteNeg,
-    getChatContatos, saveChatContato,
+    getClientesNeg, saveClienteNeg, deleteClienteNeg,
+    getChatContatos, saveChatContato, deleteChatContato,
     getChatMsgs, saveChatMsg,
     getLlmConfig, saveLlmConfig,
     getLlmConversas, saveLlmConversa, deleteLlmConversa,

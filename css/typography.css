@@ -1,0 +1,217 @@
+/* ═══════════════════════════════════════════════════════════
+   TYPOGRAPHY — Mentor24h · Quiet Intelligence
+   Fraunces (display) · Switzer (UI) · JetBrains Mono (numeric)
+   Forge v5.2 | 2026-05-12
+═══════════════════════════════════════════════════════════ */
+
+/* ─── Display: Fraunces ─── */
+/* Títulos editoriais, números grandes de destaque, hero text */
+
+.display-hero {
+  font-family: var(--font-display);
+  font-size: var(--t-hero);
+  font-weight: 300;
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+}
+
+.display-4xl {
+  font-family: var(--font-display);
+  font-size: var(--t-4xl);
+  font-weight: 300;
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+}
+
+.display-3xl {
+  font-family: var(--font-display);
+  font-size: var(--t-3xl);
+  font-weight: 400;
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+}
+
+.display-2xl {
+  font-family: var(--font-display);
+  font-size: var(--t-2xl);
+  font-weight: 400;
+  line-height: var(--leading-snug);
+  letter-spacing: var(--tracking-snug);
+}
+
+.display-xl {
+  font-family: var(--font-display);
+  font-size: var(--t-xl);
+  font-weight: 400;
+  line-height: var(--leading-snug);
+}
+
+/* Display itálico — assinatura editorial */
+.display-italic {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 300;
+  letter-spacing: var(--tracking-tight);
+}
+
+/* ─── Headings: Switzer ─── */
+/* Interface, seções, labels de módulos */
+
+h1 {
+  font-family: var(--font-ui);
+  font-size: var(--t-2xl);
+  font-weight: 600;
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+  color: var(--text-1);
+}
+
+h2 {
+  font-family: var(--font-ui);
+  font-size: var(--t-xl);
+  font-weight: 600;
+  line-height: var(--leading-snug);
+  letter-spacing: var(--tracking-tight);
+  color: var(--text-1);
+}
+
+h3 {
+  font-family: var(--font-ui);
+  font-size: var(--t-lg);
+  font-weight: 500;
+  line-height: var(--leading-snug);
+  color: var(--text-1);
+}
+
+h4 {
+  font-family: var(--font-ui);
+  font-size: var(--t-md);
+  font-weight: 500;
+  line-height: var(--leading-base);
+  color: var(--text-2);
+}
+
+h5, h6 {
+  font-family: var(--font-ui);
+  font-size: var(--t-base);
+  font-weight: 500;
+  line-height: var(--leading-base);
+  color: var(--text-2);
+}
+
+/* ─── Body: Switzer ─── */
+
+p {
+  font-family: var(--font-ui);
+  font-size: var(--t-base);
+  font-weight: 400;
+  line-height: var(--leading-base);
+  color: var(--text-2);
+}
+
+.text-sm {
+  font-size: var(--t-sm);
+  line-height: var(--leading-snug);
+}
+
+.text-xs {
+  font-size: var(--t-xs);
+  line-height: var(--leading-base);
+  letter-spacing: var(--tracking-wide);
+}
+
+.text-lg {
+  font-size: var(--t-lg);
+  line-height: var(--leading-base);
+}
+
+/* ─── Labels e UI text ─── */
+
+.label {
+  font-family: var(--font-ui);
+  font-size: var(--t-xs);
+  font-weight: 600;
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.caption {
+  font-family: var(--font-ui);
+  font-size: var(--t-xs);
+  font-weight: 400;
+  color: var(--text-4);
+  line-height: var(--leading-base);
+}
+
+/* ─── Mono: JetBrains Mono ─── */
+/* Valores financeiros, datas, códigos, dados numéricos */
+
+.mono, .num {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-feature-settings: "tnum", "ss01", "cv05";
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+.mono-sm {
+  font-family: var(--font-mono);
+  font-size: var(--t-sm);
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Valores monetários — destaque */
+.value-display {
+  font-family: var(--font-display);
+  font-size: var(--t-3xl);
+  font-weight: 300;
+  letter-spacing: var(--tracking-tight);
+  color: var(--text-1);
+}
+
+.value-lg {
+  font-family: var(--font-mono);
+  font-size: var(--t-xl);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.value-sm {
+  font-family: var(--font-mono);
+  font-size: var(--t-base);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ─── Cores de texto utilitárias ─── */
+
+.text-gold     { color: var(--color-gold); }
+.text-muted    { color: var(--text-3); }
+.text-success  { color: var(--color-success); }
+.text-error    { color: var(--color-error); }
+.text-warning  { color: var(--color-warning); }
+.text-info     { color: var(--color-info); }
+
+/* ─── Peso utilitário ─── */
+
+.font-light    { font-weight: 300; }
+.font-regular  { font-weight: 400; }
+.font-medium   { font-weight: 500; }
+.font-semibold { font-weight: 600; }
+.font-bold     { font-weight: 700; }
+
+/* ─── Alinhamento ─── */
+
+.text-left   { text-align: left; }
+.text-center { text-align: center; }
+.text-right  { text-align: right; }
+
+/* ─── Truncate ─── */
+
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

@@ -12,6 +12,7 @@ const Dashboard = (() => {
     const monthRange = Utils.getMonthRange();
     const stats = DB.getStats(monthRange.start, monthRange.end);
 
+    renderGreeting();
     renderHero(stats);
     renderKPIs(stats);
     renderCalc();
@@ -27,6 +28,7 @@ const Dashboard = (() => {
     if (wrapper.querySelector('.bento')) return;
     wrapper.innerHTML = `
       <div class="bento stagger">
+        <div class="bento-card span-12" id="greeting-card"></div>
         <div class="bento-card hero span-5 row-2" id="hero-card"></div>
         <div class="bento-card span-4" id="kpi-1"></div>
         <div class="bento-card span-3" id="kpi-2"></div>
@@ -86,6 +88,63 @@ const Dashboard = (() => {
         </div>
       </div>
     `;
+  }
+
+  function renderGreeting() {
+    const el = document.getElementById('greeting-card');
+    if (!el) return;
+
+    const cfg = DB.getConfig();
+    const nome = cfg.nomeUsuario || 'Você';
+    const h = new Date().getHours();
+    const prefix = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
+
+    const today = todayISO();
+    const eventosHoje = DB.getAgenda({ data: today });
+    const meds = DB.getMedicamentos();
+    const dosesHoje = DB.getDoses(null, today);
+    const medsTomados = new Set(dosesHoje.map(d => d.medId));
+    const medsFaltam = meds.filter(m => !medsTomados.has(m.id));
+    const tarefasAlta = DB.getTarefas({ status: 'pendente', prioridade: 'alta' });
+
+    const summaryParts = [];
+    if (eventosHoje.length) summaryParts.push(`${eventosHoje.length} evento${eventosHoje.length > 1 ? 's' : ''} hoje`);
+    if (medsFaltam.length) summaryParts.push(`${medsFaltam.length} medicamento${medsFaltam.length > 1 ? 's' : ''} pendente${medsFaltam.length > 1 ? 's' : ''}`);
+    if (tarefasAlta.length) summaryParts.push(`${tarefasAlta.length} tarefa${tarefasAlta.length > 1 ? 's' : ''} urgente${tarefasAlta.length > 1 ? 's' : ''}`);
+    const summary = summaryParts.length ? 'Hoje: ' + summaryParts.join(' · ') + '.' : 'Tudo tranquilo por aqui.';
+
+    const chips = [];
+    if (eventosHoje.length) {
+      chips.push({ icon: 'calendar', label: `${eventosHoje.length} evento${eventosHoje.length > 1 ? 's' : ''}`, cls: 'info', nav: 'agenda' });
+    }
+    if (medsFaltam.length) {
+      chips.push({ icon: 'pill', label: `${medsFaltam.length} med${medsFaltam.length > 1 ? 's' : ''}`, cls: 'warn', nav: 'medicamentos' });
+    }
+    if (tarefasAlta.length) {
+      chips.push({ icon: 'check-square', label: `${tarefasAlta.length} urgente${tarefasAlta.length > 1 ? 's' : ''}`, cls: 'warn', nav: 'tarefas' });
+    }
+    if (!chips.length) {
+      chips.push({ icon: 'check-circle', label: 'Tudo em ordem', cls: 'ok', nav: null });
+    }
+
+    el.innerHTML = `
+      <div class="dash-greeting-row">
+        <div>
+          <div class="dash-greeting-name">${esc(prefix)}, <em>${esc(nome)}</em></div>
+          <div class="dash-greeting-sum">${esc(summary)}</div>
+        </div>
+        <div class="dash-context-strip">
+          ${chips.map(c => `
+            <button class="dash-cs-item ${c.cls}" ${c.nav ? `onclick="Router.navigate('${c.nav}')"` : 'disabled'}>
+              <span data-icon="${c.icon}" data-size="12"></span>
+              ${esc(c.label)}
+            </button>
+          `).join('')}
+        </div>
+      </div>
+    `;
+
+    Icons.render(el);
   }
 
   function renderHero(stats) {

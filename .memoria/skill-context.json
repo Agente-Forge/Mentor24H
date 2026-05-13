@@ -1,0 +1,33 @@
+{
+  "project_name": "Mentor24h",
+  "generated_date": "2026-05-12",
+  "skill_metadata": {
+    "last_skill": "skill-scaffolder v5.1",
+    "last_executed": "2026-05-12T10:30:00Z",
+    "next_skill": "skill-consultor v5.2"
+  },
+  "context": {
+    "appetite": "M",
+    "level": "INTERMEDIÁRIO",
+    "scope_modules": 18,
+    "scope_pages": 17,
+    "scope_lines": 3500,
+    "phase": "ESTRUTURA FORGE",
+    "status": "IN_PROGRESS"
+  },
+  "structure_summary": {
+    "entrada_point": "INICIO.md",
+    "navigation": "MAPA-VISUAL.md",
+    "index": "INDEX-SKILLS.md",
+    "memoria_files": 4,
+    "estructura_proyecto_folders": 12,
+    "contexto_files": 12
+  },
+  "next_steps": [
+    "Você preenche Estructura-Proyecto/02-protocolo/AGENTS.md (8 seções)",
+    "Chamamos skill-consultor para PRD + CONSTITUTION",
+    "Chamamos skill-planner para sprints + roadmap",
+    "Desenvolvimento com skill-construtor (TDD)"
+  ],
+  "notes": "Contexto para próximas skills. Atualizar conforme projeto avança."
+}
