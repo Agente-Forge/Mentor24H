@@ -153,6 +153,7 @@
 | 2026-05-13 | 6.2 | skill-performance (Sonnet 4.6): 3 otimizações — P-01 Google Fonts `@import` → `<link>` paralelo com preconnect (`tokens.css` + `index.html`), P-02 debounce 150ms no wa-search (`chat-wa.js`), P-03 `will-change: max-height` no accordion sidebar (`layout.css`). |
 | 2026-05-13 | 7.1 | skill-devops (Sonnet 4.6): `.github/workflows/deploy.yml` (GitHub Actions → GitHub Pages), `.nojekyll`, `.gitignore` atualizado com `leo-data.js`/`leo-import.json`. Remote: `Leozinhobh77/controle-financeiro-v2`. |
 | 2026-05-13 | Add-on | Groq adicionado aos provedores de LLM: 4 modelos (Llama 3.3 70B, Llama 3.1 70B, Mixtral, Gemma 2), função `callGroq()` em `llm.js`, switch case configurado. |
+| 2026-05-13 | Hotfix-LLM | 3 bugs críticos na configuração de LLM corrigidos: (1) CSP `connect-src` bloqueava `api.groq.com` — adicionado; (2) Schema antigo tinha `apiKey` única compartilhada entre todos os provedores — refatorado para `apiKeys: {provider: key}` e `models: {provider: model}` em `db.js` com migração automática v1→v2; (3) `renderConfig` em `llm.js` agora escapa XSS, mostra placeholder específico por provedor, auto-salva chave anterior ao trocar provider e indica status "✓ chave preenchida". |
 
 ---
 

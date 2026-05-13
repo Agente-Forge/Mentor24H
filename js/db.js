@@ -728,13 +728,57 @@ const DB = (() => {
     arr.push(novo); write(KEY.chatMsgs, arr); return novo;
   }
 
-  /* ═══ LLM CONFIG ═══ */
+  /* ═══ LLM CONFIG ═══
+     Estrutura: { provider, apiKeys: {provider: key}, models: {provider: model}, systemPrompt }
+     Cada provedor tem chave + modelo próprios (não compartilhados).
+     `apiKey` e `model` são getters convenientes do provider atual.
+  */
   function getLlmConfig() {
-    return Object.assign({ provider: 'openrouter', apiKey: '', model: 'anthropic/claude-3.5-sonnet', systemPrompt: 'Você é o Mentor24h, um assistente pessoal e empresarial. Responda sempre em português brasileiro.' }, read(KEY.llmConfig, null) || {});
+    const raw = read(KEY.llmConfig, null) || {};
+
+    /* Migração v1 → v2: campo antigo `apiKey`/`model` vira por-provedor */
+    if (raw.apiKey !== undefined && !raw.apiKeys) {
+      raw.apiKeys = {};
+      if (raw.apiKey) raw.apiKeys[raw.provider || 'openrouter'] = raw.apiKey;
+      delete raw.apiKey;
+    }
+    if (raw.model !== undefined && !raw.models) {
+      raw.models = {};
+      if (raw.model) raw.models[raw.provider || 'openrouter'] = raw.model;
+      delete raw.model;
+    }
+
+    const cfg = Object.assign({
+      provider: 'openrouter',
+      apiKeys: {},
+      models: {},
+      systemPrompt: 'Você é o Mentor24h, um assistente pessoal e empresarial. Responda sempre em português brasileiro.',
+    }, raw);
+
+    /* Getters convenientes do provider atual (usado pelas funções call*) */
+    cfg.apiKey = (cfg.apiKeys && cfg.apiKeys[cfg.provider]) || '';
+    cfg.model  = (cfg.models  && cfg.models[cfg.provider])  || '';
+    return cfg;
   }
+
   function saveLlmConfig(patch) {
-    const merged = Object.assign(getLlmConfig(), patch || {});
-    write(KEY.llmConfig, merged); return merged;
+    const raw = read(KEY.llmConfig, {}) || {};
+    if (!raw.apiKeys) raw.apiKeys = {};
+    if (!raw.models)  raw.models  = {};
+
+    /* Limpa campos legados v1 */
+    delete raw.apiKey;
+    delete raw.model;
+
+    if (patch.provider)              raw.provider     = patch.provider;
+    if (patch.systemPrompt !== undefined) raw.systemPrompt = patch.systemPrompt;
+
+    const target = patch.provider || raw.provider || 'openrouter';
+    if (patch.apiKey !== undefined) raw.apiKeys[target] = patch.apiKey;
+    if (patch.model !== undefined)  raw.models[target]  = patch.model;
+
+    write(KEY.llmConfig, raw);
+    return getLlmConfig();
   }
 
   /* ═══ LLM CONVERSAS ═══ */

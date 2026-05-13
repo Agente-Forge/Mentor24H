@@ -502,7 +502,7 @@ const LLM = (() => {
 
     const provider = PROVIDERS[cfg.provider] || PROVIDERS.openrouter;
     const modelsHtml = provider.models.map(m =>
-      `<option value="${m.id}" ${cfg.model === m.id ? 'selected' : ''}>${m.label}</option>`
+      `<option value="${esc(m.id)}" ${cfg.model === m.id ? 'selected' : ''}>${esc(m.label)}</option>`
     ).join('');
 
     container.innerHTML = `
@@ -517,7 +517,7 @@ const LLM = (() => {
             <label class="field-label">Provedor</label>
             <select id="llm-cfg-provider">
               ${Object.entries(PROVIDERS).map(([k, v]) =>
-                `<option value="${k}" ${cfg.provider === k ? 'selected' : ''}>${v.name}</option>`
+                `<option value="${esc(k)}" ${cfg.provider === k ? 'selected' : ''}>${esc(v.name)}</option>`
               ).join('')}
             </select>
           </div>
@@ -527,20 +527,22 @@ const LLM = (() => {
           </div>
         </div>
 
-        <div id="llm-provider-hint" class="field-hint" style="margin-bottom:var(--s-3);color:var(--amber)">${provider.hint}</div>
+        <div id="llm-provider-hint" class="field-hint" style="margin-bottom:var(--s-3);color:var(--amber)">${esc(provider.hint)}</div>
 
         <div class="field">
-          <label class="field-label">API Key</label>
-          <input type="password" id="llm-cfg-key" value="${cfg.apiKey}" placeholder="sk-... ou chave do provedor">
+          <label class="field-label">API Key
+            <span id="llm-cfg-key-status" style="font-size:11px;color:var(--gold);margin-left:8px"></span>
+          </label>
+          <input type="password" id="llm-cfg-key" value="${esc(cfg.apiKey)}" placeholder="${esc(keyPlaceholder(cfg.provider))}" autocomplete="off" spellcheck="false">
           <div class="field-hint" style="color:var(--amber);margin-top:4px">
             <span data-icon="alert-triangle" data-size="11"></span>
-            A chave fica salva no navegador. Não use em computadores compartilhados.
+            Cada provedor tem sua própria chave (salva no navegador). Não use em computadores compartilhados.
           </div>
         </div>
 
         <div class="field" style="margin-top:var(--s-3)">
           <label class="field-label">Prompt do sistema (opcional)</label>
-          <textarea id="llm-cfg-system" rows="3" style="resize:vertical">${cfg.systemPrompt || ''}</textarea>
+          <textarea id="llm-cfg-system" rows="3" style="resize:vertical">${esc(cfg.systemPrompt || '')}</textarea>
           <div class="field-hint">Define a personalidade e instruções base do assistente.</div>
         </div>
 
@@ -553,29 +555,86 @@ const LLM = (() => {
 
     Icons.render(container);
     bindConfigEvents(container);
+    updateKeyStatus(container);
+  }
+
+  /* Placeholder específico por provedor */
+  function keyPlaceholder(provider) {
+    return {
+      openrouter: 'sk-or-v1-...',
+      openai:     'sk-...',
+      gemini:     'AIza...',
+      claude:     'sk-ant-...',
+      groq:       'gsk_...',
+    }[provider] || 'chave do provedor';
+  }
+
+  /* Indicador "✓ chave salva" / "Sem chave" ao lado do label */
+  function updateKeyStatus(container) {
+    const provSelect = container.querySelector('#llm-cfg-provider');
+    const keyInput   = container.querySelector('#llm-cfg-key');
+    const status     = container.querySelector('#llm-cfg-key-status');
+    if (!provSelect || !keyInput || !status) return;
+    const has = (keyInput.value || '').trim().length > 0;
+    status.textContent = has ? '✓ chave preenchida' : '⚠ sem chave';
+    status.style.color = has ? 'var(--gold)' : 'var(--amber)';
   }
 
   function bindConfigEvents(container) {
-    const provSelect = container.querySelector('#llm-cfg-provider');
+    const provSelect  = container.querySelector('#llm-cfg-provider');
     const modelSelect = container.querySelector('#llm-cfg-model');
-    const hint = container.querySelector('#llm-provider-hint');
+    const keyInput    = container.querySelector('#llm-cfg-key');
+    const sysInput    = container.querySelector('#llm-cfg-system');
+    const hint        = container.querySelector('#llm-provider-hint');
+
+    /* Rastreia o provedor "anterior" para auto-salvar a chave digitada antes de trocar */
+    let lastProvider = provSelect.value;
 
     provSelect?.addEventListener('change', () => {
-      const p = PROVIDERS[provSelect.value];
+      const newProvider = provSelect.value;
+      const p = PROVIDERS[newProvider];
       if (!p) return;
+
+      /* 1. Salva a chave do provider anterior (se preenchida) — não perde o que foi digitado */
+      const typedKey = (keyInput.value || '').trim();
+      if (typedKey) {
+        DB.saveLlmConfig({ provider: lastProvider, apiKey: typedKey });
+      }
+
+      /* 2. Atualiza hint */
       hint.textContent = p.hint;
-      modelSelect.innerHTML = p.models.map(m => `<option value="${m.id}">${m.label}</option>`).join('');
+
+      /* 3. Recarrega config — pega a chave e o modelo salvos do novo provider */
+      const cfg = DB.getLlmConfig();
+      const savedKey   = (cfg.apiKeys && cfg.apiKeys[newProvider]) || '';
+      const savedModel = (cfg.models  && cfg.models[newProvider])  || '';
+
+      /* 4. Renderiza modelos com o salvo (ou primeiro) selecionado */
+      modelSelect.innerHTML = p.models.map(m =>
+        `<option value="${esc(m.id)}" ${savedModel === m.id ? 'selected' : ''}>${esc(m.label)}</option>`
+      ).join('');
+
+      /* 5. Atualiza input da chave e placeholder */
+      keyInput.value = savedKey;
+      keyInput.placeholder = keyPlaceholder(newProvider);
+
+      lastProvider = newProvider;
+      updateKeyStatus(container);
     });
 
+    keyInput?.addEventListener('input', () => updateKeyStatus(container));
+
     container.querySelector('#llm-cfg-save')?.addEventListener('click', () => {
+      const provider = provSelect?.value;
       DB.saveLlmConfig({
-        provider: provSelect?.value,
-        apiKey: container.querySelector('#llm-cfg-key')?.value?.trim(),
+        provider,
+        apiKey: (keyInput?.value || '').trim(),
         model: modelSelect?.value,
-        systemPrompt: container.querySelector('#llm-cfg-system')?.value?.trim(),
+        systemPrompt: (sysInput?.value || '').trim(),
       });
-      Toast.success('Configuração salva!', 'Provedor de IA atualizado.');
-      Toast.warning('Lembrete de segurança', 'Sua API key está salva no navegador. Não use em computadores compartilhados.');
+      const providerName = PROVIDERS[provider]?.name || provider;
+      Toast.success('Configuração salva!', `${providerName} pronto para uso.`);
+      updateKeyStatus(container);
     });
   }
 
