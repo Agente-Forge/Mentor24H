@@ -114,14 +114,6 @@ const Contatos = (() => {
           </div>
         </div>` : ''}
 
-        <div class="ctto-sidebar-section ctto-sidebar-actions">
-          <button class="btn btn-primary btn-sm ctto-novo-btn" onclick="Contatos.abrirForm(null)">
-            ${Icons.html('user-plus', 13)} Novo contato
-          </button>
-          <button class="btn btn-ghost btn-sm" onclick="Contatos.abrirImport()">
-            ${Icons.html('upload', 13)} Importar
-          </button>
-        </div>
       </div>
     `;
   }
@@ -154,8 +146,14 @@ const Contatos = (() => {
         </div>
 
         <div class="ctto-toolbar-right">
+          <button class="btn btn-ghost btn-sm" onclick="Contatos.abrirImport()">
+            ${Icons.html('upload', 13)} <span class="ctto-tb-label">Importar</span>
+          </button>
           <button class="btn btn-ghost btn-sm ctto-export-btn" onclick="Contatos.toggleExportMenu(event)">
-            ${Icons.html('download', 13)} Exportar ${Icons.html('chevron-down', 11)}
+            ${Icons.html('download', 13)} <span class="ctto-tb-label">Exportar</span> ${Icons.html('chevron-down', 11)}
+          </button>
+          <button id="ctto-novo-btn" class="btn btn-primary btn-sm" onclick="Contatos.abrirForm(null)">
+            ${Icons.html('user-plus', 13)} <span class="ctto-tb-label">Novo contato</span>
           </button>
         </div>
       </div>

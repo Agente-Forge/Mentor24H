@@ -2709,7 +2709,17 @@
   color: var(--violet);
 }
 
-.ctto-toolbar-right { margin-left: auto; }
+.ctto-toolbar-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  flex-shrink: 0;
+}
+
+@media (max-width: 480px) {
+  .ctto-tb-label { display: none; }
+}
 
 /* ── Content area ── */
 .ctto-content {
