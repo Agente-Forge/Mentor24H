@@ -3056,98 +3056,189 @@
 .ctto-act-edit:active  { color: var(--violet); }
 .ctto-act-del:active   { color: #FF3B30; }
 
-/* ── Lista view ── */
-.ctto-lista-wrap {
-  overflow-x: auto;
+/* ── Lista view (Apple-style flex rows) ── */
+.ctto-list-view {
+  display: flex;
+  flex-direction: column;
 }
 
-.ctto-lista {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: var(--t-sm);
-}
-
-.ctto-lista thead th {
-  padding: var(--s-2) var(--s-4);
-  text-align: left;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--text-4);
-  border-bottom: 1px solid var(--line-1);
-  white-space: nowrap;
-  background: var(--surface-1);
-  position: sticky;
-  top: 0;
-  z-index: 1;
-}
-
-.ctto-lista tbody tr {
-  cursor: pointer;
-  border-bottom: 1px solid var(--line-1);
-  transition: background var(--d-fast);
-}
-
-.ctto-lista tbody tr:hover { background: var(--surface-2); }
-.ctto-lista tbody tr.active { background: color-mix(in srgb, var(--violet) 6%, var(--surface-1)); }
-
-.ctto-lista tbody td {
-  padding: var(--s-3) var(--s-4);
-  color: var(--text-2);
-  vertical-align: middle;
-}
-
-.ctto-lista-nome {
+.ctto-row {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: var(--s-2);
+  gap: var(--s-3);
+  padding: var(--s-3) var(--s-4);
+  cursor: pointer;
+  background: var(--surface-1);
+  transition: background var(--d-fast);
+  min-height: 64px;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.ctto-lista-cargo {
+/* Inset separator (starts after avatar — Apple HIG) */
+.ctto-row::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: calc(var(--s-4) + 40px + var(--s-3));
+  right: 0;
+  height: 1px;
+  background: var(--line-1);
+}
+
+.ctto-row:last-child::after { display: none; }
+
+.ctto-row:hover { background: var(--surface-2); }
+
+.ctto-row.active {
+  background: color-mix(in srgb, var(--violet) 6%, var(--surface-1));
+}
+
+.ctto-row.active::after { background: color-mix(in srgb, var(--violet) 18%, var(--line-1)); }
+
+/* Avatar */
+.ctto-av-row {
+  width: 40px;
+  height: 40px;
+  font-size: 15px;
+  font-weight: 700;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--av-cor, var(--violet)) 30%, transparent);
+}
+
+/* Identity block */
+.ctto-row-identity {
+  flex: 0 0 28%;
+  min-width: 0;
+}
+
+.ctto-row-nome {
+  font-size: var(--t-sm);
+  font-weight: 600;
+  color: var(--text-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ctto-row-sub {
   font-size: 11px;
   color: var(--text-4);
   margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.ctto-lista-contact {
+/* Contact info (phone + email) */
+.ctto-row-mid {
+  flex: 0 0 26%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.ctto-row-contact-line {
   display: flex;
   align-items: center;
-  gap: var(--s-2);
+  gap: 5px;
+  font-size: var(--t-xs);
+  color: var(--text-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.ctto-mini-wa {
+.ctto-row-email-line { color: var(--violet); }
+
+.ctto-row-contact-icon {
+  flex-shrink: 0;
+  opacity: 0.6;
+  display: flex;
+  align-items: center;
+}
+
+/* Context chips */
+.ctto-row-chips {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+}
+
+/* Action buttons (hover on desktop, always show on touch) */
+.ctto-row-acts {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  opacity: 0;
+  transition: opacity var(--d-fast);
+  flex-shrink: 0;
+}
+
+.ctto-row:hover .ctto-row-acts { opacity: 1; }
+
+@media (hover: none) {
+  .ctto-row-acts { opacity: 1; }
+}
+
+.ctto-row-act {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 20px;
-  border-radius: var(--r-sm);
-  background: rgba(37,211,102,0.12);
-  color: #25D366;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--r-md);
+  border: none;
+  background: transparent;
+  color: var(--text-3);
+  cursor: pointer;
   text-decoration: none;
+  transition: background var(--d-fast), color var(--d-fast);
   flex-shrink: 0;
-  transition: background var(--d-fast);
 }
 
-.ctto-mini-wa:hover { background: rgba(37,211,102,0.22); }
+.ctto-row-call:hover  { color: #34C759; background: color-mix(in srgb, #34C759 10%, transparent); }
+.ctto-row-wa:hover    { color: #25D366; background: color-mix(in srgb, #25D366 10%, transparent); }
+.ctto-row-mail:hover  { color: #007AFF; background: color-mix(in srgb, #007AFF 10%, transparent); }
+.ctto-row-edit:hover  { color: var(--violet); background: color-mix(in srgb, var(--violet) 10%, transparent); }
+.ctto-row-del:hover   { color: #FF3B30; background: color-mix(in srgb, #FF3B30 9%, transparent); }
 
-.ctto-email-link {
-  color: var(--violet);
-  text-decoration: none;
-  font-size: var(--t-xs);
-}
+.ctto-row-call:active  { color: #34C759; }
+.ctto-row-wa:active    { color: #25D366; }
+.ctto-row-mail:active  { color: #007AFF; }
+.ctto-row-edit:active  { color: var(--violet); }
+.ctto-row-del:active   { color: #FF3B30; }
 
-.ctto-email-link:hover { text-decoration: underline; }
-
-.ctto-lista-btns {
+/* Chevron — tappability indicator */
+.ctto-row-chevron {
   display: flex;
-  gap: 4px;
-  opacity: 0;
-  transition: opacity var(--d-fast);
+  align-items: center;
+  color: var(--text-4);
+  flex-shrink: 0;
+  opacity: 0.5;
+  transition: opacity var(--d-fast), transform var(--d-fast);
 }
 
-.ctto-lista tbody tr:hover .ctto-lista-btns { opacity: 1; }
+.ctto-row:hover .ctto-row-chevron,
+.ctto-row.active .ctto-row-chevron {
+  opacity: 1;
+  transform: translateX(2px);
+}
+
+/* Responsive — mobile: identity + acts + chevron only */
+@media (max-width: 900px) {
+  .ctto-row { gap: var(--s-2); padding: var(--s-2) var(--s-3); min-height: 56px; }
+  .ctto-row::after { left: calc(var(--s-3) + 40px + var(--s-2)); }
+  .ctto-row-identity { flex: 1; min-width: 0; }
+  .ctto-row-mid { display: none; }
+  .ctto-row-chips { display: none; }
+  .ctto-row-acts { opacity: 1; gap: 1px; }
+  .ctto-row-act { width: 36px; height: 36px; }
+}
 
 /* ── Kanban view ── */
 .ctto-kanban {
