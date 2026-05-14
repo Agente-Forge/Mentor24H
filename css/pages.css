@@ -3283,47 +3283,19 @@
   transform: translateX(2px);
 }
 
-/* ═══════ MOBILE ≤900px — layout flex compacto ═══════ */
-@media (max-width: 900px) {
-  .ctto-list-head { display: none; }
-
-  .ctto-row {
-    display: flex;
-    gap: var(--s-2);
-    padding: var(--s-2) var(--s-3);
-    min-height: 62px;
-    box-shadow: inset 2px 0 0 transparent;
-  }
-  .ctto-row.active { box-shadow: inset 2px 0 0 var(--violet); }
-
-  .ctto-row::after { left: calc(var(--s-3) + 36px + var(--s-2)); }
-
-  /* Identidade ocupa o espaço restante, mostra sub-line */
-  .ctto-col-identity { flex: 1; min-width: 0; }
-  .ctto-col-mob-sub  { display: block; }
-
-  /* Oculta colunas desktop */
-  .ctto-col-cargo,
-  .ctto-col-tel,
-  .ctto-col-email,
-  .ctto-col-tags { display: none; }
-
-  /* Ações sempre visíveis no mobile, sem stagger */
+/* ═══════ Touch — botões sempre visíveis (sem hover) ═══════ */
+@media (hover: none) {
   .ctto-row-act {
     opacity: 1 !important;
     transform: none !important;
-    width: 34px;
-    height: 34px;
   }
+  .ctto-row-chevron        { opacity: 0.4 !important; }
+  .ctto-row.active .ctto-row-chevron { opacity: 0.75 !important; }
+}
 
-  /* Mobile: só ligar + editar */
-  .ctto-row-wa,
-  .ctto-row-mail,
-  .ctto-row-del { display: none; }
-
-  .ctto-row-chevron { opacity: 0.4; }
-  .ctto-row:hover .ctto-row-chevron,
-  .ctto-row.active .ctto-row-chevron { opacity: 0.75; }
+/* ═══════ Mobile — grid compacto, scroll horizontal ativo ═══════ */
+@media (max-width: 900px) {
+  .ctto-row { min-height: 54px; padding: 0 var(--s-3); }
 }
 
 /* ── Kanban view ── */
