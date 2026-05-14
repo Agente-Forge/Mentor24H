@@ -273,49 +273,68 @@ const Contatos = (() => {
 
   function cardHTML(c) {
     const ini = (c.nome || '?')[0].toUpperCase();
-    const cor = avatarCor(c.nome);
-    const tel = (c.telefone || '').replace(/\D/g, '');
-    const ctxs = (c.contextos || []).slice(0, 2);
+    const cor  = avatarCor(c.nome);
+    const tel  = (c.telefone || '').replace(/\D/g, '');
+    const ctxs = (c.contextos || []).slice(0, 3);
     const aniLabel = proximoAniversario(c.aniversario);
+    const sub  = [c.cargo, c.empresa].filter(Boolean).join(' · ');
+
+    // Monta as ações disponíveis para este contato
+    const acts = [];
+    if (c.telefone) acts.push(`
+      <a class="ctto-act-item ctto-act-call" href="tel:${esc(c.telefone)}"
+         onclick="event.stopPropagation()" title="Ligar para ${esc(c.nome)}">
+        ${Icons.html('phone', 17)}
+        <span>Ligar</span>
+      </a>`);
+    if (tel) acts.push(`
+      <a class="ctto-act-item ctto-act-wa" href="https://wa.me/55${tel}"
+         target="_blank" rel="noopener" onclick="event.stopPropagation()" title="WhatsApp">
+        ${Icons.html('message-circle', 17)}
+        <span>WhatsApp</span>
+      </a>`);
+    if (c.email) acts.push(`
+      <a class="ctto-act-item ctto-act-mail" href="mailto:${esc(c.email)}"
+         onclick="event.stopPropagation()" title="Enviar e-mail">
+        ${Icons.html('mail', 17)}
+        <span>E-mail</span>
+      </a>`);
+    acts.push(`
+      <button class="ctto-act-item ctto-act-edit"
+              onclick="event.stopPropagation(); Contatos.abrirForm('${esc(c.id)}')"
+              title="Editar contato">
+        ${Icons.html('pencil', 17)}
+        <span>Editar</span>
+      </button>`);
+    acts.push(`
+      <button class="ctto-act-item ctto-act-del"
+              onclick="event.stopPropagation(); Contatos.confirmarDeletar('${esc(c.id)}')"
+              title="Excluir contato">
+        ${Icons.html('trash-2', 17)}
+        <span>Excluir</span>
+      </button>`);
 
     return `
       <div class="ctto-card ${st.ativoId === c.id ? 'active' : ''}"
            data-contact-id="${esc(c.id)}"
            onclick="Contatos.abrirDetalhe('${esc(c.id)}')">
-        <div class="ctto-card-top">
-          <div class="ctto-avatar" style="--av-cor:${cor}">${ini}</div>
-          <div class="ctto-card-info">
+
+        <div class="ctto-card-header">
+          <div class="ctto-avatar ctto-av-card" style="--av-cor:${cor}">${ini}</div>
+          <div class="ctto-card-meta">
             <div class="ctto-card-nome">${esc(c.nome)}</div>
-            ${c.empresa ? `<div class="ctto-card-empresa">${esc(c.empresa)}</div>` : ''}
-            <div class="ctto-card-ctxs">
-              ${ctxs.map(id => ctxBadge(id)).join('')}
-              ${(c.tags || []).slice(0, 2).map(t => `<span class="ctto-tag-sm">#${esc(t)}</span>`).join('')}
-            </div>
+            ${sub ? `<div class="ctto-card-sub">${esc(sub)}</div>` : ''}
           </div>
         </div>
 
-        ${aniLabel ? `<div class="ctto-card-bday">${Icons.html('cake', 11)} ${aniLabel}</div>` : ''}
+        ${ctxs.length || aniLabel ? `
+          <div class="ctto-card-chips">
+            ${ctxs.map(id => ctxBadge(id)).join('')}
+            ${aniLabel ? `<span class="ctto-chip-bday">${Icons.html('cake', 9)} ${aniLabel}</span>` : ''}
+          </div>` : ''}
 
         <div class="ctto-card-actions">
-          ${c.telefone ? `
-            <a href="tel:${esc(c.telefone)}" class="ctto-action-btn" title="Ligar" onclick="event.stopPropagation()">
-              ${Icons.html('phone', 13)}
-            </a>
-            ${tel ? `
-            <a href="https://wa.me/55${tel}" target="_blank" rel="noopener"
-               class="ctto-action-btn ctto-wa-btn" title="WhatsApp" onclick="event.stopPropagation()">
-              ${Icons.html('message-circle', 13)}
-            </a>` : ''}
-          ` : ''}
-          ${c.email ? `
-            <a href="mailto:${esc(c.email)}" class="ctto-action-btn" title="Email" onclick="event.stopPropagation()">
-              ${Icons.html('mail', 13)}
-            </a>
-          ` : ''}
-          <button class="ctto-action-btn ctto-del-btn" title="Excluir"
-                  onclick="event.stopPropagation(); Contatos.confirmarDeletar('${esc(c.id)}')">
-            ${Icons.html('trash-2', 13)}
-          </button>
+          ${acts.join('')}
         </div>
       </div>
     `;
