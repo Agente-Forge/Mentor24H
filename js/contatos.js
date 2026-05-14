@@ -140,46 +140,92 @@ const Contatos = (() => {
 
   /* ── Toolbar ── */
   function renderToolbarHTML() {
+    const total = getFiltered().length;
+    const all   = DB.getContatos().length;
+    const hasFilter = st.busca || st.tag || st.contexto !== 'todos';
+
     return `
       <div class="ctto-toolbar">
-        <button class="ctto-sidebar-toggle btn btn-ghost btn-icon btn-sm" onclick="Contatos._toggleSidebar()" title="Filtros">
-          ${Icons.html('sliders', 15)}
-        </button>
 
-        <div class="ctto-search-wrap">
-          ${Icons.html('search', 13)}
-          <input id="ctto-busca" class="ctto-search" type="text"
-                 placeholder="Buscar por nome, empresa, telefone…"
-                 value="${esc(st.busca)}">
-          ${st.busca ? `<button class="ctto-search-clear" onclick="Contatos.setBusca('')">${Icons.html('x', 11)}</button>` : ''}
+        <!-- Linha 1: toggle filtros + busca (desktop: ficam inline na row 1) -->
+        <div class="ctto-tb-r1">
+          <button class="ctto-sidebar-toggle btn btn-ghost btn-icon"
+                  onclick="Contatos._toggleSidebar()"
+                  title="Abrir filtros e contextos"
+                  aria-label="Filtros">
+            ${Icons.html('sliders', 15)}
+          </button>
+
+          <div class="ctto-search-wrap" role="search">
+            <span class="ctto-search-icon" aria-hidden="true">${Icons.html('search', 14)}</span>
+            <input id="ctto-busca" class="ctto-search" type="search"
+                   placeholder="Buscar por nome, empresa ou telefone…"
+                   value="${esc(st.busca)}"
+                   autocomplete="off"
+                   aria-label="Buscar contatos">
+            ${st.busca
+              ? `<button class="ctto-search-clear" onclick="Contatos.setBusca('')" aria-label="Limpar busca" title="Limpar">
+                   ${Icons.html('x-circle', 14)}
+                 </button>`
+              : `<span class="ctto-search-hint">${hasFilter ? total + ' de ' + all : all + (all === 1 ? ' contato' : ' contatos')}</span>`
+            }
+          </div>
+
+          <!-- Desktop only: importar + exportar aparecem inline -->
+          <div class="ctto-tb-acts-desktop">
+            <button class="btn btn-ghost btn-sm" onclick="Contatos.abrirImport()"
+                    title="Importar contatos (.vcf, .csv, Google Contacts)">
+              ${Icons.html('upload', 13)} Importar
+            </button>
+            <button class="btn btn-ghost btn-sm ctto-export-btn" onclick="Contatos.toggleExportMenu(event)"
+                    title="Exportar contatos">
+              ${Icons.html('download', 13)} Exportar ${Icons.html('chevron-down', 10)}
+            </button>
+            <button class="btn btn-primary" onclick="Contatos.abrirForm(null)">
+              ${Icons.html('user-plus', 14)} Novo contato
+            </button>
+          </div>
         </div>
 
-        <div class="ctto-view-toggle">
-          <button class="ctto-view-btn ${st.view === 'cards' ? 'active' : ''}"
-                  onclick="Contatos.setView('cards')" title="Cards">
-            ${Icons.html('layout-grid', 14)}
-          </button>
-          <button class="ctto-view-btn ${st.view === 'lista' ? 'active' : ''}"
-                  onclick="Contatos.setView('lista')" title="Lista">
-            ${Icons.html('list', 14)}
-          </button>
-          <button class="ctto-view-btn ${st.view === 'kanban' ? 'active' : ''}"
-                  onclick="Contatos.setView('kanban')" title="Kanban">
-            ${Icons.html('columns', 14)}
-          </button>
+        <!-- Linha 2: view selector + ações mobile (desktop: inline após row 1) -->
+        <div class="ctto-tb-r2">
+          <div class="ctto-seg-ctrl" role="group" aria-label="Modo de visualização">
+            <button class="ctto-seg-btn ${st.view === 'cards'  ? 'active' : ''}"
+                    onclick="Contatos.setView('cards')"
+                    aria-pressed="${st.view === 'cards'}"
+                    title="Visualizar como cards">
+              ${Icons.html('layout-grid', 13)} <span>Cards</span>
+            </button>
+            <button class="ctto-seg-btn ${st.view === 'lista'  ? 'active' : ''}"
+                    onclick="Contatos.setView('lista')"
+                    aria-pressed="${st.view === 'lista'}"
+                    title="Visualizar como lista">
+              ${Icons.html('list', 13)} <span>Lista</span>
+            </button>
+            <button class="ctto-seg-btn ${st.view === 'kanban' ? 'active' : ''}"
+                    onclick="Contatos.setView('kanban')"
+                    aria-pressed="${st.view === 'kanban'}"
+                    title="Visualizar kanban de clientes">
+              ${Icons.html('columns', 13)} <span>Kanban</span>
+            </button>
+          </div>
+
+          <!-- Mobile only: ações compactas + botão novo -->
+          <div class="ctto-tb-acts-mobile">
+            <button class="btn btn-ghost btn-icon" onclick="Contatos.abrirImport()"
+                    title="Importar contatos">
+              ${Icons.html('upload', 15)}
+            </button>
+            <button class="btn btn-ghost btn-icon ctto-export-btn" onclick="Contatos.toggleExportMenu(event)"
+                    title="Exportar contatos">
+              ${Icons.html('download', 15)}
+            </button>
+            <button class="btn btn-primary ctto-novo-mobile" onclick="Contatos.abrirForm(null)">
+              ${Icons.html('plus', 14)} Novo
+            </button>
+          </div>
         </div>
 
-        <div class="ctto-toolbar-right">
-          <button class="btn btn-ghost btn-sm ctto-tb-import" onclick="Contatos.abrirImport()">
-            ${Icons.html('upload', 13)} <span class="ctto-tb-label">Importar</span>
-          </button>
-          <button class="btn btn-ghost btn-sm ctto-export-btn" onclick="Contatos.toggleExportMenu(event)">
-            ${Icons.html('download', 13)} <span class="ctto-tb-label">Exportar</span> ${Icons.html('chevron-down', 11)}
-          </button>
-          <button id="ctto-novo-btn" class="btn btn-primary btn-sm" onclick="Contatos.abrirForm(null)">
-            ${Icons.html('user-plus', 13)} <span class="ctto-tb-label">Novo contato</span>
-          </button>
-        </div>
       </div>
     `;
   }
