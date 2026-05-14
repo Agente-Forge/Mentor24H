@@ -3618,6 +3618,473 @@
   .ctto-content { padding: var(--s-3); }
 }
 
+/* ═══════════════════════════════════════════════════════════
+   CONTATOS — FORM DRAWER (slide-in lateral / bottom sheet)
+═══════════════════════════════════════════════════════════ */
+
+.ctto-form-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  z-index: 300;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--d-base);
+}
+
+.ctto-form-backdrop.open {
+  opacity: 1;
+  pointer-events: all;
+}
+
+/* Desktop: slide da direita */
+.ctto-form-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 440px;
+  max-width: 100vw;
+  background: var(--surface-1);
+  border-left: 1px solid var(--line-2);
+  box-shadow: -12px 0 48px rgba(0, 0, 0, 0.3);
+  z-index: 301;
+  transform: translateX(110%);
+  transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.ctto-form-drawer.open {
+  transform: translateX(0);
+}
+
+/* Mobile: bottom sheet */
+@media (max-width: 640px) {
+  .ctto-form-drawer {
+    top: auto;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 96vh;
+    border-left: none;
+    border-top: 1px solid var(--line-2);
+    border-radius: var(--r-xl, 20px) var(--r-xl, 20px) 0 0;
+    box-shadow: 0 -12px 48px rgba(0, 0, 0, 0.3);
+    transform: translateY(110%);
+  }
+  .ctto-form-drawer.open {
+    transform: translateY(0);
+  }
+}
+
+/* ── Inner container ── */
+.ctto-fd-inner {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* ── Handle mobile (linha de arrastar) ── */
+.ctto-fd-handle {
+  width: 36px;
+  height: 4px;
+  background: var(--line-3);
+  border-radius: var(--r-full);
+  margin: var(--s-3) auto var(--s-1);
+  flex-shrink: 0;
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .ctto-fd-handle { display: block; }
+}
+
+/* ── Header ── */
+.ctto-fd-header {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-3) var(--s-4) var(--s-3) var(--s-3);
+  border-bottom: 1px solid var(--line-1);
+  flex-shrink: 0;
+  background: var(--glass-1);
+}
+
+.ctto-fd-title {
+  font-family: var(--font-display);
+  font-size: var(--t-lg);
+  font-weight: 400;
+  letter-spacing: var(--tracking-tight);
+  color: var(--text-1);
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Avatar ao vivo ── */
+.ctto-fd-avatar-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s-2);
+  padding: var(--s-6) var(--s-4) var(--s-4);
+  flex-shrink: 0;
+  background: linear-gradient(180deg, var(--glass-1) 0%, transparent 100%);
+}
+
+.ctto-fd-avatar-live {
+  transition: background-color 0.3s, box-shadow 0.3s;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--av-cor, var(--violet)) 20%, transparent),
+              0 8px 24px color-mix(in srgb, var(--av-cor, var(--violet)) 30%, transparent);
+}
+
+.ctto-fd-avatar-hint {
+  font-size: 10px;
+  color: var(--text-4);
+  text-align: center;
+}
+
+/* ── Body (scrollável) ── */
+.ctto-fd-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--s-2) var(--s-5) var(--s-5);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* ── Seção ── */
+.ctto-fd-section {
+  padding: var(--s-4) 0;
+  border-bottom: 1px solid var(--line-1);
+}
+
+.ctto-fd-section:last-child { border-bottom: none; }
+
+.ctto-fd-section-label {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-4);
+  margin-bottom: var(--s-3);
+}
+
+/* ── 2 colunas dentro da seção ── */
+.ctto-fd-row2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s-3);
+  margin-top: var(--s-3);
+}
+
+@media (max-width: 400px) {
+  .ctto-fd-row2 { grid-template-columns: 1fr; }
+}
+
+/* ── Inputs ── */
+.ctto-fd-input {
+  width: 100%;
+  background: var(--surface-2);
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-md);
+  padding: var(--s-3) var(--s-4);
+  font-family: var(--font-body);
+  font-size: var(--t-sm);
+  color: var(--text-1);
+  outline: none;
+  transition: border-color var(--d-fast), box-shadow var(--d-fast);
+  box-sizing: border-box;
+}
+
+.ctto-fd-input:focus {
+  border-color: var(--violet);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--violet) 15%, transparent);
+}
+
+.ctto-fd-input::placeholder { color: var(--text-4); }
+
+.ctto-fd-textarea {
+  resize: vertical;
+  min-height: 80px;
+  line-height: 1.5;
+}
+
+.ctto-req {
+  color: var(--red);
+  font-size: 13px;
+  margin-left: 2px;
+}
+
+/* ── Tipo de telefone ── */
+.ctto-ph-type-row {
+  display: flex;
+  gap: var(--s-2);
+  margin-bottom: var(--s-3);
+}
+
+.ctto-ph-type-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  padding: var(--s-2) var(--s-3);
+  border-radius: var(--r-full);
+  font-size: var(--t-xs);
+  font-weight: 600;
+  background: var(--surface-2);
+  border: 1px solid var(--line-2);
+  color: var(--text-3);
+  cursor: pointer;
+  transition: all var(--d-fast);
+  white-space: nowrap;
+}
+
+.ctto-ph-type-btn:hover { background: var(--surface-3); color: var(--text-1); }
+
+.ctto-ph-type-btn.active {
+  background: color-mix(in srgb, var(--violet) 15%, transparent);
+  border-color: var(--violet);
+  color: var(--violet);
+}
+
+/* ── Campo de telefone ── */
+.ctto-phone-field {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-md);
+  overflow: hidden;
+  transition: border-color var(--d-fast), box-shadow var(--d-fast);
+  background: var(--surface-2);
+}
+
+.ctto-phone-field:focus-within {
+  border-color: var(--violet);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--violet) 15%, transparent);
+}
+
+.ctto-country-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--s-1);
+  padding: var(--s-3) var(--s-3);
+  background: var(--surface-3);
+  border: none;
+  border-right: 1px solid var(--line-2);
+  cursor: pointer;
+  font-size: var(--t-sm);
+  color: var(--text-2);
+  transition: background var(--d-fast);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.ctto-country-btn:hover { background: var(--surface-4); }
+
+.ctto-country-code {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-3);
+}
+
+.ctto-tel-input {
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  flex: 1;
+  font-family: var(--font-mono);
+  letter-spacing: 0.02em;
+}
+
+/* ── Dropdown de países ── */
+.ctto-country-dropdown {
+  position: fixed;
+  z-index: 400;
+  background: var(--surface-3);
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-4);
+  min-width: 200px;
+  padding: var(--s-2);
+  backdrop-filter: blur(12px);
+}
+
+.ctto-country-dropdown button {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  width: 100%;
+  padding: var(--s-2) var(--s-3);
+  border-radius: var(--r-sm);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: background var(--d-fast);
+  text-align: left;
+}
+
+.ctto-country-dropdown button:hover { background: var(--surface-4); }
+
+.ctto-dd-flag { font-size: 16px; }
+
+.ctto-dd-code {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--violet);
+  min-width: 36px;
+}
+
+.ctto-dd-name {
+  font-size: var(--t-xs);
+  color: var(--text-2);
+}
+
+/* ── Contextos chips (form) ── */
+.ctto-ctx-chips-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}
+
+.ctto-ctx-chip-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  padding: var(--s-2) var(--s-3);
+  border-radius: var(--r-full);
+  font-size: var(--t-xs);
+  font-weight: 600;
+  background: var(--surface-2);
+  border: 1.5px solid var(--line-2);
+  color: var(--text-3);
+  cursor: pointer;
+  transition: all var(--d-fast);
+  user-select: none;
+}
+
+.ctto-ctx-chip-btn:hover {
+  border-color: var(--cx-cor, var(--violet));
+  color: var(--cx-cor, var(--violet));
+  background: color-mix(in srgb, var(--cx-cor, var(--violet)) 8%, var(--surface-2));
+}
+
+.ctto-ctx-chip-btn.active {
+  background: color-mix(in srgb, var(--cx-cor, var(--violet)) 18%, transparent);
+  border-color: var(--cx-cor, var(--violet));
+  color: var(--cx-cor, var(--violet));
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--cx-cor, var(--violet)) 20%, transparent);
+}
+
+/* ── Tags chip input ── */
+.ctto-tags-field {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-2);
+  min-height: 44px;
+  background: var(--surface-2);
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-md);
+  padding: var(--s-2) var(--s-3);
+  cursor: text;
+  transition: border-color var(--d-fast), box-shadow var(--d-fast);
+}
+
+.ctto-tags-field:focus-within {
+  border-color: var(--violet);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--violet) 15%, transparent);
+}
+
+.ctto-tags-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-1);
+}
+
+.ctto-tags-input {
+  flex: 1;
+  min-width: 80px;
+  background: none;
+  border: none;
+  outline: none;
+  font-family: var(--font-body);
+  font-size: var(--t-sm);
+  color: var(--text-1);
+  padding: 2px 0;
+}
+
+.ctto-tags-input::placeholder { color: var(--text-4); }
+
+.ctto-chip-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: color-mix(in srgb, var(--violet) 15%, transparent);
+  color: var(--violet);
+  border: 1px solid color-mix(in srgb, var(--violet) 30%, transparent);
+  border-radius: var(--r-full);
+  padding: 2px 8px 2px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.ctto-chip-remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  background: none;
+  border: none;
+  color: var(--violet);
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  padding: 0;
+  border-radius: 50%;
+  opacity: 0.6;
+  transition: opacity var(--d-fast), background var(--d-fast);
+}
+
+.ctto-chip-remove:hover {
+  opacity: 1;
+  background: color-mix(in srgb, var(--violet) 20%, transparent);
+}
+
+/* ── Hint ── */
+.ctto-fd-hint {
+  font-size: 10px;
+  color: var(--text-4);
+  margin-top: var(--s-2);
+}
+
+/* ── Footer fixo ── */
+.ctto-fd-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--s-3);
+  padding: var(--s-4) var(--s-5);
+  border-top: 1px solid var(--line-1);
+  background: var(--glass-1);
+  flex-shrink: 0;
+}
+
 /* ─── LLM SUGESTÕES ─── */
 .llm-suggestions {
   display: flex;

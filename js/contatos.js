@@ -31,6 +31,23 @@ const Contatos = (() => {
     { id: 'arquivado', label: 'Arquivado', cor: 'red'   },
   ];
 
+  /* ── Form drawer state ── */
+  let _formSt = {
+    id: null, tags: [], phoneType: 'celular',
+    country: { flag: '🇧🇷', code: '+55', name: 'Brasil' },
+  };
+
+  const COUNTRIES = [
+    { flag: '🇧🇷', code: '+55',  name: 'Brasil'       },
+    { flag: '🇵🇹', code: '+351', name: 'Portugal'      },
+    { flag: '🇺🇸', code: '+1',   name: 'EUA / Canadá'  },
+    { flag: '🇦🇷', code: '+54',  name: 'Argentina'     },
+    { flag: '🇨🇴', code: '+57',  name: 'Colômbia'      },
+    { flag: '🇲🇽', code: '+52',  name: 'México'        },
+    { flag: '🇦🇴', code: '+244', name: 'Angola'        },
+    { flag: '🇲🇿', code: '+258', name: 'Moçambique'    },
+  ];
+
   /* ════════════════════════════════════════════
      RENDER PRINCIPAL
   ════════════════════════════════════════════ */
@@ -496,106 +513,343 @@ const Contatos = (() => {
      FORMULÁRIO (criar / editar)
   ════════════════════════════════════════════ */
 
+  /* ── Drawer: abrir ── */
   function abrirForm(id) {
     const c = id ? DB.getContatos().find(x => x.id === id) : null;
-    const titulo = c ? 'Editar contato' : 'Novo contato';
+    _formSt = {
+      id: id || null,
+      tags: [...(c?.tags || [])],
+      phoneType: c?.phoneType || 'celular',
+      country: COUNTRIES[0],
+    };
 
-    Modal.open(`
-      <div class="modal-header">
-        <h3>${titulo}</h3>
-      </div>
-      <div class="modal-body" style="display:flex;flex-direction:column;gap:var(--s-4)">
-        <div class="field-row">
-          <div class="field">
-            <label class="field-label">Nome *</label>
-            <input id="cf-nome" type="text" placeholder="Nome completo" value="${esc(c?.nome||'')}">
-          </div>
-          <div class="field">
-            <label class="field-label">Empresa</label>
-            <input id="cf-empresa" type="text" placeholder="Empresa ou organização" value="${esc(c?.empresa||'')}">
-          </div>
-        </div>
-        <div class="field-row">
-          <div class="field">
-            <label class="field-label">Cargo</label>
-            <input id="cf-cargo" type="text" placeholder="Cargo ou função" value="${esc(c?.cargo||'')}">
-          </div>
-          <div class="field">
-            <label class="field-label">Telefone</label>
-            <input id="cf-tel" type="tel" placeholder="(11) 99999-9999" value="${esc(c?.telefone||'')}">
-          </div>
-        </div>
-        <div class="field-row">
-          <div class="field">
-            <label class="field-label">E-mail</label>
-            <input id="cf-email" type="email" placeholder="email@exemplo.com" value="${esc(c?.email||'')}">
-          </div>
-          <div class="field">
-            <label class="field-label">Aniversário</label>
-            <input id="cf-ani" type="date" value="${esc(c?.aniversario||'')}">
-          </div>
-        </div>
-        <div class="field">
-          <label class="field-label">Contextos</label>
-          <div class="ctto-ctx-checkboxes">
-            ${CTXS.map(cx => `
-              <label class="ctto-ctx-check" style="--cx-cor:${cx.cor}">
-                <input type="checkbox" id="cf-ctx-${cx.id}"
-                       ${(c?.contextos||[]).includes(cx.id) ? 'checked' : ''}>
-                <span>${Icons.html(cx.icon, 12)}</span>
-                <span>${cx.label}</span>
-              </label>
-            `).join('')}
-          </div>
-        </div>
-        <div class="field-row">
-          <div class="field">
-            <label class="field-label">Tags (vírgula)</label>
-            <input id="cf-tags" type="text" placeholder="amigo, vip, lead" value="${esc((c?.tags||[]).join(', '))}">
-          </div>
-        </div>
-        <div class="field">
-          <label class="field-label">Notas</label>
-          <textarea id="cf-notas" rows="2" placeholder="Observações…">${esc(c?.notas||'')}</textarea>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-ghost" onclick="Modal.close()">Cancelar</button>
-        <button class="btn btn-primary" onclick="Contatos._salvarForm('${esc(id||'')}')">
-          ${Icons.html('check', 13)} Salvar
-        </button>
-      </div>
-    `, 'modal-lg');
+    let backdrop = document.getElementById('ctto-fd-backdrop');
+    let drawer   = document.getElementById('ctto-fd-drawer');
+
+    if (!backdrop) {
+      backdrop = document.createElement('div');
+      backdrop.id = 'ctto-fd-backdrop';
+      backdrop.className = 'ctto-form-backdrop';
+      backdrop.addEventListener('click', () => Contatos._fecharDrawer());
+      document.body.appendChild(backdrop);
+    }
+    if (!drawer) {
+      drawer = document.createElement('div');
+      drawer.id = 'ctto-fd-drawer';
+      drawer.className = 'ctto-form-drawer';
+      document.body.appendChild(drawer);
+    }
+
+    drawer.innerHTML = _renderFormHTML(c);
+    Icons.render(drawer);
+
+    requestAnimationFrame(() => {
+      backdrop.classList.add('open');
+      drawer.classList.add('open');
+    });
+
+    _renderFormTags();
+    _bindFormTagInput();
+    setTimeout(() => drawer.querySelector('#cf-nome')?.focus(), 320);
   }
 
+  /* ── Drawer: renderizar HTML ── */
+  function _renderFormHTML(c) {
+    const nome  = c?.nome || '';
+    const avCor = avatarCor(nome);
+    const avIni = nome ? nome[0].toUpperCase() : '?';
+    const sid   = esc(c?.id || '');
+    const ph    = _formSt.phoneType === 'fixo' ? '(11) 9999-9999' : '(11) 9 9999-9999';
+
+    return `
+      <div class="ctto-fd-inner">
+        <div class="ctto-fd-handle"></div>
+
+        <div class="ctto-fd-header">
+          <button class="btn btn-ghost btn-icon" onclick="Contatos._fecharDrawer()" title="Fechar">
+            ${Icons.html('arrow-left', 16)}
+          </button>
+          <span class="ctto-fd-title">${c ? 'Editar contato' : 'Novo contato'}</span>
+          <button class="btn btn-primary btn-sm" onclick="Contatos._salvarForm('${sid}')">
+            ${Icons.html('check', 13)} Salvar
+          </button>
+        </div>
+
+        <div class="ctto-fd-avatar-row">
+          <div class="ctto-avatar lg ctto-fd-avatar-live" id="ctto-fd-avatar"
+               style="--av-cor:${avCor}">${avIni}</div>
+          <p class="ctto-fd-avatar-hint">Avatar gerado pelo nome</p>
+        </div>
+
+        <div class="ctto-fd-body">
+
+          <!-- Identificação -->
+          <div class="ctto-fd-section">
+            <div class="ctto-fd-section-label">${Icons.html('user', 11)} Identificação</div>
+            <div class="field">
+              <label class="field-label">Nome <span class="ctto-req">*</span></label>
+              <input id="cf-nome" type="text" class="ctto-fd-input"
+                     placeholder="Nome completo" value="${esc(c?.nome || '')}"
+                     oninput="Contatos._updateAvatar()">
+            </div>
+            <div class="ctto-fd-row2">
+              <div class="field">
+                <label class="field-label">Empresa</label>
+                <input id="cf-empresa" type="text" class="ctto-fd-input"
+                       placeholder="Organização" value="${esc(c?.empresa || '')}">
+              </div>
+              <div class="field">
+                <label class="field-label">Cargo</label>
+                <input id="cf-cargo" type="text" class="ctto-fd-input"
+                       placeholder="Função" value="${esc(c?.cargo || '')}">
+              </div>
+            </div>
+          </div>
+
+          <!-- Telefone -->
+          <div class="ctto-fd-section">
+            <div class="ctto-fd-section-label">${Icons.html('phone', 11)} Telefone</div>
+            <div class="ctto-ph-type-row" id="ctto-ph-types">
+              ${[
+                { id: 'celular',  icon: 'smartphone',     label: 'Celular'  },
+                { id: 'fixo',     icon: 'phone',          label: 'Fixo'     },
+                { id: 'whatsapp', icon: 'message-circle', label: 'WhatsApp' },
+              ].map(t => `
+                <button class="ctto-ph-type-btn ${_formSt.phoneType === t.id ? 'active' : ''}"
+                        data-type="${t.id}"
+                        onclick="Contatos._setPhoneType('${t.id}', this)">
+                  ${Icons.html(t.icon, 11)} ${t.label}
+                </button>
+              `).join('')}
+            </div>
+            <div class="ctto-phone-field">
+              <button class="ctto-country-btn" onclick="Contatos._toggleCountry(event)" title="Código do país">
+                <span id="ctto-flag">${_formSt.country.flag}</span>
+                <span id="ctto-code" class="ctto-country-code">${_formSt.country.code}</span>
+                ${Icons.html('chevron-down', 9)}
+              </button>
+              <input id="cf-tel" type="tel" class="ctto-fd-input ctto-tel-input"
+                     placeholder="${ph}" value="${esc(c?.telefone || '')}"
+                     oninput="Contatos._maskTel(this)">
+            </div>
+          </div>
+
+          <!-- Contato digital -->
+          <div class="ctto-fd-section">
+            <div class="ctto-fd-section-label">${Icons.html('at-sign', 11)} Contato digital</div>
+            <div class="ctto-fd-row2">
+              <div class="field">
+                <label class="field-label">E-mail</label>
+                <input id="cf-email" type="email" class="ctto-fd-input"
+                       placeholder="email@exemplo.com" value="${esc(c?.email || '')}">
+              </div>
+              <div class="field">
+                <label class="field-label">Aniversário</label>
+                <input id="cf-ani" type="date" class="ctto-fd-input"
+                       value="${esc(c?.aniversario || '')}">
+              </div>
+            </div>
+          </div>
+
+          <!-- Classificação -->
+          <div class="ctto-fd-section">
+            <div class="ctto-fd-section-label">${Icons.html('layers', 11)} Classificação</div>
+            <label class="field-label" style="margin-bottom:var(--s-2)">Contexto</label>
+            <div class="ctto-ctx-chips-row">
+              ${CTXS.map(cx => `
+                <button class="ctto-ctx-chip-btn ${(c?.contextos||[]).includes(cx.id) ? 'active' : ''}"
+                        data-ctx="${cx.id}" style="--cx-cor:${cx.cor}"
+                        onclick="this.classList.toggle('active')">
+                  ${Icons.html(cx.icon, 12)} ${cx.label}
+                </button>
+              `).join('')}
+            </div>
+            <label class="field-label" style="margin:var(--s-4) 0 var(--s-2)">Tags</label>
+            <div class="ctto-tags-field" id="ctto-tags-wrap"
+                 onclick="document.getElementById('cf-tags-input')?.focus()">
+              <div class="ctto-tags-chips" id="ctto-tag-chips"></div>
+              <input id="cf-tags-input" class="ctto-tags-input"
+                     type="text" placeholder="${_formSt.tags.length ? '' : 'Adicionar tag…'}"
+                     autocomplete="off">
+            </div>
+            <p class="ctto-fd-hint">Enter ou vírgula para adicionar · clique no chip para remover</p>
+          </div>
+
+          <!-- Notas -->
+          <div class="ctto-fd-section">
+            <div class="ctto-fd-section-label">${Icons.html('file-text', 11)} Notas</div>
+            <textarea id="cf-notas" class="ctto-fd-input ctto-fd-textarea"
+                      rows="3" placeholder="Observações, histórico, informações importantes…">${esc(c?.notas || '')}</textarea>
+          </div>
+
+        </div>
+
+        <div class="ctto-fd-footer">
+          <button class="btn btn-ghost" onclick="Contatos._fecharDrawer()">Cancelar</button>
+          <button class="btn btn-primary" onclick="Contatos._salvarForm('${sid}')">
+            ${Icons.html('check', 13)} Salvar contato
+          </button>
+        </div>
+      </div>
+    `;
+  }
+
+  /* ── Drawer: fechar ── */
+  function _fecharDrawer() {
+    document.getElementById('ctto-fd-backdrop')?.classList.remove('open');
+    document.getElementById('ctto-fd-drawer')?.classList.remove('open');
+  }
+
+  /* ── Avatar ao vivo ── */
+  function _updateAvatar() {
+    const nome = document.getElementById('cf-nome')?.value || '';
+    const av   = document.getElementById('ctto-fd-avatar');
+    if (!av) return;
+    av.textContent = nome ? nome[0].toUpperCase() : '?';
+    av.style.setProperty('--av-cor', avatarCor(nome));
+  }
+
+  /* ── Tipo de telefone ── */
+  function _setPhoneType(type, btn) {
+    _formSt.phoneType = type;
+    document.querySelectorAll('.ctto-ph-type-btn').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    const input = document.getElementById('cf-tel');
+    if (input) {
+      input.placeholder = type === 'fixo' ? '(11) 9999-9999' : '(11) 9 9999-9999';
+      input.value = '';
+    }
+  }
+
+  /* ── País ── */
+  function _toggleCountry(e) {
+    e.stopPropagation();
+    const existing = document.getElementById('ctto-country-dd');
+    if (existing) { existing.remove(); return; }
+    const btn  = e.currentTarget;
+    const rect = btn.getBoundingClientRect();
+    const dd   = document.createElement('div');
+    dd.id = 'ctto-country-dd';
+    dd.className = 'ctto-country-dropdown';
+    dd.style.cssText = `top:${rect.bottom + 4}px;left:${rect.left}px`;
+    dd.innerHTML = COUNTRIES.map(cn => `
+      <button onclick="Contatos._selectCountry('${cn.code}','${cn.flag}')">
+        <span class="ctto-dd-flag">${cn.flag}</span>
+        <span class="ctto-dd-code">${cn.code}</span>
+        <span class="ctto-dd-name">${cn.name}</span>
+      </button>
+    `).join('');
+    document.body.appendChild(dd);
+    setTimeout(() => document.addEventListener('click', () => dd.remove(), { once: true }), 0);
+  }
+
+  function _selectCountry(code, flag) {
+    _formSt.country = COUNTRIES.find(c => c.code === code) || COUNTRIES[0];
+    const f = document.getElementById('ctto-flag');
+    const c = document.getElementById('ctto-code');
+    if (f) f.textContent = flag;
+    if (c) c.textContent = code;
+    document.getElementById('ctto-country-dd')?.remove();
+  }
+
+  /* ── Máscara de telefone ── */
+  function _maskTel(input) {
+    const d = input.value.replace(/\D/g, '');
+    if (_formSt.phoneType === 'fixo') {
+      const s = d.slice(0, 10);
+      let v = '';
+      if (s.length > 0) v  = '(' + s.slice(0, 2);
+      if (s.length > 2) v += ') ' + s.slice(2, 6);
+      if (s.length > 6) v += '-' + s.slice(6, 10);
+      input.value = v;
+    } else {
+      const s = d.slice(0, 11);
+      let v = '';
+      if (s.length > 0) v  = '(' + s.slice(0, 2);
+      if (s.length > 2) v += ') ' + s.slice(2, 3);
+      if (s.length > 3) v += ' ' + s.slice(3, 7);
+      if (s.length > 7) v += '-' + s.slice(7, 11);
+      input.value = v;
+    }
+  }
+
+  /* ── Tags chip input ── */
+  function _addFormTag(val) {
+    const tag = val.trim().replace(/^#/, '').toLowerCase();
+    if (!tag || _formSt.tags.includes(tag)) return;
+    _formSt.tags.push(tag);
+    _renderFormTags();
+    const inp = document.getElementById('cf-tags-input');
+    if (inp) { inp.value = ''; inp.placeholder = ''; }
+  }
+
+  function _removeFormTag(tag) {
+    _formSt.tags = _formSt.tags.filter(t => t !== tag);
+    _renderFormTags();
+    if (!_formSt.tags.length) {
+      const inp = document.getElementById('cf-tags-input');
+      if (inp) inp.placeholder = 'Adicionar tag…';
+    }
+  }
+
+  function _renderFormTags() {
+    const el = document.getElementById('ctto-tag-chips');
+    if (!el) return;
+    el.innerHTML = _formSt.tags.map(t => `
+      <span class="ctto-chip-tag">
+        #${esc(t)}
+        <button class="ctto-chip-remove" onclick="Contatos._removeFormTag('${esc(t)}')" title="Remover">×</button>
+      </span>
+    `).join('');
+  }
+
+  function _bindFormTagInput() {
+    const inp = document.getElementById('cf-tags-input');
+    if (!inp) return;
+    inp.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ',') {
+        e.preventDefault();
+        if (inp.value.trim()) _addFormTag(inp.value);
+      } else if (e.key === 'Backspace' && !inp.value && _formSt.tags.length) {
+        _removeFormTag(_formSt.tags[_formSt.tags.length - 1]);
+      }
+    });
+    inp.addEventListener('blur', () => { if (inp.value.trim()) _addFormTag(inp.value); });
+  }
+
+  /* ── Salvar ── */
   function _salvarForm(id) {
     const nome = document.getElementById('cf-nome')?.value.trim();
-    if (!nome) { Toast.warning('Campo obrigatório', 'Informe o nome do contato.'); return; }
+    if (!nome) {
+      Toast.warning('Campo obrigatório', 'Informe o nome do contato.');
+      document.getElementById('cf-nome')?.focus();
+      return;
+    }
 
-    const contextos = CTXS.map(cx => cx.id).filter(id2 =>
-      document.getElementById(`cf-ctx-${id2}`)?.checked
-    );
-    const tagsRaw = document.getElementById('cf-tags')?.value || '';
-    const tags    = tagsRaw.split(',').map(t => t.trim()).filter(Boolean);
+    const contextos = Array.from(
+      document.querySelectorAll('.ctto-ctx-chip-btn.active[data-ctx]')
+    ).map(b => b.dataset.ctx);
 
     const data = {
       nome,
-      empresa:    document.getElementById('cf-empresa')?.value.trim() || '',
-      cargo:      document.getElementById('cf-cargo')?.value.trim()   || '',
-      telefone:   document.getElementById('cf-tel')?.value.trim()     || '',
-      email:      document.getElementById('cf-email')?.value.trim()   || '',
-      aniversario:document.getElementById('cf-ani')?.value            || null,
-      notas:      document.getElementById('cf-notas')?.value.trim()   || '',
-      contextos, tags,
+      empresa:     document.getElementById('cf-empresa')?.value.trim()  || '',
+      cargo:       document.getElementById('cf-cargo')?.value.trim()    || '',
+      telefone:    document.getElementById('cf-tel')?.value.trim()      || '',
+      phoneType:   _formSt.phoneType,
+      email:       document.getElementById('cf-email')?.value.trim()    || '',
+      aniversario: document.getElementById('cf-ani')?.value             || null,
+      notas:       document.getElementById('cf-notas')?.value.trim()    || '',
+      contextos,
+      tags: [..._formSt.tags],
     };
 
     if (id) data.id = id;
 
     DB.saveContato(data);
-    Modal.close();
+    _fecharDrawer();
     Toast.success(id ? 'Contato atualizado' : 'Contato salvo', nome);
     render();
-    if (id) abrirDetalhe(id);
+    if (id) setTimeout(() => abrirDetalhe(id), 50);
   }
 
   /* ════════════════════════════════════════════
@@ -1076,7 +1330,9 @@ const Contatos = (() => {
   return {
     render, setView, setContexto, setTag, setBusca, limparFiltros,
     abrirDetalhe, fecharDetalhe,
-    abrirForm, _salvarForm,
+    abrirForm, _salvarForm, _fecharDrawer,
+    _updateAvatar, _setPhoneType, _toggleCountry, _selectCountry, _maskTel,
+    _addFormTag, _removeFormTag,
     confirmarDeletar, moverStage,
     abrirImport, _impTab, _onVcfFile, _onCsvFile, _confirmarImport,
     toggleExportMenu, _exportVcf, _exportCsv, _exportJson,
