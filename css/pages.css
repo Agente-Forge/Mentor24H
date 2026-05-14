@@ -2472,6 +2472,11 @@
   grid-template-columns: 220px 1fr 320px;
 }
 
+/* Backdrop sidebar mobile — invisível no desktop */
+.ctto-sb-backdrop {
+  display: none;
+}
+
 /* ── Sidebar esquerda ── */
 .ctto-sidebar {
   background: var(--glass-1);
@@ -2633,6 +2638,9 @@
   flex-shrink: 0;
 }
 
+/* Botão toggle sidebar — oculto no desktop, visível no mobile via media query */
+.ctto-sidebar-toggle { display: none; }
+
 .ctto-search-wrap {
   display: flex;
   align-items: center;
@@ -2726,6 +2734,7 @@
   flex: 1;
   overflow-y: auto;
   padding: var(--s-5);
+  min-width: 0;
 }
 
 /* ── Avatares ── */
@@ -2882,6 +2891,11 @@
 .ctto-card:hover .ctto-card-actions { opacity: 1; }
 .ctto-card.active .ctto-card-actions { opacity: 1; }
 
+/* Dispositivos touch: mostrar ações sempre */
+@media (hover: none) {
+  .ctto-card-actions { opacity: 1; }
+}
+
 .ctto-action-btn {
   display: flex;
   align-items: center;
@@ -2998,10 +3012,9 @@
 /* ── Kanban view ── */
 .ctto-kanban {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(160px, 1fr));
   gap: var(--s-4);
   align-items: start;
-  min-width: 720px;
 }
 
 .ctto-kanban-col {
@@ -3119,14 +3132,14 @@
   z-index: 90;
   opacity: 0;
   pointer-events: none;
-  transition: opacity var(--d-base);
-  display: none;
+  transition: opacity var(--d-base), visibility var(--d-base);
+  visibility: hidden;
 }
 
 .ctto-detail-backdrop.show {
   opacity: 1;
   pointer-events: all;
-  display: block;
+  visibility: visible;
 }
 
 .ctto-detail-panel {
@@ -3159,6 +3172,18 @@
   align-items: center;
   justify-content: space-between;
   flex-shrink: 0;
+}
+
+.ctto-detail-close-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--s-1);
+  font-size: var(--t-sm);
+  color: var(--text-3);
+}
+
+.ctto-detail-close-btn:hover {
+  color: var(--text-1);
 }
 
 .ctto-detail-hero {
@@ -3581,30 +3606,77 @@
     grid-template-columns: 1fr;
   }
 
-  .ctto-sidebar { display: none; }
+  .ctto-sidebar {
+    display: none;
+    flex-direction: column;
+  }
 
   .ctto-sidebar.mobile-open {
     display: flex;
     position: fixed;
     inset: 0 auto 0 0;
-    width: 240px;
-    z-index: 100;
+    width: 260px;
+    z-index: 102;
     box-shadow: var(--shadow-4);
+    background: var(--surface-1);
   }
 
-  .ctto-detail-backdrop { display: none; }
-  .ctto-detail-backdrop.show { display: block; }
+  /* Backdrop da sidebar mobile */
+  .ctto-sb-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 101;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--d-base), visibility var(--d-base);
+    visibility: hidden;
+  }
 
-  .ctto-detail-panel.open {
+  .ctto-sb-backdrop.show {
+    opacity: 1;
+    pointer-events: all;
+    visibility: visible;
+  }
+
+  /* Toggle button sidebar — só mobile */
+  .ctto-sidebar-toggle { display: flex !important; }
+
+  /* Detail panel mobile: bottom sheet com transform */
+  .ctto-detail-panel {
     position: fixed;
     inset: auto 0 0 0;
-    width: 100%;
-    max-height: 75vh;
+    width: 100% !important;
+    max-height: 80vh;
     border-top: 1px solid var(--line-2);
     border-left: none;
     border-radius: var(--r-lg) var(--r-lg) 0 0;
     z-index: 95;
     overflow-y: auto;
+    opacity: 1 !important;
+    transform: translateY(100%);
+    transition: transform 0.38s cubic-bezier(0.32, 0.72, 0, 1) !important;
+    will-change: transform;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .ctto-detail-panel.open {
+    width: 100% !important;
+    transform: translateY(0) !important;
+    overflow-y: auto;
+  }
+
+  /* Handle visual (arrasto) no bottom sheet */
+  .ctto-detail-inner::before {
+    content: '';
+    display: block;
+    width: 36px;
+    height: 4px;
+    background: var(--line-3);
+    border-radius: 2px;
+    margin: 0 auto var(--s-3);
+    flex-shrink: 0;
   }
 
   .ctto-kanban { grid-template-columns: repeat(2, 1fr); min-width: 0; }
@@ -3656,6 +3728,7 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  will-change: transform;
 }
 
 .ctto-form-drawer.open {
@@ -4080,6 +4153,7 @@
   justify-content: flex-end;
   gap: var(--s-3);
   padding: var(--s-4) var(--s-5);
+  padding-bottom: calc(var(--s-4) + env(safe-area-inset-bottom, 0px));
   border-top: 1px solid var(--line-1);
   background: var(--glass-1);
   flex-shrink: 0;

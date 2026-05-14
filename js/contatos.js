@@ -69,6 +69,9 @@ const Contatos = (() => {
           <div class="ctto-content" id="ctto-content"></div>
         </div>
 
+        <!-- Backdrop sidebar mobile -->
+        <div class="ctto-sb-backdrop" id="ctto-sb-backdrop" onclick="Contatos._toggleSidebar()"></div>
+
         <!-- Painel de detalhe (slide-in) -->
         <div class="ctto-detail-backdrop" id="ctto-backdrop" onclick="Contatos.fecharDetalhe()"></div>
         <aside class="ctto-detail-panel" id="ctto-detail"></aside>
@@ -139,6 +142,10 @@ const Contatos = (() => {
   function renderToolbarHTML() {
     return `
       <div class="ctto-toolbar">
+        <button class="ctto-sidebar-toggle btn btn-ghost btn-icon btn-sm" onclick="Contatos._toggleSidebar()" title="Filtros">
+          ${Icons.html('sliders', 15)}
+        </button>
+
         <div class="ctto-search-wrap">
           ${Icons.html('search', 13)}
           <input id="ctto-busca" class="ctto-search" type="text"
@@ -163,7 +170,7 @@ const Contatos = (() => {
         </div>
 
         <div class="ctto-toolbar-right">
-          <button class="btn btn-ghost btn-sm" onclick="Contatos.abrirImport()">
+          <button class="btn btn-ghost btn-sm ctto-tb-import" onclick="Contatos.abrirImport()">
             ${Icons.html('upload', 13)} <span class="ctto-tb-label">Importar</span>
           </button>
           <button class="btn btn-ghost btn-sm ctto-export-btn" onclick="Contatos.toggleExportMenu(event)">
@@ -225,6 +232,7 @@ const Contatos = (() => {
 
     return `
       <div class="ctto-card ${st.ativoId === c.id ? 'active' : ''}"
+           data-contact-id="${esc(c.id)}"
            onclick="Contatos.abrirDetalhe('${esc(c.id)}')">
         <div class="ctto-card-top">
           <div class="ctto-avatar" style="--av-cor:${cor}">${ini}</div>
@@ -285,6 +293,7 @@ const Contatos = (() => {
               const tel = (c.telefone || '').replace(/\D/g, '');
               return `
               <tr class="${st.ativoId === c.id ? 'active' : ''}"
+                  data-contact-id="${esc(c.id)}"
                   onclick="Contatos.abrirDetalhe('${esc(c.id)}')">
                 <td>
                   <div class="ctto-lista-nome">
@@ -400,11 +409,11 @@ const Contatos = (() => {
     el.innerHTML = `
       <div class="ctto-detail-inner">
         <div class="ctto-detail-header">
-          <button class="btn btn-ghost btn-icon btn-sm" onclick="Contatos.fecharDetalhe()" title="Fechar">
-            ${Icons.html('x', 14)}
-          </button>
           <button class="btn btn-secondary btn-sm" onclick="Contatos.abrirForm('${esc(c.id)}')">
             ${Icons.html('pencil', 12)} Editar
+          </button>
+          <button class="btn btn-ghost btn-sm ctto-detail-close-btn" onclick="Contatos.fecharDetalhe()">
+            Fechar ${Icons.html('x', 13)}
           </button>
         </div>
 
@@ -479,8 +488,8 @@ const Contatos = (() => {
     if (shell) shell.classList.add('detail-open');
 
     // Atualiza cards sem re-render completo
-    document.querySelectorAll('.ctto-card, .ctto-lista tbody tr').forEach(el2 => {
-      el2.classList.toggle('active', el2.onclick?.toString().includes(id));
+    document.querySelectorAll('[data-contact-id]').forEach(el2 => {
+      el2.classList.toggle('active', el2.dataset.contactId === id);
     });
 
     Icons.render(el);
@@ -523,22 +532,20 @@ const Contatos = (() => {
       country: COUNTRIES[0],
     };
 
-    let backdrop = document.getElementById('ctto-fd-backdrop');
-    let drawer   = document.getElementById('ctto-fd-drawer');
+    // Sempre recriar para evitar estado obsoleto
+    document.getElementById('ctto-fd-backdrop')?.remove();
+    document.getElementById('ctto-fd-drawer')?.remove();
 
-    if (!backdrop) {
-      backdrop = document.createElement('div');
-      backdrop.id = 'ctto-fd-backdrop';
-      backdrop.className = 'ctto-form-backdrop';
-      backdrop.addEventListener('click', () => Contatos._fecharDrawer());
-      document.body.appendChild(backdrop);
-    }
-    if (!drawer) {
-      drawer = document.createElement('div');
-      drawer.id = 'ctto-fd-drawer';
-      drawer.className = 'ctto-form-drawer';
-      document.body.appendChild(drawer);
-    }
+    const backdrop = document.createElement('div');
+    backdrop.id = 'ctto-fd-backdrop';
+    backdrop.className = 'ctto-form-backdrop';
+    backdrop.addEventListener('click', () => Contatos._fecharDrawer());
+    document.body.appendChild(backdrop);
+
+    const drawer = document.createElement('div');
+    drawer.id = 'ctto-fd-drawer';
+    drawer.className = 'ctto-form-drawer';
+    document.body.appendChild(drawer);
 
     drawer.innerHTML = _renderFormHTML(c);
     Icons.render(drawer);
@@ -696,8 +703,14 @@ const Contatos = (() => {
 
   /* ── Drawer: fechar ── */
   function _fecharDrawer() {
-    document.getElementById('ctto-fd-backdrop')?.classList.remove('open');
-    document.getElementById('ctto-fd-drawer')?.classList.remove('open');
+    const backdrop = document.getElementById('ctto-fd-backdrop');
+    const drawer   = document.getElementById('ctto-fd-drawer');
+    if (backdrop) backdrop.classList.remove('open');
+    if (drawer)   drawer.classList.remove('open');
+    setTimeout(() => {
+      backdrop?.remove();
+      drawer?.remove();
+    }, 400);
   }
 
   /* ── Avatar ao vivo ── */
@@ -1223,10 +1236,25 @@ const Contatos = (() => {
   ════════════════════════════════════════════ */
 
   function setView(v)     { st.view = v; renderContent(); _refreshSidebar(); _refreshToolbar(); }
-  function setContexto(c) { st.contexto = c; st.tag = null; renderContent(); _refreshSidebar(); }
-  function setTag(t)      { st.tag = t; renderContent(); _refreshSidebar(); }
+  function setContexto(c) { st.contexto = c; st.tag = null; renderContent(); _refreshSidebar(); _closeSidebarMobile(); }
+  function setTag(t)      { st.tag = t; renderContent(); _refreshSidebar(); _closeSidebarMobile(); }
   function setBusca(v)    { st.busca = v; const el = document.getElementById('ctto-busca'); if (el) el.value = v; renderContent(); _refreshToolbar(); }
   function limparFiltros(){ st.contexto = 'todos'; st.tag = null; st.busca = ''; render(); }
+
+  function _toggleSidebar() {
+    const sb = document.getElementById('ctto-sidebar');
+    const bd = document.getElementById('ctto-sb-backdrop');
+    if (!sb) return;
+    const isOpen = sb.classList.toggle('mobile-open');
+    if (bd) bd.classList.toggle('show', isOpen);
+  }
+
+  function _closeSidebarMobile() {
+    const sb = document.getElementById('ctto-sidebar');
+    const bd = document.getElementById('ctto-sb-backdrop');
+    if (sb) sb.classList.remove('mobile-open');
+    if (bd) bd.classList.remove('show');
+  }
 
   function getFiltered() { return DB.getContatos({ contexto: st.contexto, tag: st.tag, busca: st.busca }); }
 
@@ -1236,8 +1264,14 @@ const Contatos = (() => {
   }
 
   function _refreshToolbar() {
-    const el = document.querySelector('.ctto-toolbar');
-    if (el) { el.outerHTML = renderToolbarHTML(); bindToolbar(document.querySelector('.ctto-toolbar')); Icons.render(document.querySelector('.ctto-toolbar')); }
+    const old = document.querySelector('.ctto-toolbar');
+    if (!old) return;
+    const parent = old.parentElement;
+    old.remove();
+    parent.insertAdjacentHTML('afterbegin', renderToolbarHTML());
+    const nw = parent.querySelector('.ctto-toolbar');
+    bindToolbar(nw);
+    Icons.render(nw);
   }
 
   /* ════════════════════════════════════════════
@@ -1336,6 +1370,6 @@ const Contatos = (() => {
     confirmarDeletar, moverStage,
     abrirImport, _impTab, _onVcfFile, _onCsvFile, _confirmarImport,
     toggleExportMenu, _exportVcf, _exportCsv, _exportJson,
-    _conectarGoogle,
+    _conectarGoogle, _toggleSidebar,
   };
 })();
