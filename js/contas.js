@@ -253,6 +253,25 @@ const Contas = (() => {
     `;
   }
 
+  function labelPagamento(c) {
+    if (c.status !== 'paga' || !c.dataPagamento) return '';
+    const hoje   = toDateStr(new Date());
+    const ontem  = toDateStr(new Date(Date.now() - 86400000));
+    const pago   = c.dataPagamento.slice(0, 10);
+    const foiAtrasada = c.dataVencimento && pago > c.dataVencimento;
+
+    let label;
+    if (pago === hoje)  label = 'Pago hoje';
+    else if (pago === ontem) label = 'Pago ontem';
+    else {
+      const [y, m, d] = pago.split('-');
+      label = `Pago em ${d}/${m}/${y}`;
+    }
+    return foiAtrasada
+      ? `<span class="badge badge-green" title="Pago após vencimento">${Icons.html('check-circle-2', 9)} ${label} · com atraso</span>`
+      : `<span class="badge badge-green">${Icons.html('check-circle-2', 9)} ${label}</span>`;
+  }
+
   function renderItem(c) {
     const cat        = DB.getCategoria(c.categoria);
     const urg        = Utils.urgencyOf(c.dataVencimento, c.status);
@@ -270,7 +289,8 @@ const Contas = (() => {
             <span class="badge badge-muted">${esc(cat.nome)}</span>
             ${c.parcelado ? `<span class="badge badge-violet">${c.parcelaAtual}/${c.totalParcelas}</span>` : ''}
             ${c.recorrente ? `<span class="badge badge-blue">${Icons.html('repeat', 9)} ${esc(c.intervaloRecorrencia || '')}</span>` : ''}
-            ${c.dataVencimento ? `<span style="color:var(--${urg === 'muted' ? 'text-3' : urg});font-weight:500">${esc(Utils.urgencyLabel(c.dataVencimento, c.status))}</span>` : ''}
+            ${c.status !== 'paga' && c.dataVencimento ? `<span style="color:var(--${urg === 'muted' ? 'text-3' : urg});font-weight:500">${esc(Utils.urgencyLabel(c.dataVencimento, c.status))}</span>` : ''}
+            ${labelPagamento(c)}
           </div>
         </div>
         <div class="list-amount" style="${c.status === 'paga' ? 'color:var(--green)' : ''}">${fmt(c.valor)}</div>
