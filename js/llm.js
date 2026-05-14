@@ -419,30 +419,49 @@ const LLM = (() => {
       const contas = (DB.getContas && DB.getContas()) || [];
       const txs = (DB.getTxs && DB.getTxs()) || [];
 
-      const contasMes = contas.filter(c => (c.vencimento || '').startsWith(mesAtual));
-      const pendentes = contasMes.filter(c => c.status === 'pendente' || c.status === 'atrasada');
-      const pagas     = contasMes.filter(c => c.status === 'paga');
-      const totalPendente = pendentes.reduce((s, c) => s + (c.valor || 0), 0);
-      const totalPago     = pagas.reduce((s, c) => s + (c.valor || 0), 0);
+      /* Schema correto: c.dataVencimento, c.descricao, c.valor, c.status */
+      const contasMes = contas.filter(c => (c.dataVencimento || '').startsWith(mesAtual));
+      const pendentes = contas.filter(c => c.status === 'pendente' || c.status === 'atrasada');
+      const pendentesMes = contasMes.filter(c => c.status === 'pendente' || c.status === 'atrasada');
+      const pagasMes  = contasMes.filter(c => c.status === 'paga');
+      const totalPendenteMes = pendentesMes.reduce((s, c) => s + (c.valor || 0), 0);
+      const totalPagoMes     = pagasMes.reduce((s, c) => s + (c.valor || 0), 0);
+      const totalPendenteGeral = pendentes.reduce((s, c) => s + (c.valor || 0), 0);
+      const atrasadas = contas.filter(c => c.status === 'atrasada');
+      const totalAtrasado = atrasadas.reduce((s, c) => s + (c.valor || 0), 0);
 
       const txMes = txs.filter(t => (t.data || '').startsWith(mesAtual));
-      const receitas = txMes.filter(t => t.tipo === 'receita').reduce((s, t) => s + (t.valor || 0), 0);
-      const despesas = txMes.filter(t => t.tipo === 'despesa').reduce((s, t) => s + (t.valor || 0), 0);
+      const receitas = txMes.filter(t => t.tipo === 'entrada' || t.tipo === 'receita').reduce((s, t) => s + (t.valor || 0), 0);
+      const despesas = txMes.filter(t => t.tipo === 'saida' || t.tipo === 'despesa').reduce((s, t) => s + (t.valor || 0), 0);
 
-      linhas.push('── FINANCEIRO (mês atual) ──');
-      linhas.push(`Saldo inicial: ${fmtBRL(cfg.saldoInicial || 0)}`);
-      linhas.push(`Receitas no mês: ${fmtBRL(receitas)}`);
-      linhas.push(`Despesas no mês: ${fmtBRL(despesas)}`);
-      linhas.push(`Saldo estimado: ${fmtBRL((cfg.saldoInicial || 0) + receitas - despesas)}`);
-      linhas.push(`Contas a pagar este mês: ${pendentes.length} (total ${fmtBRL(totalPendente)})`);
-      linhas.push(`Contas já pagas este mês: ${pagas.length} (total ${fmtBRL(totalPago)})`);
-
-      if (pendentes.length) {
+      linhas.push('── FINANCEIRO ──');
+      linhas.push(`Total de contas cadastradas: ${contas.length}`);
+      if (contas.length === 0) {
+        linhas.push('(Nenhuma conta cadastrada ainda. Para criar, acesse a página "Contas".)');
+      } else {
+        linhas.push(`Saldo inicial configurado: ${fmtBRL(cfg.saldoInicial || 0)}`);
+        linhas.push(`Receitas registradas este mês: ${fmtBRL(receitas)} (${txMes.filter(t => t.tipo === 'entrada' || t.tipo === 'receita').length} lançamentos)`);
+        linhas.push(`Despesas registradas este mês: ${fmtBRL(despesas)} (${txMes.filter(t => t.tipo === 'saida' || t.tipo === 'despesa').length} lançamentos)`);
+        linhas.push(`Saldo estimado: ${fmtBRL((cfg.saldoInicial || 0) + receitas - despesas)}`);
         linhas.push('');
-        linhas.push('Próximas contas (até 10):');
-        pendentes.slice(0, 10).forEach(c => {
-          linhas.push(`  • ${c.descricao || c.nome || 'Conta'} — ${fmtBRL(c.valor)} (vence ${c.vencimento || 's/data'}) [${c.status}]`);
-        });
+        linhas.push(`Contas a pagar este mês (${mesAtual}): ${pendentesMes.length} (total ${fmtBRL(totalPendenteMes)})`);
+        linhas.push(`Contas já pagas este mês: ${pagasMes.length} (total ${fmtBRL(totalPagoMes)})`);
+        linhas.push(`Total de contas pendentes (todas datas): ${pendentes.length} (${fmtBRL(totalPendenteGeral)})`);
+        if (atrasadas.length) {
+          linhas.push(`⚠ Contas atrasadas: ${atrasadas.length} (${fmtBRL(totalAtrasado)})`);
+        }
+
+        const proximas = pendentes
+          .filter(c => c.dataVencimento)
+          .sort((a, b) => a.dataVencimento.localeCompare(b.dataVencimento))
+          .slice(0, 10);
+        if (proximas.length) {
+          linhas.push('');
+          linhas.push('Próximas contas a vencer:');
+          proximas.forEach(c => {
+            linhas.push(`  • ${c.descricao || 'Conta'} — ${fmtBRL(c.valor)} (vence ${c.dataVencimento}) [${c.status}]`);
+          });
+        }
       }
       linhas.push('');
     } catch (e) { /* coleção pode não existir */ }
@@ -453,8 +472,11 @@ const LLM = (() => {
       if (metas.length) {
         linhas.push('── METAS / CAIXINHAS ──');
         metas.forEach(m => {
-          const pct = m.objetivo ? Math.round((m.atual || 0) / m.objetivo * 100) : 0;
-          linhas.push(`  • ${m.nome}: ${fmtBRL(m.atual || 0)} / ${fmtBRL(m.objetivo || 0)} (${pct}%)`);
+          /* Schema correto: m.valorAlvo + DB.getValorMeta(m.id) para valor atual */
+          const valorAtual = (DB.getValorMeta && DB.getValorMeta(m.id)) || 0;
+          const alvo = m.valorAlvo || 0;
+          const pct = alvo ? Math.round(valorAtual / alvo * 100) : 0;
+          linhas.push(`  • ${m.nome}: ${fmtBRL(valorAtual)} / ${fmtBRL(alvo)} (${pct}%)`);
         });
         linhas.push('');
       }
@@ -466,9 +488,13 @@ const LLM = (() => {
       const vendas   = (DB.getVendas   && DB.getVendas())   || [];
       const clientes = (DB.getClientesNeg && DB.getClientesNeg()) || [];
 
-      if (produtos.length || vendas.length || clientes.length) {
+      linhas.push('── NEGÓCIO ──');
+      if (!produtos.length && !vendas.length && !clientes.length) {
+        linhas.push('(Nenhum produto, venda ou cliente cadastrado ainda.)');
+      } else {
         const ativos = produtos.filter(p => p.status === 'ativo' || !p.status);
-        const baixoEstoque = produtos.filter(p => (p.estoque || 0) > 0 && (p.estoque || 0) <= (p.estoqueMin || 0));
+        /* Schema correto: p.estoqueMinimo (não estoqueMin) */
+        const baixoEstoque = produtos.filter(p => (p.estoque || 0) > 0 && (p.estoque || 0) <= (p.estoqueMinimo || 0));
         const semEstoque = produtos.filter(p => (p.estoque || 0) === 0);
 
         const vendasMes = vendas.filter(v => (v.data || '').startsWith(mesAtual));
@@ -477,13 +503,29 @@ const LLM = (() => {
         const vendasPendentes = vendasMes.filter(v => v.status === 'pendente' || v.status === 'fiado');
         const totalPendenteVendas = vendasPendentes.reduce((s, v) => s + (v.total || 0), 0);
 
-        linhas.push('── NEGÓCIO ──');
         linhas.push(`Produtos cadastrados: ${produtos.length} (${ativos.length} ativos)`);
-        if (baixoEstoque.length) linhas.push(`⚠ Produtos com estoque baixo: ${baixoEstoque.length}`);
-        if (semEstoque.length)   linhas.push(`⚠ Produtos sem estoque: ${semEstoque.length}`);
+        if (baixoEstoque.length) {
+          linhas.push(`⚠ Produtos com estoque baixo: ${baixoEstoque.length}`);
+          baixoEstoque.slice(0, 5).forEach(p => {
+            linhas.push(`  • ${p.nome}: ${p.estoque} unidades (mín. ${p.estoqueMinimo})`);
+          });
+        }
+        if (semEstoque.length) {
+          linhas.push(`⚠ Produtos sem estoque: ${semEstoque.length}`);
+          semEstoque.slice(0, 5).forEach(p => linhas.push(`  • ${p.nome}`));
+        }
         linhas.push(`Vendas este mês: ${vendasMes.length} (total ${fmtBRL(totalVendasMes)})`);
-        linhas.push(`  → Pagas: ${vendasPagas.length}`);
-        linhas.push(`  → Pendentes/fiado: ${vendasPendentes.length} (${fmtBRL(totalPendenteVendas)})`);
+        if (vendasMes.length) {
+          linhas.push(`  → Pagas: ${vendasPagas.length}`);
+          linhas.push(`  → Pendentes/fiado: ${vendasPendentes.length} (${fmtBRL(totalPendenteVendas)})`);
+
+          /* Top 5 vendas mais recentes */
+          const recentes = vendasMes.slice().sort((a, b) => (b.data || '').localeCompare(a.data || '')).slice(0, 5);
+          linhas.push('Vendas recentes:');
+          recentes.forEach(v => {
+            linhas.push(`  • ${v.data} — ${v.clienteNome || 'Cliente'} — ${fmtBRL(v.total)} [${v.status}]`);
+          });
+        }
         linhas.push(`Clientes cadastrados: ${clientes.length}`);
 
         const clientesDevendo = clientes.filter(c => (c.saldoDevedor || 0) > 0);
@@ -493,8 +535,8 @@ const LLM = (() => {
             linhas.push(`  • ${c.nome}: ${fmtBRL(c.saldoDevedor)}`);
           });
         }
-        linhas.push('');
       }
+      linhas.push('');
     } catch (e) {}
 
     /* ─── PESSOAL ─── */
@@ -503,36 +545,48 @@ const LLM = (() => {
       const agenda = (DB.getAgenda && DB.getAgenda()) || [];
       const meds = (DB.getMedicamentos && DB.getMedicamentos()) || [];
 
+      /* Schema correto: t.data (não t.prazo!) */
       const tarefasPendentes = tarefas.filter(t => t.status !== 'concluida');
-      const tarefasHoje = tarefasPendentes.filter(t => t.prazo === hojeISO);
-      const tarefasAtrasadas = tarefasPendentes.filter(t => t.prazo && t.prazo < hojeISO);
+      const tarefasHoje = tarefasPendentes.filter(t => t.data === hojeISO);
+      const tarefasAtrasadas = tarefasPendentes.filter(t => t.data && t.data < hojeISO);
+      const tarefasSemPrazo = tarefasPendentes.filter(t => !t.data);
 
       const eventosSemana = agenda.filter(e => e.data >= hojeISO && e.data <= daquiSeteDias);
+      const eventosHoje = agenda.filter(e => e.data === hojeISO);
 
-      if (tarefasPendentes.length || eventosSemana.length || meds.length) {
-        linhas.push('── PESSOAL ──');
-        linhas.push(`Tarefas pendentes: ${tarefasPendentes.length} (hoje: ${tarefasHoje.length}, atrasadas: ${tarefasAtrasadas.length})`);
+      linhas.push('── PESSOAL ──');
+      if (!tarefas.length && !agenda.length && !meds.length) {
+        linhas.push('(Nenhuma tarefa, evento ou medicamento cadastrado ainda.)');
+      } else {
+        linhas.push(`Tarefas: ${tarefas.length} total, ${tarefasPendentes.length} pendentes`);
+        linhas.push(`  → Para hoje (${hojeISO}): ${tarefasHoje.length}`);
+        linhas.push(`  → Atrasadas: ${tarefasAtrasadas.length}`);
+        linhas.push(`  → Sem prazo: ${tarefasSemPrazo.length}`);
         if (tarefasAtrasadas.length) {
           linhas.push('Tarefas atrasadas:');
           tarefasAtrasadas.slice(0, 5).forEach(t => {
-            linhas.push(`  • ${t.titulo} (prazo era ${t.prazo}) [${t.prioridade || 'normal'}]`);
+            linhas.push(`  • ${t.titulo} (era ${t.data}) [${t.prioridade || 'normal'}]`);
           });
         }
         if (tarefasHoje.length) {
           linhas.push('Tarefas de hoje:');
           tarefasHoje.slice(0, 5).forEach(t => {
-            linhas.push(`  • ${t.titulo} [${t.prioridade || 'normal'}]`);
+            linhas.push(`  • ${t.titulo}${t.hora ? ' às ' + t.hora : ''} [${t.prioridade || 'normal'}]`);
           });
         }
-        linhas.push(`Eventos nos próximos 7 dias: ${eventosSemana.length}`);
-        eventosSemana.slice(0, 5).forEach(e => {
-          linhas.push(`  • ${e.data} ${e.hora || ''} — ${e.titulo}`);
-        });
-        if (meds.length) {
-          linhas.push(`Medicamentos cadastrados: ${meds.length}`);
+        if (eventosHoje.length) {
+          linhas.push(`Eventos de hoje (${eventosHoje.length}):`);
+          eventosHoje.forEach(e => linhas.push(`  • ${e.hora || ''} — ${e.titulo}`));
         }
-        linhas.push('');
+        if (eventosSemana.length) {
+          linhas.push(`Eventos nos próximos 7 dias: ${eventosSemana.length}`);
+          eventosSemana.slice(0, 8).forEach(e => {
+            linhas.push(`  • ${e.data} ${e.hora || ''} — ${e.titulo}`);
+          });
+        }
+        if (meds.length) linhas.push(`Medicamentos cadastrados: ${meds.length}`);
       }
+      linhas.push('');
     } catch (e) {}
 
     linhas.push('═══ FIM DOS DADOS ═══');
