@@ -631,21 +631,53 @@ const DB = (() => {
   function deleteTarefa(id) { write(KEY.tarefas, read(KEY.tarefas, []).filter(t => t.id !== id)); }
 
   /* ═══ CONTATOS ═══ */
-  function getContatos(busca) {
-    let arr = read(KEY.contatos, []);
-    if (busca) { const q = busca.toLowerCase(); arr = arr.filter(c => (c.nome + c.telefone + c.email).toLowerCase().includes(q)); }
-    return arr.sort((a, b) => a.nome.localeCompare(b.nome));
+  function _normalizeContato(c) {
+    return Object.assign({
+      empresa: '', cargo: '', contextos: [], kanbanStage: 'ativo',
+      googleResourceName: null, atualizadoEm: c.criadoEm || new Date().toISOString(),
+    }, c);
   }
+
+  function getContatos(filtros = {}) {
+    // backward-compat: string = busca simples
+    if (typeof filtros === 'string') filtros = { busca: filtros };
+    let arr = read(KEY.contatos, []).map(_normalizeContato);
+    if (filtros.contexto && filtros.contexto !== 'todos')
+      arr = arr.filter(c => (c.contextos || []).includes(filtros.contexto));
+    if (filtros.tag)
+      arr = arr.filter(c => (c.tags || []).includes(filtros.tag));
+    if (filtros.busca) {
+      const q = filtros.busca.toLowerCase();
+      arr = arr.filter(c =>
+        [c.nome, c.telefone, c.email, c.empresa, c.cargo,
+          ...(c.tags || []), ...(c.contextos || [])].join(' ').toLowerCase().includes(q));
+    }
+    return arr.sort((a, b) => (a.nome || '').localeCompare(b.nome || ''));
+  }
+
   function saveContato(data) {
     const arr = read(KEY.contatos, []);
     const now = new Date().toISOString();
     if (data.id) {
       const idx = arr.findIndex(c => c.id === data.id);
-      if (idx >= 0) { arr[idx] = Object.assign({}, arr[idx], data); write(KEY.contatos, arr); return arr[idx]; }
+      if (idx >= 0) {
+        arr[idx] = Object.assign({}, arr[idx], data, { atualizadoEm: now });
+        write(KEY.contatos, arr);
+        return _normalizeContato(arr[idx]);
+      }
     }
-    const novo = Object.assign({ id: Utils.uid(), nome: '', telefone: '', email: '', tags: [], aniversario: null, notas: '', criadoEm: now }, data, { id: Utils.uid() });
-    arr.push(novo); write(KEY.contatos, arr); return novo;
+    const novo = _normalizeContato(Object.assign(
+      { id: Utils.uid(), nome: '', telefone: '', email: '',
+        tags: [], contextos: [], empresa: '', cargo: '',
+        aniversario: null, notas: '', kanbanStage: 'ativo',
+        googleResourceName: null, criadoEm: now, atualizadoEm: now },
+      data, { id: Utils.uid() }
+    ));
+    arr.push(novo);
+    write(KEY.contatos, arr);
+    return novo;
   }
+
   function deleteContato(id) { write(KEY.contatos, read(KEY.contatos, []).filter(c => c.id !== id)); }
 
   /* ═══ PRODUTOS ═══ */

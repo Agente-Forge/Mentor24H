@@ -2,7 +2,7 @@
 
 **Projeto:** Mentor24h — Hub Pessoal + Empreendedor  
 **Iniciado:** 2026-05-12  
-**Última atualização:** 2026-05-13  
+**Última atualização:** 2026-05-14  
 **Status geral:** FASE 7 — Deploy COMPLETA → FASE 8 (Monitoramento) próxima
 
 ---
@@ -161,6 +161,7 @@
 | 2026-05-13 | Function-Calling | Upgrade arquitetural: de RAG estático → Function Calling dinâmico. Novo arquivo `js/llm-tools.js` com 11 ferramentas (`getDataAtual`, `getContas`, `getResumoFinanceiroMes`, `getVendas`, `getClientes`, `getProdutos`, `getTarefas`, `getEventos`, `getMedicamentos`, `getMetas`, `getConfigUsuario`). Implementação para 5 providers (OpenAI/Groq/OpenRouter compartilham formato; Anthropic e Gemini têm formatos próprios). Loop de tool calling com até 6 iterações. `buildLightContext` substitui snapshot pesado — IA puxa dados sob demanda. systemPrompt v4 com migração automática v1/v2/v3→v4. Agora responde "mês passado", "dezembro", "essa semana", "contas para hoje" — qualquer query dinâmica. |
 | 2026-05-14 | UI-Contas-Data-Pagamento | Enhancement em `js/contas.js`: cards de contas pagas exibem data de pagamento inteligente — "Pago hoje", "Pago ontem" ou "Pago em DD/MM/AAAA". Se pago após vencimento, badge exibe "· com atraso". Label de urgência suprimido para contas já pagas (sem conflito visual). Função `labelPagamento()` adicionada antes de `renderItem()`. |
 | 2026-05-14 | UI-Contas-Filtros | Redesign completo dos filtros de Contas: (1) segmented control Dia/Semana/Mês/Intervalo, (2) navegador de período com ‹ › + label dinâmico ("Este mês", "Esta semana", "Hoje", "Ontem", etc.) + botão "Hoje" quando fora do período atual, (3) range personalizado com 4 presets (7 dias, 30 dias, mês atual, ano atual), (4) faixa de informações com contadores de pendentes/atrasadas/pagas, (5) filtros avançados (busca + status + tipo + categoria) com destaque visual quando ativos + botão "Limpar". Padrão de abertura: mês atual. Sem `.filter-bar` wrapper — `#contas-filtros` recebe `.contas-filtros-wrap` direto. |
+| 2026-05-14 | Contatos-v2 | Módulo de Contatos completamente redesenhado — "Contexto Duplo". **db.js:** novo schema com `contextos[]`, `empresa`, `cargo`, `kanbanStage`, `googleResourceName`, `atualizadoEm`; `getContatos()` aceita filtros `{contexto, tag, busca}`. **contatos.js** (~540 linhas): 6 contextos (pessoal/trabalho/cliente/parceiro/fornecedor/família) com cores únicas, 3 views (Cards/Lista/Kanban), painel de detalhe slide-in, formulário com checkboxes de contexto, import vCard+CSV com drag-drop e detecção de duplicatas, export por contexto (.vcf/.csv/JSON), parser vCard 3.0 inline (suporta iPhone/Android/Google/Outlook), kanban de 4 estágios para clientes (prospect→ativo→inativo→arquivado), aniversários próximos (até 30 dias), integração Google Contacts OAuth (setup). **pages.css:** +500 linhas CSS enterprise — shell 3 colunas responsivo, detail panel slide-in, context badges com `color-mix()`, kanban cards, drop zones, export menu, import preview, form checkboxes estilizados. |
 
 ---
 
