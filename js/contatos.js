@@ -350,75 +350,50 @@ const Contatos = (() => {
   }
 
   function listRowHTML(c) {
-    const cor   = avatarCor(c.nome);
-    const ini   = (c.nome || '?')[0].toUpperCase();
-    const tel   = (c.telefone || '').replace(/\D/g, '');
-    const sub   = [c.cargo, c.empresa].filter(Boolean).join(' · ');
-    const ctxs  = (c.contextos || []).slice(0, 2);
+    const cor      = avatarCor(c.nome);
+    const ini      = (c.nome || '?')[0].toUpperCase();
+    const tel      = (c.telefone || '').replace(/\D/g, '');
+    const sub      = [c.cargo, c.empresa].filter(Boolean).join(' · ');
+    const ctxs     = (c.contextos || []).slice(0, 3);
     const aniLabel = proximoAniversario(c.aniversario);
+
+    // Line 2: contact details — phone (green) + email (blue)
+    const line2 = [];
+    if (sub)         line2.push(`<span class="ctto-ri-sub">${esc(sub)}</span>`);
+    if (c.telefone)  line2.push(`<span class="ctto-ri-tel">${Icons.html('phone', 10)} ${esc(c.telefone)}</span>`);
+    if (c.email)     line2.push(`<span class="ctto-ri-email">${Icons.html('mail', 10)} ${esc(c.email)}</span>`);
 
     return `
       <div class="ctto-row ${st.ativoId === c.id ? 'active' : ''}"
            data-contact-id="${esc(c.id)}"
            onclick="Contatos.abrirDetalhe('${esc(c.id)}')">
 
-        <!-- Avatar -->
         <div class="ctto-avatar ctto-av-row" style="--av-cor:${cor}">${ini}</div>
 
-        <!-- Identidade: nome + sub -->
-        <div class="ctto-row-identity">
-          <div class="ctto-row-nome">${esc(c.nome)}</div>
-          ${sub ? `<div class="ctto-row-sub">${esc(sub)}</div>` : ''}
-        </div>
-
-        <!-- Contato + chips (oculto mobile) -->
-        <div class="ctto-row-mid">
-          ${c.telefone ? `
-            <div class="ctto-row-contact-line">
-              <span class="ctto-row-contact-icon">${Icons.html('phone', 10)}</span>
-              <span>${esc(c.telefone)}</span>
-            </div>` : ''}
-          ${c.email ? `
-            <div class="ctto-row-contact-line ctto-row-email-line">
-              <span class="ctto-row-contact-icon">${Icons.html('mail', 10)}</span>
-              <span>${esc(c.email)}</span>
+        <div class="ctto-row-body">
+          <div class="ctto-row-line1">
+            <span class="ctto-row-nome">${esc(c.nome)}</span>
+            ${ctxs.length || aniLabel ? `
+              <div class="ctto-row-tags">
+                ${ctxs.map(id => ctxBadge(id)).join('')}
+                ${aniLabel ? `<span class="ctto-chip-bday">${Icons.html('cake', 9)} ${aniLabel}</span>` : ''}
+              </div>` : ''}
+          </div>
+          ${line2.length ? `
+            <div class="ctto-row-line2">
+              ${line2.map((p, i) => i < line2.length - 1 ? p + '<span class="ctto-ri-dot">·</span>' : p).join('')}
             </div>` : ''}
         </div>
 
-        <!-- Contextos (oculto mobile) -->
-        <div class="ctto-row-chips">
-          ${ctxs.map(id => ctxBadge(id)).join('')}
-          ${aniLabel ? `<span class="ctto-chip-bday">${Icons.html('cake', 9)} ${aniLabel}</span>` : ''}
-        </div>
-
-        <!-- Ações rápidas -->
         <div class="ctto-row-acts" onclick="event.stopPropagation()">
-          ${c.telefone ? `
-            <a class="ctto-row-act ctto-row-call" href="tel:${esc(c.telefone)}" title="Ligar">
-              ${Icons.html('phone', 14)}
-            </a>` : ''}
-          ${tel ? `
-            <a class="ctto-row-act ctto-row-wa" href="https://wa.me/55${tel}"
-               target="_blank" rel="noopener" title="WhatsApp">
-              ${Icons.html('message-circle', 14)}
-            </a>` : ''}
-          ${c.email ? `
-            <a class="ctto-row-act ctto-row-mail" href="mailto:${esc(c.email)}" title="E-mail">
-              ${Icons.html('mail', 14)}
-            </a>` : ''}
-          <button class="ctto-row-act ctto-row-edit"
-                  onclick="Contatos.abrirForm('${esc(c.id)}')" title="Editar">
-            ${Icons.html('pencil', 14)}
-          </button>
-          <button class="ctto-row-act ctto-row-del"
-                  onclick="Contatos.confirmarDeletar('${esc(c.id)}')" title="Excluir">
-            ${Icons.html('trash-2', 14)}
-          </button>
+          ${c.telefone ? `<a class="ctto-row-act ctto-row-call" href="tel:${esc(c.telefone)}" title="Ligar">${Icons.html('phone', 14)}</a>` : ''}
+          ${tel ? `<a class="ctto-row-act ctto-row-wa" href="https://wa.me/55${tel}" target="_blank" rel="noopener" title="WhatsApp">${Icons.html('message-circle', 14)}</a>` : ''}
+          ${c.email ? `<a class="ctto-row-act ctto-row-mail" href="mailto:${esc(c.email)}" title="E-mail">${Icons.html('mail', 14)}</a>` : ''}
+          <button class="ctto-row-act ctto-row-edit" onclick="Contatos.abrirForm('${esc(c.id)}')" title="Editar">${Icons.html('pencil', 14)}</button>
+          <button class="ctto-row-act ctto-row-del" onclick="Contatos.confirmarDeletar('${esc(c.id)}')" title="Excluir">${Icons.html('trash-2', 14)}</button>
         </div>
 
-        <!-- Chevron: indica detalhes ao tocar (sempre visível) -->
         <div class="ctto-row-chevron" aria-hidden="true">${Icons.html('chevron-right', 14)}</div>
-
       </div>
     `;
   }
