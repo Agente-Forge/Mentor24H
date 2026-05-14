@@ -396,56 +396,83 @@ const LLM = (() => {
     render();
   }
 
+  /* Modelos que sabidamente NÃO suportam Function Calling de forma confiável.
+     Para esses, usamos o RAG estático (contexto pesado) como fallback.
+     Match por substring para cobrir variações em diferentes providers. */
+  const MODELOS_SEM_TOOLS_SUBSTRINGS = [
+    'gemma',
+    'mixtral',
+    'gpt-3.5',
+    'llama-3.1-8b',
+    'claude-3-haiku',
+    'gemini-1.5-flash',
+  ];
+
+  function modeloSuportaTools(cfg) {
+    const model = (cfg.model || '').toLowerCase();
+    if (MODELOS_SEM_TOOLS_SUBSTRINGS.some(s => model.includes(s))) return false;
+    return ['openrouter', 'openai', 'groq', 'claude', 'gemini'].includes(cfg.provider);
+  }
+
   /* ═══════════════════════════════════════════════════════════
      TOOL CALLING LOOP — Provedor-agnóstico
      A IA pode chamar tools várias vezes. Loop até gerar resposta final.
+     Tem fallback automático para o RAG estático em caso de erro.
   ═══════════════════════════════════════════════════════════ */
   async function callWithTools(msgs, cfg) {
-    const provider = cfg.provider;
-    const supportsTools = ['openrouter', 'openai', 'groq', 'claude', 'gemini'].includes(provider);
-
-    if (!supportsTools) {
-      /* Fallback: provider sem tools — usa o contexto antigo pesado */
-      const fallbackCfg = Object.assign({}, cfg, {
-        systemPrompt: cfg.systemPrompt + '\n\n' + buildUserContext(),
-      });
-      return callProvider(msgs, fallbackCfg);
+    /* Se modelo não suporta tools, vai direto pro RAG estático */
+    if (!modeloSuportaTools(cfg)) {
+      return callComContextoEstatico(msgs, cfg);
     }
 
     let currentMsgs = msgs.slice();
     const MAX_ITER = 6;
 
-    for (let i = 0; i < MAX_ITER; i++) {
-      const result = await callProviderWithTools(currentMsgs, cfg);
+    try {
+      for (let i = 0; i < MAX_ITER; i++) {
+        const result = await callProviderWithTools(currentMsgs, cfg);
 
-      /* Se não retornou tool_calls, é a resposta final */
-      if (!result.tool_calls || !result.tool_calls.length) {
-        return result.content || '(sem resposta)';
+        /* Se não retornou tool_calls, é a resposta final */
+        if (!result.tool_calls || !result.tool_calls.length) {
+          return result.content || '(sem resposta)';
+        }
+
+        /* Executa cada tool e adiciona ao histórico */
+        const toolResults = result.tool_calls.map(tc => {
+          let args = {};
+          try { args = typeof tc.arguments === 'string' ? JSON.parse(tc.arguments) : (tc.arguments || {}); }
+          catch (e) { args = {}; }
+          const out = LLMTools.execute(tc.name, args);
+          console.log(`[LLM Tool] ${tc.name}(${JSON.stringify(args)})`, out);
+          return { tool_call_id: tc.id, name: tc.name, result: out };
+        });
+
+        currentMsgs = currentMsgs.concat([
+          { role: 'assistant', tool_calls: result.tool_calls, content: result.content || '' },
+          ...toolResults.map(tr => ({
+            role: 'tool',
+            tool_call_id: tr.tool_call_id,
+            name: tr.name,
+            content: JSON.stringify(tr.result),
+          })),
+        ]);
       }
 
-      /* Executa cada tool e adiciona ao histórico */
-      const toolResults = result.tool_calls.map(tc => {
-        let args = {};
-        try { args = typeof tc.arguments === 'string' ? JSON.parse(tc.arguments) : (tc.arguments || {}); }
-        catch (e) { args = {}; }
-        const result = LLMTools.execute(tc.name, args);
-        console.log(`[LLM Tool] ${tc.name}(${JSON.stringify(args)})`, result);
-        return { tool_call_id: tc.id, name: tc.name, result };
-      });
-
-      /* Adiciona ao histórico (formato específico do provider é tratado em callProviderWithTools) */
-      currentMsgs = currentMsgs.concat([
-        { role: 'assistant', tool_calls: result.tool_calls, content: result.content || '' },
-        ...toolResults.map(tr => ({
-          role: 'tool',
-          tool_call_id: tr.tool_call_id,
-          name: tr.name,
-          content: JSON.stringify(tr.result),
-        })),
-      ]);
+      return 'Desculpe, não consegui processar sua pergunta após várias tentativas. Pode reformular?';
+    } catch (err) {
+      /* Se falhou no tool calling, faz fallback para o RAG estático.
+         Isso cobre erros como "Failed to call a function" do Groq/Gemma. */
+      console.warn('[LLM] Function calling falhou, usando RAG estático como fallback:', err.message);
+      return callComContextoEstatico(msgs, cfg);
     }
+  }
 
-    return 'Desculpe, não consegui processar sua pergunta após várias tentativas. Pode reformular?';
+  /* Fallback: chama o provider sem tools, com contexto pesado injetado */
+  async function callComContextoEstatico(msgs, cfg) {
+    const fallbackCfg = Object.assign({}, cfg, {
+      systemPrompt: (cfg.systemPrompt || '') + '\n\n' + buildUserContext(),
+    });
+    return callProvider(msgs, fallbackCfg);
   }
 
   /* Dispatcher: chama o caller específico que suporta tools */
