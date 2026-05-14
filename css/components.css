@@ -340,6 +340,205 @@
   max-width: 200px;
 }
 
+/* ───────────────── CONTAS — FILTROS AVANÇADOS ───────────────── */
+
+.contas-filtros-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+  padding: var(--s-4);
+  background: var(--surface-2);
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-lg);
+  margin-bottom: var(--s-5);
+}
+
+.cf-row {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  flex-wrap: wrap;
+}
+
+/* Segmented control */
+.seg-ctrl {
+  display: flex;
+  background: var(--surface-1);
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-md);
+  padding: 2px;
+  gap: 2px;
+}
+
+.seg-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 12px;
+  font-size: var(--t-xs);
+  font-weight: 500;
+  color: var(--text-2);
+  background: transparent;
+  border: none;
+  border-radius: calc(var(--r-md) - 2px);
+  cursor: pointer;
+  transition: background var(--d-fast), color var(--d-fast);
+  white-space: nowrap;
+}
+
+.seg-btn:hover {
+  background: var(--surface-3);
+  color: var(--text-1);
+}
+
+.seg-btn.active {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* Navegador de período */
+.period-nav {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: var(--surface-1);
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-md);
+  padding: 2px;
+}
+
+.period-nav-label {
+  min-width: 110px;
+  text-align: center;
+  font-size: var(--t-xs);
+  font-weight: 600;
+  color: var(--text-1);
+  padding: 0 var(--s-2);
+  white-space: nowrap;
+}
+
+.cf-hoje-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Range personalizado */
+.period-custom-range {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  flex-wrap: wrap;
+}
+
+.period-custom-range input[type="date"] {
+  padding: 6px 10px;
+  font-size: var(--t-xs);
+  min-width: 130px;
+  max-width: 150px;
+}
+
+.period-range-sep {
+  color: var(--text-3);
+  display: flex;
+  align-items: center;
+}
+
+.period-presets {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+/* Faixa de informação */
+.info-strip {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  flex-wrap: wrap;
+  padding: 8px var(--s-3);
+  background: var(--surface-1);
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-md);
+}
+
+.info-strip-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: var(--t-xs);
+  color: var(--text-2);
+}
+
+.info-strip-item + .info-strip-item::before {
+  content: '·';
+  color: var(--text-3);
+  margin-right: 0;
+}
+
+.info-strip-item.amber { color: var(--amber); }
+.info-strip-item.red   { color: var(--red);   }
+.info-strip-item.green { color: var(--green);  }
+.info-strip-item.muted { color: var(--text-3); }
+
+/* Filtros avançados (row 3) */
+.cf-adv-row {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  flex-wrap: wrap;
+  padding-top: var(--s-2);
+  border-top: 1px solid var(--line-2);
+}
+
+.cf-busca {
+  flex: 1 1 180px;
+  max-width: 240px;
+}
+
+.cf-adv-row select {
+  flex: 1 1 120px;
+  max-width: 180px;
+  font-size: var(--t-xs);
+}
+
+.cf-adv-row input,
+.cf-adv-row select {
+  padding: 7px 10px;
+  font-size: var(--t-xs);
+}
+
+/* Destaque quando filtro está ativo */
+.filter-active {
+  border-color: var(--accent) !important;
+  color: var(--accent);
+}
+
+.cf-clear-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+}
+
+/* Responsivo mobile */
+@media (max-width: 600px) {
+  .seg-ctrl {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .seg-btn {
+    flex: 1;
+    justify-content: center;
+    padding: 5px 6px;
+  }
+  .cf-adv-row select,
+  .cf-busca {
+    flex: 1 1 100%;
+    max-width: 100%;
+  }
+}
+
 /* ───────────────── LIST ITEM (contas, transações) ───────────────── */
 .list-item {
   display: grid;
