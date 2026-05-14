@@ -3056,209 +3056,268 @@
 .ctto-act-edit:active  { color: var(--violet); }
 .ctto-act-del:active   { color: #FF3B30; }
 
-/* ── Lista view — 2-line Apple-style, tudo visível ── */
+/* ── Lista view — colunas horizontais Premium ── */
 .ctto-list-view {
   display: flex;
   flex-direction: column;
 }
 
-/* Row base */
+/* Header sticky com labels de colunas */
+.ctto-list-head {
+  display: grid;
+  grid-template-columns: 52px 1.4fr 1fr 1fr 1.1fr 0.9fr auto 24px;
+  align-items: center;
+  gap: 0 var(--s-3);
+  padding: var(--s-2) var(--s-5) var(--s-2) var(--s-4);
+  border-bottom: 1px solid var(--line-2);
+  position: sticky;
+  top: 0;
+  background: var(--surface-1);
+  backdrop-filter: blur(12px);
+  z-index: 2;
+}
+
+.ctto-lh-col {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--text-5);
+  user-select: none;
+}
+
+/* Row — mesmo grid do header: colunas perfeitamente alinhadas */
 .ctto-row {
   position: relative;
-  display: flex;
+  display: grid;
+  grid-template-columns: 52px 1.4fr 1fr 1fr 1.1fr 0.9fr auto 24px;
   align-items: center;
-  gap: var(--s-3);
-  padding: var(--s-3) var(--s-4);
+  gap: 0 var(--s-3);
+  padding: 0 var(--s-5) 0 var(--s-4);
+  min-height: 60px;
   cursor: pointer;
   background: var(--surface-1);
-  transition: background var(--d-fast);
-  min-height: 76px;
+  box-shadow: inset 3px 0 0 transparent;
+  transition: background var(--d-fast), box-shadow 0.22s ease;
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Inset separator Apple HIG — começa depois do avatar */
+/* Inset separator — começa depois do avatar (Apple HIG) */
 .ctto-row::after {
   content: '';
   position: absolute;
   bottom: 0;
-  left: calc(var(--s-4) + 44px + var(--s-3));
+  left: calc(var(--s-4) + 52px);
   right: 0;
   height: 1px;
   background: var(--line-1);
+  pointer-events: none;
 }
 .ctto-row:last-child::after { display: none; }
 
 .ctto-row:hover { background: var(--surface-2); }
+
 .ctto-row.active {
-  background: color-mix(in srgb, var(--violet) 5%, var(--surface-1));
-}
-.ctto-row.active::after {
-  background: color-mix(in srgb, var(--violet) 22%, var(--line-1));
+  background: color-mix(in srgb, var(--violet) 4%, var(--surface-1));
+  box-shadow: inset 3px 0 0 var(--violet);
 }
 
-/* Avatar com glow colorido */
+/* Avatar */
+.ctto-av-cell { display: flex; align-items: center; }
+
 .ctto-av-row {
-  width: 44px;
-  height: 44px;
-  font-size: 17px;
+  width: 36px;
+  height: 36px;
+  font-size: 14px;
   font-weight: 700;
   flex-shrink: 0;
-  box-shadow:
-    0 2px 10px color-mix(in srgb, var(--av-cor, var(--violet)) 35%, transparent),
-    0 1px 3px rgba(0,0,0,0.08);
+  box-shadow: 0 1px 8px color-mix(in srgb, var(--av-cor, var(--violet)) 30%, transparent);
 }
 
-/* Body — centro da linha, ocupa o espaço restante */
-.ctto-row-body {
-  flex: 1;
-  min-width: 0;
+/* Coluna: Identidade */
+.ctto-col-identity {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 1px;
+  min-width: 0;
 }
 
-/* Linha 1: nome + tags contextuais */
-.ctto-row-line1 {
-  display: flex;
-  align-items: center;
-  gap: var(--s-2);
-  flex-wrap: wrap;
-  row-gap: 3px;
-}
-
-.ctto-row-nome {
+.ctto-col-nome {
   font-size: var(--t-sm);
   font-weight: 600;
   color: var(--text-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   letter-spacing: -0.01em;
-  flex-shrink: 0;
 }
 
-.ctto-row-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  align-items: center;
-}
-
-/* Linha 2: cargo·empresa + telefone (verde) + email (azul) */
-.ctto-row-line2 {
-  display: flex;
-  align-items: center;
-  gap: var(--s-2);
-  flex-wrap: wrap;
-  row-gap: 2px;
-}
-
-.ctto-ri-sub {
-  font-size: var(--t-xs);
+/* Sub-line só visível no mobile */
+.ctto-col-mob-sub {
+  display: none;
+  font-size: 11px;
   color: var(--text-4);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 180px;
 }
 
-.ctto-ri-tel {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
+/* Coluna: Cargo */
+.ctto-col-cargo {
   font-size: var(--t-xs);
-  font-weight: 500;
-  color: #34C759;
-  white-space: nowrap;
-}
-
-.ctto-ri-email {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: var(--t-xs);
-  color: #007AFF;
+  color: var(--text-3);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 200px;
+  min-width: 0;
 }
 
-.ctto-ri-dot {
-  font-size: 10px;
-  color: var(--text-5);
-  user-select: none;
-  flex-shrink: 0;
+/* Coluna: Telefone */
+.ctto-col-tel { min-width: 0; }
+
+.ctto-ci-tel {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: var(--t-xs);
+  font-weight: 500;
+  color: #30D158;
+  white-space: nowrap;
 }
 
-/* Ações — sempre visíveis, círculos semânticos */
+/* Coluna: E-mail */
+.ctto-col-email { min-width: 0; overflow: hidden; }
+
+.ctto-ci-email {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: var(--t-xs);
+  color: #0A84FF;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* Coluna: Tags */
+.ctto-col-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  align-items: center;
+  min-width: 0;
+}
+
+/* Ações — stagger de entrada no hover */
 .ctto-row-acts {
   display: flex;
   align-items: center;
   gap: 3px;
   flex-shrink: 0;
+  justify-content: flex-end;
 }
 
 .ctto-row-act {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 34px;
-  height: 34px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   border: none;
-  background: var(--surface-2);
-  color: var(--text-3);
+  background: transparent;
   cursor: pointer;
   text-decoration: none;
-  transition: background var(--d-fast), color var(--d-fast), transform 0.15s;
   flex-shrink: 0;
+  opacity: 0;
+  transform: translateX(10px) scale(0.7);
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease,
+    background 0.12s,
+    color 0.12s;
   -webkit-tap-highlight-color: transparent;
 }
-.ctto-row-act:hover { transform: scale(1.1); }
-.ctto-row-act:active { transform: scale(0.92); }
 
-.ctto-row-call { background: color-mix(in srgb, #34C759 10%, var(--surface-2)); color: #34C759; }
-.ctto-row-wa   { background: color-mix(in srgb, #25D366 10%, var(--surface-2)); color: #25D366; }
-.ctto-row-mail { background: color-mix(in srgb, #007AFF 9%, var(--surface-2));  color: #007AFF; }
-.ctto-row-edit { background: color-mix(in srgb, var(--violet) 9%, var(--surface-2)); color: var(--violet); }
-.ctto-row-del  { background: color-mix(in srgb, #FF3B30 8%, var(--surface-2));  color: #FF3B30; }
+/* Stagger delay de entrada */
+.ctto-row:hover .ctto-row-act:nth-child(1) { opacity: 1; transform: none; transition-delay: 0ms;   }
+.ctto-row:hover .ctto-row-act:nth-child(2) { opacity: 1; transform: none; transition-delay: 35ms;  }
+.ctto-row:hover .ctto-row-act:nth-child(3) { opacity: 1; transform: none; transition-delay: 70ms;  }
+.ctto-row:hover .ctto-row-act:nth-child(4) { opacity: 1; transform: none; transition-delay: 105ms; }
+.ctto-row:hover .ctto-row-act:nth-child(5) { opacity: 1; transform: none; transition-delay: 140ms; }
 
-.ctto-row-call:hover  { background: color-mix(in srgb, #34C759 18%, var(--surface-2)); }
-.ctto-row-wa:hover    { background: color-mix(in srgb, #25D366 18%, var(--surface-2)); }
-.ctto-row-mail:hover  { background: color-mix(in srgb, #007AFF 17%, var(--surface-2)); }
-.ctto-row-edit:hover  { background: color-mix(in srgb, var(--violet) 17%, var(--surface-2)); }
-.ctto-row-del:hover   { background: color-mix(in srgb, #FF3B30 16%, var(--surface-2)); }
+/* Cores semânticas dos botões */
+.ctto-row-call { color: #30D158; }
+.ctto-row-wa   { color: #25D366; }
+.ctto-row-mail { color: #0A84FF; }
+.ctto-row-edit { color: var(--violet); }
+.ctto-row-del  { color: #FF453A; }
 
-/* Chevron: affordance de toque */
+.ctto-row-call:hover  { background: color-mix(in srgb, #30D158 13%, transparent); }
+.ctto-row-wa:hover    { background: color-mix(in srgb, #25D366 13%, transparent); }
+.ctto-row-mail:hover  { background: color-mix(in srgb, #0A84FF 13%, transparent); }
+.ctto-row-edit:hover  { background: color-mix(in srgb, var(--violet) 13%, transparent); }
+.ctto-row-del:hover   { background: color-mix(in srgb, #FF453A 11%, transparent); }
+
+.ctto-row-act:active { transform: scale(0.82) !important; transition-delay: 0ms !important; }
+
+/* Chevron — aparece no hover */
 .ctto-row-chevron {
   display: flex;
   align-items: center;
+  justify-content: center;
   color: var(--text-4);
-  flex-shrink: 0;
-  opacity: 0.35;
+  opacity: 0;
   transition: opacity var(--d-fast), transform var(--d-fast);
 }
 .ctto-row:hover .ctto-row-chevron,
 .ctto-row.active .ctto-row-chevron {
-  opacity: 0.85;
+  opacity: 0.55;
   transform: translateX(2px);
 }
 
-/* Mobile — tudo continua visível, apenas comprime ações */
+/* ═══════ MOBILE ≤900px — layout flex compacto ═══════ */
 @media (max-width: 900px) {
+  .ctto-list-head { display: none; }
+
   .ctto-row {
+    display: flex;
     gap: var(--s-2);
     padding: var(--s-2) var(--s-3);
-    min-height: 68px;
+    min-height: 62px;
+    box-shadow: inset 2px 0 0 transparent;
   }
-  .ctto-row::after {
-    left: calc(var(--s-3) + 44px + var(--s-2));
-  }
-  .ctto-ri-sub { max-width: 120px; }
-  .ctto-ri-email { max-width: 130px; }
+  .ctto-row.active { box-shadow: inset 2px 0 0 var(--violet); }
 
-  /* Oculta mail + del na linha de ações no mobile (acessíveis via detalhe) */
-  .ctto-row-mail { display: none; }
-  .ctto-row-del  { display: none; }
-  .ctto-row-act  { width: 36px; height: 36px; }
+  .ctto-row::after { left: calc(var(--s-3) + 36px + var(--s-2)); }
+
+  /* Identidade ocupa o espaço restante, mostra sub-line */
+  .ctto-col-identity { flex: 1; min-width: 0; }
+  .ctto-col-mob-sub  { display: block; }
+
+  /* Oculta colunas desktop */
+  .ctto-col-cargo,
+  .ctto-col-tel,
+  .ctto-col-email,
+  .ctto-col-tags { display: none; }
+
+  /* Ações sempre visíveis no mobile, sem stagger */
+  .ctto-row-act {
+    opacity: 1 !important;
+    transform: none !important;
+    width: 34px;
+    height: 34px;
+  }
+
+  /* Mobile: só ligar + editar */
+  .ctto-row-wa,
+  .ctto-row-mail,
+  .ctto-row-del { display: none; }
+
+  .ctto-row-chevron { opacity: 0.4; }
+  .ctto-row:hover .ctto-row-chevron,
+  .ctto-row.active .ctto-row-chevron { opacity: 0.75; }
 }
 
 /* ── Kanban view ── */

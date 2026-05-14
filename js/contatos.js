@@ -340,10 +340,20 @@ const Contatos = (() => {
     `;
   }
 
-  /* ══ View: LISTA (Apple-style rows) ══ */
+  /* ══ View: LISTA — colunas horizontais Premium ══ */
   function renderLista(el, lista) {
     el.innerHTML = `
       <div class="ctto-list-view">
+        <div class="ctto-list-head" aria-hidden="true">
+          <div></div>
+          <div class="ctto-lh-col">Contato</div>
+          <div class="ctto-lh-col">Função · Empresa</div>
+          <div class="ctto-lh-col">Telefone</div>
+          <div class="ctto-lh-col">E-mail</div>
+          <div class="ctto-lh-col">Contextos</div>
+          <div></div>
+          <div></div>
+        </div>
         ${lista.map(c => listRowHTML(c)).join('')}
       </div>
     `;
@@ -353,36 +363,38 @@ const Contatos = (() => {
     const cor      = avatarCor(c.nome);
     const ini      = (c.nome || '?')[0].toUpperCase();
     const tel      = (c.telefone || '').replace(/\D/g, '');
-    const sub      = [c.cargo, c.empresa].filter(Boolean).join(' · ');
+    const cargo    = [c.cargo, c.empresa].filter(Boolean).join(' · ');
     const ctxs     = (c.contextos || []).slice(0, 3);
     const aniLabel = proximoAniversario(c.aniversario);
-
-    // Line 2: contact details — phone (green) + email (blue)
-    const line2 = [];
-    if (sub)         line2.push(`<span class="ctto-ri-sub">${esc(sub)}</span>`);
-    if (c.telefone)  line2.push(`<span class="ctto-ri-tel">${Icons.html('phone', 10)} ${esc(c.telefone)}</span>`);
-    if (c.email)     line2.push(`<span class="ctto-ri-email">${Icons.html('mail', 10)} ${esc(c.email)}</span>`);
+    const mobSub   = [cargo, c.telefone].filter(Boolean).join(' · ');
 
     return `
       <div class="ctto-row ${st.ativoId === c.id ? 'active' : ''}"
            data-contact-id="${esc(c.id)}"
            onclick="Contatos.abrirDetalhe('${esc(c.id)}')">
 
-        <div class="ctto-avatar ctto-av-row" style="--av-cor:${cor}">${ini}</div>
+        <div class="ctto-av-cell">
+          <div class="ctto-avatar ctto-av-row" style="--av-cor:${cor}">${ini}</div>
+        </div>
 
-        <div class="ctto-row-body">
-          <div class="ctto-row-line1">
-            <span class="ctto-row-nome">${esc(c.nome)}</span>
-            ${ctxs.length || aniLabel ? `
-              <div class="ctto-row-tags">
-                ${ctxs.map(id => ctxBadge(id)).join('')}
-                ${aniLabel ? `<span class="ctto-chip-bday">${Icons.html('cake', 9)} ${aniLabel}</span>` : ''}
-              </div>` : ''}
-          </div>
-          ${line2.length ? `
-            <div class="ctto-row-line2">
-              ${line2.map((p, i) => i < line2.length - 1 ? p + '<span class="ctto-ri-dot">·</span>' : p).join('')}
-            </div>` : ''}
+        <div class="ctto-col-identity">
+          <span class="ctto-col-nome">${esc(c.nome)}</span>
+          ${mobSub ? `<span class="ctto-col-mob-sub">${esc(mobSub)}</span>` : ''}
+        </div>
+
+        <div class="ctto-col-cargo">${cargo ? esc(cargo) : ''}</div>
+
+        <div class="ctto-col-tel">
+          ${c.telefone ? `<span class="ctto-ci-tel">${Icons.html('phone', 11)} ${esc(c.telefone)}</span>` : ''}
+        </div>
+
+        <div class="ctto-col-email">
+          ${c.email ? `<span class="ctto-ci-email">${Icons.html('mail', 11)} ${esc(c.email)}</span>` : ''}
+        </div>
+
+        <div class="ctto-col-tags">
+          ${ctxs.map(id => ctxBadge(id)).join('')}
+          ${aniLabel ? `<span class="ctto-chip-bday">${Icons.html('cake', 9)} ${aniLabel}</span>` : ''}
         </div>
 
         <div class="ctto-row-acts" onclick="event.stopPropagation()">
