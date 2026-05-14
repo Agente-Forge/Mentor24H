@@ -748,10 +748,11 @@ const DB = (() => {
       delete raw.model;
     }
 
-    /* Migração: systemPrompt antigo padrão → novo (com contexto).
-       Só substitui se for o EXATO antigo. Customizações do usuário ficam intactas. */
+    /* Migração: systemPrompt antigo padrão → novo (com contexto + regras anti-cálculo).
+       Só substitui se for um dos prompts padrão antigos. Customizações ficam intactas. */
     const SYSTEM_PROMPT_V1 = 'Você é o Mentor24h, um assistente pessoal e empresarial. Responda sempre em português brasileiro.';
-    if (raw.systemPrompt === SYSTEM_PROMPT_V1) {
+    const SYSTEM_PROMPT_V2_PREFIX = 'Você é o Mentor24h, assistente pessoal e empresarial do usuário. Você tem acesso aos dados';
+    if (raw.systemPrompt === SYSTEM_PROMPT_V1 || (raw.systemPrompt || '').startsWith(SYSTEM_PROMPT_V2_PREFIX)) {
       delete raw.systemPrompt;
     }
 
@@ -759,7 +760,7 @@ const DB = (() => {
       provider: 'openrouter',
       apiKeys: {},
       models: {},
-      systemPrompt: 'Você é o Mentor24h, assistente pessoal e empresarial do usuário. Você tem acesso aos dados do app dele (contas, vendas, tarefas, metas, agenda) e deve usar esses dados para responder perguntas como "quanto devo este mês", "quanto já paguei", "quais tarefas tenho hoje", etc. Responda sempre em português brasileiro, de forma direta e prática. Quando citar valores monetários, use o formato R$ X,XX. Se o usuário pedir uma ação (criar conta, registrar venda), explique o passo a passo de onde clicar no app.',
+      systemPrompt: 'Você é o Mentor24h, assistente pessoal e empresarial do usuário. A cada mensagem você recebe um snapshot com os dados reais do app dele (contas, vendas, tarefas, metas, agenda). REGRAS CRÍTICAS: (1) Os valores no snapshot JÁ ESTÃO CALCULADOS — NUNCA some, subtraia, multiplique ou divida eles. Apenas copie os números exatos. (2) Quando a pergunta corresponder a uma "RESPOSTA DIRETA" no contexto, use exatamente aquela resposta. (3) "Quanto devo este mês" = "Ainda a pagar no mês" (NÃO é total original menos pagas — isso já foi calculado pra você). (4) Se a informação não estiver no contexto, responda "Essa informação ainda não está cadastrada no app". (5) Responda em português brasileiro, de forma direta. (6) Valores em formato R$ X,XX (vírgula como decimal). (7) Se o usuário pedir uma ação (criar conta, registrar venda), explique o passo a passo de onde clicar no app.',
     }, raw);
 
     /* Getters convenientes do provider atual (usado pelas funções call*) */

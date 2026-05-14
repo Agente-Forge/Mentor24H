@@ -395,9 +395,10 @@ const LLM = (() => {
   }
 
   /* ═══════════════════════════════════════════════════════════
-     CONTEXTO DO USUÁRIO — Snapshot dos dados do app
-     A IA recebe este snapshot a cada mensagem para responder
-     com base nos dados reais (contas, vendas, tarefas, etc).
+     CONTEXTO DO USUÁRIO — Snapshot pré-computado dos dados do app
+     A IA recebe este snapshot a cada mensagem. Todos os valores
+     numéricos JÁ ESTÃO CALCULADOS — a IA não deve fazer aritmética.
+     Inclui "Respostas Diretas" para perguntas comuns.
   ═══════════════════════════════════════════════════════════ */
   function buildUserContext() {
     const cfg = DB.getConfig();
@@ -407,11 +408,36 @@ const LLM = (() => {
     const daquiSeteDias = new Date(hoje.getTime() + 7 * 86400000).toISOString().slice(0, 10);
     const inicioMes = mesAtual + '-01';
 
+    /* Coletor de "Respostas Diretas" — dicionário de pergunta → resposta literal.
+       A IA é instruída a usar essas respostas quando a pergunta corresponder. */
+    const respostasDiretas = [];
+
     const linhas = [];
-    linhas.push('═══ DADOS ATUAIS DO USUÁRIO ═══');
-    linhas.push(`Usuário: ${cfg.nomeUsuario || 'Você'}`);
-    linhas.push(`Data: ${hojeISO} (${hoje.toLocaleDateString('pt-BR', { weekday: 'long' })})`);
-    linhas.push(`Moeda: ${cfg.moeda || 'BRL'}`);
+    linhas.push('═══════════════════════════════════════════════════════════');
+    linhas.push('  CONTEXTO DO USUÁRIO — DADOS REAIS DO APP MENTOR24H');
+    linhas.push('═══════════════════════════════════════════════════════════');
+    linhas.push('');
+    linhas.push('⚠️  INSTRUÇÕES OBRIGATÓRIAS PARA O ASSISTENTE:');
+    linhas.push('1. Todos os valores numéricos abaixo JÁ ESTÃO CALCULADOS.');
+    linhas.push('   NÃO some, subtraia, multiplique ou divida esses valores.');
+    linhas.push('   Apenas COPIE os números exatos como apresentados.');
+    linhas.push('2. Quando a pergunta do usuário corresponder a uma "RESPOSTA');
+    linhas.push('   DIRETA" listada no final, USE exatamente essa resposta.');
+    linhas.push('3. Termos importantes (use sempre estas definições):');
+    linhas.push('   • "Total ORIGINAL do mês" = soma de TODAS as contas com');
+    linhas.push('     vencimento no mês (pagas + pendentes + atrasadas).');
+    linhas.push('   • "Já pago no mês" = soma APENAS das contas com status=paga.');
+    linhas.push('   • "Ainda a pagar no mês" = soma das contas com status pendente');
+    linhas.push('     ou atrasada que vencem no mês.');
+    linhas.push('   • "Devo este mês" = mesmo que "Ainda a pagar no mês".');
+    linhas.push('4. Se o dado não estiver no contexto, diga "não consta no app".');
+    linhas.push('5. Datas no formato YYYY-MM-DD. Valores em R$ (Real brasileiro).');
+    linhas.push('');
+    linhas.push('── DADOS DO USUÁRIO ──');
+    linhas.push(`Nome: ${cfg.nomeUsuario || 'Você'}`);
+    linhas.push(`Data atual: ${hojeISO} (${hoje.toLocaleDateString('pt-BR', { weekday: 'long' })})`);
+    linhas.push(`Mês de referência: ${mesAtual}`);
+    linhas.push(`Moeda do app: ${cfg.moeda || 'BRL'}`);
     linhas.push('');
 
     /* ─── FINANCEIRO ─── */
@@ -419,49 +445,92 @@ const LLM = (() => {
       const contas = (DB.getContas && DB.getContas()) || [];
       const txs = (DB.getTxs && DB.getTxs()) || [];
 
-      /* Schema correto: c.dataVencimento, c.descricao, c.valor, c.status */
-      const contasMes = contas.filter(c => (c.dataVencimento || '').startsWith(mesAtual));
-      const pendentes = contas.filter(c => c.status === 'pendente' || c.status === 'atrasada');
-      const pendentesMes = contasMes.filter(c => c.status === 'pendente' || c.status === 'atrasada');
-      const pagasMes  = contasMes.filter(c => c.status === 'paga');
-      const totalPendenteMes = pendentesMes.reduce((s, c) => s + (c.valor || 0), 0);
+      /* Schema: c.dataVencimento (YYYY-MM-DD), c.descricao, c.valor, c.status */
+      const contasMes      = contas.filter(c => (c.dataVencimento || '').startsWith(mesAtual));
+      const pendentesMes   = contasMes.filter(c => c.status === 'pendente' || c.status === 'atrasada');
+      const pagasMes       = contasMes.filter(c => c.status === 'paga');
+      const atrasadasMes   = contasMes.filter(c => c.status === 'atrasada');
+
+      const totalOriginalMes = contasMes.reduce((s, c) => s + (c.valor || 0), 0);
       const totalPagoMes     = pagasMes.reduce((s, c) => s + (c.valor || 0), 0);
-      const totalPendenteGeral = pendentes.reduce((s, c) => s + (c.valor || 0), 0);
-      const atrasadas = contas.filter(c => c.status === 'atrasada');
-      const totalAtrasado = atrasadas.reduce((s, c) => s + (c.valor || 0), 0);
+      const totalAindaPagar  = pendentesMes.reduce((s, c) => s + (c.valor || 0), 0);
+      const totalAtrasadoMes = atrasadasMes.reduce((s, c) => s + (c.valor || 0), 0);
+
+      const pendentesTodas    = contas.filter(c => c.status === 'pendente' || c.status === 'atrasada');
+      const totalPendenteGeral = pendentesTodas.reduce((s, c) => s + (c.valor || 0), 0);
 
       const txMes = txs.filter(t => (t.data || '').startsWith(mesAtual));
       const receitas = txMes.filter(t => t.tipo === 'entrada' || t.tipo === 'receita').reduce((s, t) => s + (t.valor || 0), 0);
-      const despesas = txMes.filter(t => t.tipo === 'saida' || t.tipo === 'despesa').reduce((s, t) => s + (t.valor || 0), 0);
+      const despesas = txMes.filter(t => t.tipo === 'saida'   || t.tipo === 'despesa').reduce((s, t) => s + (t.valor || 0), 0);
+      const saldoEstimado = (cfg.saldoInicial || 0) + receitas - despesas;
 
-      linhas.push('── FINANCEIRO ──');
-      linhas.push(`Total de contas cadastradas: ${contas.length}`);
+      linhas.push('── FINANCEIRO (mês de referência: ' + mesAtual + ') ──');
+      linhas.push(`Quantidade total de contas cadastradas no app: ${contas.length}`);
+
       if (contas.length === 0) {
         linhas.push('(Nenhuma conta cadastrada ainda. Para criar, acesse a página "Contas".)');
+        respostasDiretas.push('P: Quanto eu devo este mês?');
+        respostasDiretas.push('R: Nenhuma conta cadastrada ainda. Acesse "Contas" para criar.');
       } else {
-        linhas.push(`Saldo inicial configurado: ${fmtBRL(cfg.saldoInicial || 0)}`);
-        linhas.push(`Receitas registradas este mês: ${fmtBRL(receitas)} (${txMes.filter(t => t.tipo === 'entrada' || t.tipo === 'receita').length} lançamentos)`);
-        linhas.push(`Despesas registradas este mês: ${fmtBRL(despesas)} (${txMes.filter(t => t.tipo === 'saida' || t.tipo === 'despesa').length} lançamentos)`);
-        linhas.push(`Saldo estimado: ${fmtBRL((cfg.saldoInicial || 0) + receitas - despesas)}`);
+        /* SUMÁRIO INEQUÍVOCO — cada métrica com rótulo único */
         linhas.push('');
-        linhas.push(`Contas a pagar este mês (${mesAtual}): ${pendentesMes.length} (total ${fmtBRL(totalPendenteMes)})`);
-        linhas.push(`Contas já pagas este mês: ${pagasMes.length} (total ${fmtBRL(totalPagoMes)})`);
-        linhas.push(`Total de contas pendentes (todas datas): ${pendentes.length} (${fmtBRL(totalPendenteGeral)})`);
-        if (atrasadas.length) {
-          linhas.push(`⚠ Contas atrasadas: ${atrasadas.length} (${fmtBRL(totalAtrasado)})`);
+        linhas.push(`Contas com vencimento no mês ${mesAtual}: ${contasMes.length}`);
+        linhas.push(`  • TOTAL ORIGINAL do mês (pagas + pendentes): ${fmtBRL(totalOriginalMes)}`);
+        linhas.push(`  • JÁ PAGAS no mês: ${pagasMes.length} contas, soma ${fmtBRL(totalPagoMes)}`);
+        linhas.push(`  • AINDA A PAGAR no mês (pendentes+atrasadas): ${pendentesMes.length} contas, soma ${fmtBRL(totalAindaPagar)}`);
+        if (atrasadasMes.length) {
+          linhas.push(`  • DESTAS, atrasadas (venceram antes de hoje): ${atrasadasMes.length} contas, ${fmtBRL(totalAtrasadoMes)}`);
         }
+        linhas.push('');
+        linhas.push(`Saldo inicial configurado: ${fmtBRL(cfg.saldoInicial || 0)}`);
+        linhas.push(`Receitas lançadas em ${mesAtual}: ${fmtBRL(receitas)} (${txMes.filter(t => t.tipo === 'entrada' || t.tipo === 'receita').length} lançamentos)`);
+        linhas.push(`Despesas lançadas em ${mesAtual}: ${fmtBRL(despesas)} (${txMes.filter(t => t.tipo === 'saida' || t.tipo === 'despesa').length} lançamentos)`);
+        linhas.push(`Saldo estimado (saldo inicial + receitas − despesas): ${fmtBRL(saldoEstimado)}`);
+        linhas.push('');
+        linhas.push(`Pendências (qualquer data, não só este mês): ${pendentesTodas.length} contas, soma ${fmtBRL(totalPendenteGeral)}`);
 
-        const proximas = pendentes
+        /* Detalhamento das contas pendentes (até 15) */
+        const proximas = pendentesTodas
           .filter(c => c.dataVencimento)
           .sort((a, b) => a.dataVencimento.localeCompare(b.dataVencimento))
-          .slice(0, 10);
+          .slice(0, 15);
         if (proximas.length) {
           linhas.push('');
-          linhas.push('Próximas contas a vencer:');
+          linhas.push('Lista de contas a vencer (mais próximas primeiro):');
           proximas.forEach(c => {
-            linhas.push(`  • ${c.descricao || 'Conta'} — ${fmtBRL(c.valor)} (vence ${c.dataVencimento}) [${c.status}]`);
+            linhas.push(`  • ${c.descricao || 'Conta'} — ${fmtBRL(c.valor)} — vence ${c.dataVencimento} — status: ${c.status}`);
           });
         }
+
+        /* Detalhamento das contas já pagas no mês (até 10) */
+        if (pagasMes.length) {
+          linhas.push('');
+          linhas.push(`Lista das ${pagasMes.length} contas já pagas em ${mesAtual}:`);
+          pagasMes.slice(0, 10).forEach(c => {
+            linhas.push(`  • ${c.descricao || 'Conta'} — ${fmtBRL(c.valor)} — pago em ${c.dataPagamento || 's/data'}`);
+          });
+        }
+
+        /* Respostas diretas (pré-calculadas) para perguntas comuns */
+        respostasDiretas.push(`P: Quanto eu devo este mês? / Quanto falta pagar este mês? / Quanto ainda preciso pagar?`);
+        respostasDiretas.push(`R: ${fmtBRL(totalAindaPagar)} (${pendentesMes.length} ${pendentesMes.length === 1 ? 'conta pendente' : 'contas pendentes'} em ${mesAtual}).`);
+        respostasDiretas.push('');
+        respostasDiretas.push(`P: Quanto eu já paguei este mês?`);
+        respostasDiretas.push(`R: ${fmtBRL(totalPagoMes)} (${pagasMes.length} ${pagasMes.length === 1 ? 'conta paga' : 'contas pagas'} em ${mesAtual}).`);
+        respostasDiretas.push('');
+        respostasDiretas.push(`P: Qual o total ORIGINAL de contas deste mês? / Quanto era o total a pagar?`);
+        respostasDiretas.push(`R: ${fmtBRL(totalOriginalMes)} (${contasMes.length} ${contasMes.length === 1 ? 'conta' : 'contas'} com vencimento em ${mesAtual}, somando pagas e pendentes).`);
+        respostasDiretas.push('');
+        respostasDiretas.push(`P: Tenho contas atrasadas?`);
+        if (atrasadasMes.length) {
+          respostasDiretas.push(`R: Sim, ${atrasadasMes.length} ${atrasadasMes.length === 1 ? 'conta atrasada' : 'contas atrasadas'}, somando ${fmtBRL(totalAtrasadoMes)}.`);
+        } else {
+          respostasDiretas.push('R: Não, nenhuma conta atrasada este mês.');
+        }
+        respostasDiretas.push('');
+        respostasDiretas.push(`P: Como está meu saldo? / Qual meu saldo atual?`);
+        respostasDiretas.push(`R: Saldo estimado: ${fmtBRL(saldoEstimado)} (saldo inicial ${fmtBRL(cfg.saldoInicial || 0)} + receitas ${fmtBRL(receitas)} − despesas ${fmtBRL(despesas)}).`);
+        respostasDiretas.push('');
       }
       linhas.push('');
     } catch (e) { /* coleção pode não existir */ }
@@ -493,48 +562,76 @@ const LLM = (() => {
         linhas.push('(Nenhum produto, venda ou cliente cadastrado ainda.)');
       } else {
         const ativos = produtos.filter(p => p.status === 'ativo' || !p.status);
-        /* Schema correto: p.estoqueMinimo (não estoqueMin) */
         const baixoEstoque = produtos.filter(p => (p.estoque || 0) > 0 && (p.estoque || 0) <= (p.estoqueMinimo || 0));
         const semEstoque = produtos.filter(p => (p.estoque || 0) === 0);
 
-        const vendasMes = vendas.filter(v => (v.data || '').startsWith(mesAtual));
+        const vendasMes      = vendas.filter(v => (v.data || '').startsWith(mesAtual));
         const totalVendasMes = vendasMes.reduce((s, v) => s + (v.total || 0), 0);
-        const vendasPagas = vendasMes.filter(v => v.status === 'paga');
+        const vendasPagas    = vendasMes.filter(v => v.status === 'paga');
+        const totalPagasMes  = vendasPagas.reduce((s, v) => s + (v.total || 0), 0);
         const vendasPendentes = vendasMes.filter(v => v.status === 'pendente' || v.status === 'fiado');
         const totalPendenteVendas = vendasPendentes.reduce((s, v) => s + (v.total || 0), 0);
 
-        linhas.push(`Produtos cadastrados: ${produtos.length} (${ativos.length} ativos)`);
+        const vendasHoje = vendas.filter(v => v.data === hojeISO);
+        const totalVendasHoje = vendasHoje.reduce((s, v) => s + (v.total || 0), 0);
+
+        linhas.push(`Produtos: ${produtos.length} total (${ativos.length} ativos)`);
         if (baixoEstoque.length) {
-          linhas.push(`⚠ Produtos com estoque baixo: ${baixoEstoque.length}`);
+          linhas.push(`⚠ ${baixoEstoque.length} produto(s) com ESTOQUE BAIXO:`);
           baixoEstoque.slice(0, 5).forEach(p => {
-            linhas.push(`  • ${p.nome}: ${p.estoque} unidades (mín. ${p.estoqueMinimo})`);
+            linhas.push(`  • ${p.nome}: ${p.estoque} unidades (mínimo configurado: ${p.estoqueMinimo})`);
           });
         }
         if (semEstoque.length) {
-          linhas.push(`⚠ Produtos sem estoque: ${semEstoque.length}`);
+          linhas.push(`⚠ ${semEstoque.length} produto(s) SEM ESTOQUE:`);
           semEstoque.slice(0, 5).forEach(p => linhas.push(`  • ${p.nome}`));
         }
-        linhas.push(`Vendas este mês: ${vendasMes.length} (total ${fmtBRL(totalVendasMes)})`);
-        if (vendasMes.length) {
-          linhas.push(`  → Pagas: ${vendasPagas.length}`);
-          linhas.push(`  → Pendentes/fiado: ${vendasPendentes.length} (${fmtBRL(totalPendenteVendas)})`);
+        linhas.push('');
+        linhas.push(`Vendas em ${mesAtual}: ${vendasMes.length} vendas, total ${fmtBRL(totalVendasMes)}`);
+        linhas.push(`  • TOTAL JÁ RECEBIDO em vendas pagas: ${fmtBRL(totalPagasMes)} (${vendasPagas.length} vendas)`);
+        linhas.push(`  • TOTAL A RECEBER em vendas pendentes/fiado: ${fmtBRL(totalPendenteVendas)} (${vendasPendentes.length} vendas)`);
+        linhas.push(`Vendas de hoje (${hojeISO}): ${vendasHoje.length} vendas, total ${fmtBRL(totalVendasHoje)}`);
 
-          /* Top 5 vendas mais recentes */
+        if (vendasMes.length) {
           const recentes = vendasMes.slice().sort((a, b) => (b.data || '').localeCompare(a.data || '')).slice(0, 5);
-          linhas.push('Vendas recentes:');
+          linhas.push('Vendas mais recentes:');
           recentes.forEach(v => {
-            linhas.push(`  • ${v.data} — ${v.clienteNome || 'Cliente'} — ${fmtBRL(v.total)} [${v.status}]`);
+            linhas.push(`  • ${v.data} — ${v.clienteNome || 'Cliente'} — ${fmtBRL(v.total)} — status: ${v.status}`);
           });
         }
-        linhas.push(`Clientes cadastrados: ${clientes.length}`);
 
+        linhas.push('');
+        linhas.push(`Clientes cadastrados: ${clientes.length}`);
         const clientesDevendo = clientes.filter(c => (c.saldoDevedor || 0) > 0);
+        const totalReceberClientes = clientesDevendo.reduce((s, c) => s + (c.saldoDevedor || 0), 0);
         if (clientesDevendo.length) {
-          linhas.push(`Clientes com saldo devedor: ${clientesDevendo.length}`);
+          linhas.push(`Clientes com saldo devedor: ${clientesDevendo.length} clientes, total a receber ${fmtBRL(totalReceberClientes)}`);
           clientesDevendo.slice(0, 5).forEach(c => {
             linhas.push(`  • ${c.nome}: ${fmtBRL(c.saldoDevedor)}`);
           });
         }
+
+        /* Respostas Diretas — Negócio */
+        respostasDiretas.push(`P: Qual o resumo das vendas deste mês? / Quanto vendi este mês?`);
+        respostasDiretas.push(`R: ${vendasMes.length} ${vendasMes.length === 1 ? 'venda' : 'vendas'} em ${mesAtual}, total ${fmtBRL(totalVendasMes)} (${fmtBRL(totalPagasMes)} já recebido, ${fmtBRL(totalPendenteVendas)} a receber).`);
+        respostasDiretas.push('');
+        respostasDiretas.push(`P: Quanto vendi hoje?`);
+        respostasDiretas.push(`R: ${vendasHoje.length} ${vendasHoje.length === 1 ? 'venda' : 'vendas'} hoje (${hojeISO}), total ${fmtBRL(totalVendasHoje)}.`);
+        respostasDiretas.push('');
+        respostasDiretas.push(`P: Quais clientes estão me devendo? / Quem está em débito?`);
+        if (clientesDevendo.length) {
+          respostasDiretas.push(`R: ${clientesDevendo.length} ${clientesDevendo.length === 1 ? 'cliente' : 'clientes'} com saldo devedor, total ${fmtBRL(totalReceberClientes)} a receber.`);
+        } else {
+          respostasDiretas.push('R: Nenhum cliente em débito no momento.');
+        }
+        respostasDiretas.push('');
+        respostasDiretas.push(`P: Tenho produtos com estoque baixo?`);
+        if (baixoEstoque.length || semEstoque.length) {
+          respostasDiretas.push(`R: Sim — ${baixoEstoque.length} com estoque baixo e ${semEstoque.length} sem estoque.`);
+        } else {
+          respostasDiretas.push('R: Não, todos os produtos têm estoque acima do mínimo.');
+        }
+        respostasDiretas.push('');
       }
       linhas.push('');
     } catch (e) {}
@@ -542,55 +639,108 @@ const LLM = (() => {
     /* ─── PESSOAL ─── */
     try {
       const tarefas = (DB.getTarefas && DB.getTarefas()) || [];
-      const agenda = (DB.getAgenda && DB.getAgenda()) || [];
-      const meds = (DB.getMedicamentos && DB.getMedicamentos()) || [];
+      const agenda  = (DB.getAgenda   && DB.getAgenda())   || [];
+      const meds    = (DB.getMedicamentos && DB.getMedicamentos()) || [];
 
-      /* Schema correto: t.data (não t.prazo!) */
       const tarefasPendentes = tarefas.filter(t => t.status !== 'concluida');
-      const tarefasHoje = tarefasPendentes.filter(t => t.data === hojeISO);
+      const tarefasConcluidas = tarefas.filter(t => t.status === 'concluida');
+      const tarefasHoje      = tarefasPendentes.filter(t => t.data === hojeISO);
       const tarefasAtrasadas = tarefasPendentes.filter(t => t.data && t.data < hojeISO);
-      const tarefasSemPrazo = tarefasPendentes.filter(t => !t.data);
+      const tarefasSemPrazo  = tarefasPendentes.filter(t => !t.data);
 
       const eventosSemana = agenda.filter(e => e.data >= hojeISO && e.data <= daquiSeteDias);
-      const eventosHoje = agenda.filter(e => e.data === hojeISO);
+      const eventosHoje   = agenda.filter(e => e.data === hojeISO);
 
       linhas.push('── PESSOAL ──');
       if (!tarefas.length && !agenda.length && !meds.length) {
         linhas.push('(Nenhuma tarefa, evento ou medicamento cadastrado ainda.)');
       } else {
-        linhas.push(`Tarefas: ${tarefas.length} total, ${tarefasPendentes.length} pendentes`);
-        linhas.push(`  → Para hoje (${hojeISO}): ${tarefasHoje.length}`);
-        linhas.push(`  → Atrasadas: ${tarefasAtrasadas.length}`);
-        linhas.push(`  → Sem prazo: ${tarefasSemPrazo.length}`);
+        linhas.push(`Tarefas totais: ${tarefas.length} (${tarefasPendentes.length} pendentes + ${tarefasConcluidas.length} concluídas)`);
+        linhas.push(`  • Tarefas para HOJE (${hojeISO}): ${tarefasHoje.length}`);
+        linhas.push(`  • Tarefas ATRASADAS (vencidas antes de hoje): ${tarefasAtrasadas.length}`);
+        linhas.push(`  • Tarefas SEM PRAZO definido: ${tarefasSemPrazo.length}`);
+
         if (tarefasAtrasadas.length) {
-          linhas.push('Tarefas atrasadas:');
+          linhas.push('Lista de tarefas atrasadas:');
           tarefasAtrasadas.slice(0, 5).forEach(t => {
-            linhas.push(`  • ${t.titulo} (era ${t.data}) [${t.prioridade || 'normal'}]`);
+            linhas.push(`  • ${t.titulo} (era ${t.data}) [prioridade: ${t.prioridade || 'normal'}]`);
           });
         }
         if (tarefasHoje.length) {
-          linhas.push('Tarefas de hoje:');
+          linhas.push('Lista de tarefas de hoje:');
           tarefasHoje.slice(0, 5).forEach(t => {
-            linhas.push(`  • ${t.titulo}${t.hora ? ' às ' + t.hora : ''} [${t.prioridade || 'normal'}]`);
+            linhas.push(`  • ${t.titulo}${t.hora ? ' às ' + t.hora : ''} [prioridade: ${t.prioridade || 'normal'}]`);
           });
         }
         if (eventosHoje.length) {
-          linhas.push(`Eventos de hoje (${eventosHoje.length}):`);
+          linhas.push(`Eventos de HOJE (${eventosHoje.length}):`);
           eventosHoje.forEach(e => linhas.push(`  • ${e.hora || ''} — ${e.titulo}`));
         }
         if (eventosSemana.length) {
-          linhas.push(`Eventos nos próximos 7 dias: ${eventosSemana.length}`);
+          linhas.push(`Eventos nos próximos 7 dias (até ${daquiSeteDias}): ${eventosSemana.length}`);
           eventosSemana.slice(0, 8).forEach(e => {
             linhas.push(`  • ${e.data} ${e.hora || ''} — ${e.titulo}`);
           });
         }
         if (meds.length) linhas.push(`Medicamentos cadastrados: ${meds.length}`);
+
+        /* Respostas Diretas — Pessoal */
+        respostasDiretas.push(`P: Quais tarefas tenho hoje?`);
+        if (tarefasHoje.length) {
+          respostasDiretas.push(`R: ${tarefasHoje.length} ${tarefasHoje.length === 1 ? 'tarefa' : 'tarefas'} para hoje:`);
+          tarefasHoje.slice(0, 5).forEach(t => {
+            respostasDiretas.push(`   • ${t.titulo}${t.hora ? ' às ' + t.hora : ''}`);
+          });
+        } else {
+          respostasDiretas.push('R: Nenhuma tarefa cadastrada para hoje.');
+        }
+        respostasDiretas.push('');
+        respostasDiretas.push(`P: Tenho tarefas atrasadas?`);
+        if (tarefasAtrasadas.length) {
+          respostasDiretas.push(`R: Sim, ${tarefasAtrasadas.length} ${tarefasAtrasadas.length === 1 ? 'tarefa atrasada' : 'tarefas atrasadas'}.`);
+        } else {
+          respostasDiretas.push('R: Não, nenhuma tarefa atrasada.');
+        }
+        respostasDiretas.push('');
+        respostasDiretas.push(`P: Quais eventos tenho hoje? / O que tenho na agenda hoje?`);
+        if (eventosHoje.length) {
+          respostasDiretas.push(`R: ${eventosHoje.length} ${eventosHoje.length === 1 ? 'evento' : 'eventos'} hoje: ${eventosHoje.map(e => `${e.hora || ''} ${e.titulo}`).join('; ')}.`);
+        } else {
+          respostasDiretas.push('R: Nenhum evento cadastrado para hoje.');
+        }
+        respostasDiretas.push('');
       }
       linhas.push('');
     } catch (e) {}
 
-    linhas.push('═══ FIM DOS DADOS ═══');
-    linhas.push('Instruções: use estes dados para responder perguntas sobre o app. Valores são reais e atualizados em tempo real. Se não encontrar uma informação aqui, diga que ela ainda não foi cadastrada.');
+    /* ─── METAS / CAIXINHAS — Respostas Diretas ─── */
+    try {
+      const metas = (DB.getMetas && DB.getMetas()) || [];
+      if (metas.length) {
+        respostasDiretas.push(`P: Como estão minhas metas? / Resumo das caixinhas?`);
+        respostasDiretas.push(`R: Você tem ${metas.length} ${metas.length === 1 ? 'meta' : 'metas'}:`);
+        metas.forEach(m => {
+          const valorAtual = (DB.getValorMeta && DB.getValorMeta(m.id)) || 0;
+          const alvo = m.valorAlvo || 0;
+          const pct = alvo ? Math.round(valorAtual / alvo * 100) : 0;
+          respostasDiretas.push(`   • ${m.nome}: ${fmtBRL(valorAtual)} de ${fmtBRL(alvo)} (${pct}%)`);
+        });
+        respostasDiretas.push('');
+      }
+    } catch (e) {}
+
+    /* ═══ RESPOSTAS DIRETAS A PERGUNTAS COMUNS ═══ */
+    if (respostasDiretas.length) {
+      linhas.push('═══════════════════════════════════════════════════════════');
+      linhas.push('  RESPOSTAS DIRETAS — Use EXATAMENTE estas respostas');
+      linhas.push('  quando a pergunta do usuário corresponder.');
+      linhas.push('═══════════════════════════════════════════════════════════');
+      respostasDiretas.forEach(l => linhas.push(l));
+      linhas.push('');
+    }
+
+    linhas.push('═══ FIM DO CONTEXTO ═══');
+    linhas.push('REGRA FINAL: Se a pergunta combinar com uma "RESPOSTA DIRETA" acima, copie a resposta literalmente. Se não combinar, use os dados desta seção sem fazer cálculos próprios. Se a informação não estiver aqui, responda "Essa informação ainda não está no app".');
 
     return linhas.join('\n');
   }
