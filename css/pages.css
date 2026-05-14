@@ -3060,7 +3060,13 @@
 .ctto-list-view {
   display: flex;
   flex-direction: column;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
+
+/* Largura mínima para manter colunas legíveis */
+.ctto-list-head,
+.ctto-row { min-width: 680px; }
 
 /* Header sticky com labels de colunas */
 .ctto-list-head {
