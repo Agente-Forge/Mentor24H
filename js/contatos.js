@@ -187,7 +187,7 @@ const Contatos = (() => {
           </div>
         </div>
 
-        <!-- Linha 2: view selector + ações mobile (desktop: inline após row 1) -->
+        <!-- Linha 2: view selector (full-width no mobile, inline no desktop) -->
         <div class="ctto-tb-r2">
           <div class="ctto-seg-ctrl" role="group" aria-label="Modo de visualização">
             <button class="ctto-seg-btn ${st.view === 'cards'  ? 'active' : ''}"
@@ -209,21 +209,23 @@ const Contatos = (() => {
               ${Icons.html('columns', 13)} <span>Kanban</span>
             </button>
           </div>
+        </div>
 
-          <!-- Mobile only: ações compactas + botão novo -->
+        <!-- Linha 3: ações secundárias + novo (mobile only) -->
+        <div class="ctto-tb-r3">
           <div class="ctto-tb-acts-mobile">
-            <button class="btn btn-ghost btn-icon" onclick="Contatos.abrirImport()"
-                    title="Importar contatos">
-              ${Icons.html('upload', 15)}
+            <button class="btn btn-ghost btn-sm" onclick="Contatos.abrirImport()"
+                    title="Importar contatos (.vcf, .csv, Google Contacts)">
+              ${Icons.html('upload', 13)} Importar
             </button>
-            <button class="btn btn-ghost btn-icon ctto-export-btn" onclick="Contatos.toggleExportMenu(event)"
+            <button class="btn btn-ghost btn-sm ctto-export-btn" onclick="Contatos.toggleExportMenu(event)"
                     title="Exportar contatos">
-              ${Icons.html('download', 15)}
-            </button>
-            <button class="btn btn-primary ctto-novo-mobile" onclick="Contatos.abrirForm(null)">
-              ${Icons.html('plus', 14)} Novo
+              ${Icons.html('download', 13)} Exportar ${Icons.html('chevron-down', 10)}
             </button>
           </div>
+          <button class="btn btn-primary ctto-novo-mobile" onclick="Contatos.abrirForm(null)">
+            ${Icons.html('user-plus', 14)} Novo contato
+          </button>
         </div>
 
       </div>

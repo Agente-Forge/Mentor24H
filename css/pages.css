@@ -2740,7 +2740,14 @@
   flex-shrink: 0;
 }
 
-/* ── Ações mobile (inline na row 2) ── */
+/* ── Row 3: ações mobile (Importar / Exportar / Novo) ── */
+.ctto-tb-r3 {
+  display: none; /* hidden on desktop — shown on mobile via media query */
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-2);
+}
+
 .ctto-tb-acts-mobile {
   display: flex;
   align-items: center;
@@ -2753,7 +2760,7 @@
   align-items: center;
   gap: var(--s-1);
   white-space: nowrap;
-  padding: var(--s-2) var(--s-3);
+  flex-shrink: 0;
 }
 
 /* ── Segmented control (view toggle) ── */
@@ -2822,6 +2829,9 @@
     gap: var(--s-2);
   }
 
+  /* Row 3 não existe no desktop — ações ficam na Row 1 (ctto-tb-acts-desktop) */
+  .ctto-tb-r3 { display: none !important; }
+
   .ctto-sidebar-toggle { display: none; }
 
   .ctto-search-wrap { max-width: 380px; }
@@ -2829,8 +2839,6 @@
   .ctto-seg-ctrl { flex: 0 0 auto; }
 
   .ctto-seg-btn span { display: inline; }
-
-  .ctto-tb-acts-mobile { display: none; }
 }
 
 /* ── Content area ── */
@@ -3790,16 +3798,22 @@
   .ctto-cards-grid { grid-template-columns: 1fr; }
   .ctto-kanban { grid-template-columns: 1fr; }
   .ctto-content { padding: var(--s-3); }
-  /* Esconder labels dos seg buttons em telas muito pequenas */
-  .ctto-seg-btn span { display: none; }
-  .ctto-seg-btn { padding: var(--s-2) var(--s-3); }
 }
 
 /* ─────────────────────────────────────────
-   Desktop acts: ocultar no mobile (<= 900px)
+   Mobile: ajustes do toolbar (<=900px)
 ───────────────────────────────────────── */
 @media (max-width: 900px) {
+  /* Desktop acts somem — ficam na Row 3 */
   .ctto-tb-acts-desktop { display: none; }
+
+  /* Row 2: segmented controla largura total */
+  .ctto-tb-r2 { width: 100%; }
+  .ctto-seg-ctrl { flex: 1; width: 100%; }
+  .ctto-seg-btn span { display: inline; } /* sempre mostrar label */
+
+  /* Row 3: visível no mobile */
+  .ctto-tb-r3 { display: flex; width: 100%; }
 }
 
 /* ═══════════════════════════════════════════════════════════
