@@ -487,47 +487,104 @@ const LLM = (() => {
         linhas.push(`Despesas lançadas em ${mesAtual}: ${fmtBRL(despesas)} (${txMes.filter(t => t.tipo === 'saida' || t.tipo === 'despesa').length} lançamentos)`);
         linhas.push(`Saldo estimado (saldo inicial + receitas − despesas): ${fmtBRL(saldoEstimado)}`);
         linhas.push('');
-        linhas.push(`Pendências (qualquer data, não só este mês): ${pendentesTodas.length} contas, soma ${fmtBRL(totalPendenteGeral)}`);
+        linhas.push(`Pendências em QUALQUER DATA (todas as contas não pagas): ${pendentesTodas.length} contas, soma ${fmtBRL(totalPendenteGeral)}`);
 
-        /* Detalhamento das contas pendentes (até 15) */
-        const proximas = pendentesTodas
-          .filter(c => c.dataVencimento)
-          .sort((a, b) => a.dataVencimento.localeCompare(b.dataVencimento))
-          .slice(0, 15);
-        if (proximas.length) {
+        /* LISTA COMPLETA: pendentes do mês atual */
+        if (pendentesMes.length) {
+          const ordenadas = pendentesMes.slice().sort((a, b) => (a.dataVencimento || '').localeCompare(b.dataVencimento || ''));
           linhas.push('');
-          linhas.push('Lista de contas a vencer (mais próximas primeiro):');
-          proximas.forEach(c => {
-            linhas.push(`  • ${c.descricao || 'Conta'} — ${fmtBRL(c.valor)} — vence ${c.dataVencimento} — status: ${c.status}`);
+          linhas.push(`■ LISTA COMPLETA DAS ${pendentesMes.length} CONTAS QUE FALTAM PAGAR EM ${mesAtual}:`);
+          ordenadas.forEach(c => {
+            linhas.push(`  • ${c.descricao || 'Conta'} — ${fmtBRL(c.valor)} — vence ${c.dataVencimento || 's/data'} — status: ${c.status}`);
           });
         }
 
-        /* Detalhamento das contas já pagas no mês (até 10) */
+        /* LISTA COMPLETA: contas atrasadas do mês */
+        if (atrasadasMes.length) {
+          linhas.push('');
+          linhas.push(`■ LISTA COMPLETA DAS ${atrasadasMes.length} CONTAS ATRASADAS:`);
+          atrasadasMes.slice().sort((a, b) => (a.dataVencimento || '').localeCompare(b.dataVencimento || '')).forEach(c => {
+            linhas.push(`  • ${c.descricao || 'Conta'} — ${fmtBRL(c.valor)} — venceu em ${c.dataVencimento}`);
+          });
+        }
+
+        /* LISTA COMPLETA: pendentes futuras (próximos meses, até 30 itens) */
+        const futuras = pendentesTodas.filter(c => (c.dataVencimento || '') > hojeISO && !(c.dataVencimento || '').startsWith(mesAtual));
+        if (futuras.length) {
+          linhas.push('');
+          linhas.push(`■ LISTA DE ${Math.min(futuras.length, 30)} CONTAS PENDENTES DE MESES FUTUROS:`);
+          futuras.slice().sort((a, b) => a.dataVencimento.localeCompare(b.dataVencimento)).slice(0, 30).forEach(c => {
+            linhas.push(`  • ${c.descricao || 'Conta'} — ${fmtBRL(c.valor)} — vence ${c.dataVencimento}`);
+          });
+        }
+
+        /* LISTA COMPLETA: contas já pagas no mês */
         if (pagasMes.length) {
           linhas.push('');
-          linhas.push(`Lista das ${pagasMes.length} contas já pagas em ${mesAtual}:`);
-          pagasMes.slice(0, 10).forEach(c => {
+          linhas.push(`■ LISTA COMPLETA DAS ${pagasMes.length} CONTAS JÁ PAGAS EM ${mesAtual}:`);
+          pagasMes.slice().sort((a, b) => (a.dataPagamento || '').localeCompare(b.dataPagamento || '')).forEach(c => {
             linhas.push(`  • ${c.descricao || 'Conta'} — ${fmtBRL(c.valor)} — pago em ${c.dataPagamento || 's/data'}`);
           });
         }
 
-        /* Respostas diretas (pré-calculadas) para perguntas comuns */
+        /* ─── RESPOSTAS DIRETAS — Financeiro ─── */
         respostasDiretas.push(`P: Quanto eu devo este mês? / Quanto falta pagar este mês? / Quanto ainda preciso pagar?`);
         respostasDiretas.push(`R: ${fmtBRL(totalAindaPagar)} (${pendentesMes.length} ${pendentesMes.length === 1 ? 'conta pendente' : 'contas pendentes'} em ${mesAtual}).`);
         respostasDiretas.push('');
+
+        respostasDiretas.push(`P: Quais contas falta eu pagar? / Liste as contas pendentes deste mês / Quais ainda não paguei?`);
+        if (pendentesMes.length) {
+          respostasDiretas.push(`R: Você tem ${pendentesMes.length} ${pendentesMes.length === 1 ? 'conta' : 'contas'} para pagar em ${mesAtual} (total ${fmtBRL(totalAindaPagar)}):`);
+          pendentesMes.slice().sort((a, b) => (a.dataVencimento || '').localeCompare(b.dataVencimento || '')).forEach(c => {
+            const marcador = c.status === 'atrasada' ? '⚠ ATRASADA' : 'vence';
+            respostasDiretas.push(`   • ${c.descricao || 'Conta'} — ${fmtBRL(c.valor)} — ${marcador} ${c.dataVencimento || 's/data'}`);
+          });
+        } else {
+          respostasDiretas.push('R: Nenhuma conta pendente para este mês. Tudo em dia! ✓');
+        }
+        respostasDiretas.push('');
+
+        respostasDiretas.push(`P: Quais contas já paguei este mês? / Liste as contas pagas`);
+        if (pagasMes.length) {
+          respostasDiretas.push(`R: Você pagou ${pagasMes.length} ${pagasMes.length === 1 ? 'conta' : 'contas'} em ${mesAtual} (total ${fmtBRL(totalPagoMes)}):`);
+          pagasMes.slice().sort((a, b) => (a.dataPagamento || '').localeCompare(b.dataPagamento || '')).forEach(c => {
+            respostasDiretas.push(`   • ${c.descricao || 'Conta'} — ${fmtBRL(c.valor)} — pago em ${c.dataPagamento || 's/data'}`);
+          });
+        } else {
+          respostasDiretas.push('R: Você ainda não pagou nenhuma conta este mês.');
+        }
+        respostasDiretas.push('');
+
         respostasDiretas.push(`P: Quanto eu já paguei este mês?`);
         respostasDiretas.push(`R: ${fmtBRL(totalPagoMes)} (${pagasMes.length} ${pagasMes.length === 1 ? 'conta paga' : 'contas pagas'} em ${mesAtual}).`);
         respostasDiretas.push('');
+
         respostasDiretas.push(`P: Qual o total ORIGINAL de contas deste mês? / Quanto era o total a pagar?`);
         respostasDiretas.push(`R: ${fmtBRL(totalOriginalMes)} (${contasMes.length} ${contasMes.length === 1 ? 'conta' : 'contas'} com vencimento em ${mesAtual}, somando pagas e pendentes).`);
         respostasDiretas.push('');
-        respostasDiretas.push(`P: Tenho contas atrasadas?`);
+
+        respostasDiretas.push(`P: Tenho contas atrasadas? / Quais estão atrasadas?`);
         if (atrasadasMes.length) {
-          respostasDiretas.push(`R: Sim, ${atrasadasMes.length} ${atrasadasMes.length === 1 ? 'conta atrasada' : 'contas atrasadas'}, somando ${fmtBRL(totalAtrasadoMes)}.`);
+          respostasDiretas.push(`R: Sim, ${atrasadasMes.length} ${atrasadasMes.length === 1 ? 'conta atrasada' : 'contas atrasadas'}, somando ${fmtBRL(totalAtrasadoMes)}:`);
+          atrasadasMes.slice().sort((a, b) => (a.dataVencimento || '').localeCompare(b.dataVencimento || '')).forEach(c => {
+            respostasDiretas.push(`   • ${c.descricao || 'Conta'} — ${fmtBRL(c.valor)} — venceu em ${c.dataVencimento}`);
+          });
         } else {
           respostasDiretas.push('R: Não, nenhuma conta atrasada este mês.');
         }
         respostasDiretas.push('');
+
+        respostasDiretas.push(`P: Quais contas tenho para o próximo mês? / Quais contas vencem depois?`);
+        if (futuras.length) {
+          respostasDiretas.push(`R: Você tem ${futuras.length} ${futuras.length === 1 ? 'conta' : 'contas'} pendentes em meses futuros (após ${mesAtual}):`);
+          futuras.slice().sort((a, b) => a.dataVencimento.localeCompare(b.dataVencimento)).slice(0, 20).forEach(c => {
+            respostasDiretas.push(`   • ${c.descricao || 'Conta'} — ${fmtBRL(c.valor)} — vence ${c.dataVencimento}`);
+          });
+        } else {
+          respostasDiretas.push('R: Nenhuma conta cadastrada para meses futuros.');
+        }
+        respostasDiretas.push('');
+
         respostasDiretas.push(`P: Como está meu saldo? / Qual meu saldo atual?`);
         respostasDiretas.push(`R: Saldo estimado: ${fmtBRL(saldoEstimado)} (saldo inicial ${fmtBRL(cfg.saldoInicial || 0)} + receitas ${fmtBRL(receitas)} − despesas ${fmtBRL(despesas)}).`);
         respostasDiretas.push('');
@@ -577,14 +634,14 @@ const LLM = (() => {
 
         linhas.push(`Produtos: ${produtos.length} total (${ativos.length} ativos)`);
         if (baixoEstoque.length) {
-          linhas.push(`⚠ ${baixoEstoque.length} produto(s) com ESTOQUE BAIXO:`);
-          baixoEstoque.slice(0, 5).forEach(p => {
-            linhas.push(`  • ${p.nome}: ${p.estoque} unidades (mínimo configurado: ${p.estoqueMinimo})`);
+          linhas.push(`■ LISTA COMPLETA DOS ${baixoEstoque.length} PRODUTOS COM ESTOQUE BAIXO:`);
+          baixoEstoque.forEach(p => {
+            linhas.push(`  • ${p.nome}: ${p.estoque} unidades (mínimo: ${p.estoqueMinimo})`);
           });
         }
         if (semEstoque.length) {
-          linhas.push(`⚠ ${semEstoque.length} produto(s) SEM ESTOQUE:`);
-          semEstoque.slice(0, 5).forEach(p => linhas.push(`  • ${p.nome}`));
+          linhas.push(`■ LISTA COMPLETA DOS ${semEstoque.length} PRODUTOS SEM ESTOQUE:`);
+          semEstoque.forEach(p => linhas.push(`  • ${p.nome}`));
         }
         linhas.push('');
         linhas.push(`Vendas em ${mesAtual}: ${vendasMes.length} vendas, total ${fmtBRL(totalVendasMes)}`);
@@ -592,9 +649,20 @@ const LLM = (() => {
         linhas.push(`  • TOTAL A RECEBER em vendas pendentes/fiado: ${fmtBRL(totalPendenteVendas)} (${vendasPendentes.length} vendas)`);
         linhas.push(`Vendas de hoje (${hojeISO}): ${vendasHoje.length} vendas, total ${fmtBRL(totalVendasHoje)}`);
 
+        /* LISTA COMPLETA de vendas pendentes */
+        if (vendasPendentes.length) {
+          linhas.push('');
+          linhas.push(`■ LISTA COMPLETA DAS ${vendasPendentes.length} VENDAS PENDENTES/FIADO EM ${mesAtual}:`);
+          vendasPendentes.slice().sort((a, b) => (b.data || '').localeCompare(a.data || '')).forEach(v => {
+            linhas.push(`  • ${v.data} — ${v.clienteNome || 'Cliente'} — ${fmtBRL(v.total)} — status: ${v.status}`);
+          });
+        }
+
+        /* LISTA das vendas recentes (todas do mês, até 20) */
         if (vendasMes.length) {
-          const recentes = vendasMes.slice().sort((a, b) => (b.data || '').localeCompare(a.data || '')).slice(0, 5);
-          linhas.push('Vendas mais recentes:');
+          const recentes = vendasMes.slice().sort((a, b) => (b.data || '').localeCompare(a.data || '')).slice(0, 20);
+          linhas.push('');
+          linhas.push(`Vendas mais recentes em ${mesAtual} (até 20):`);
           recentes.forEach(v => {
             linhas.push(`  • ${v.data} — ${v.clienteNome || 'Cliente'} — ${fmtBRL(v.total)} — status: ${v.status}`);
           });
@@ -605,29 +673,53 @@ const LLM = (() => {
         const clientesDevendo = clientes.filter(c => (c.saldoDevedor || 0) > 0);
         const totalReceberClientes = clientesDevendo.reduce((s, c) => s + (c.saldoDevedor || 0), 0);
         if (clientesDevendo.length) {
-          linhas.push(`Clientes com saldo devedor: ${clientesDevendo.length} clientes, total a receber ${fmtBRL(totalReceberClientes)}`);
-          clientesDevendo.slice(0, 5).forEach(c => {
+          linhas.push(`■ LISTA COMPLETA DOS ${clientesDevendo.length} CLIENTES COM SALDO DEVEDOR (total a receber ${fmtBRL(totalReceberClientes)}):`);
+          clientesDevendo.slice().sort((a, b) => (b.saldoDevedor || 0) - (a.saldoDevedor || 0)).forEach(c => {
             linhas.push(`  • ${c.nome}: ${fmtBRL(c.saldoDevedor)}`);
           });
         }
 
-        /* Respostas Diretas — Negócio */
+        /* ─── RESPOSTAS DIRETAS — Negócio ─── */
         respostasDiretas.push(`P: Qual o resumo das vendas deste mês? / Quanto vendi este mês?`);
         respostasDiretas.push(`R: ${vendasMes.length} ${vendasMes.length === 1 ? 'venda' : 'vendas'} em ${mesAtual}, total ${fmtBRL(totalVendasMes)} (${fmtBRL(totalPagasMes)} já recebido, ${fmtBRL(totalPendenteVendas)} a receber).`);
         respostasDiretas.push('');
-        respostasDiretas.push(`P: Quanto vendi hoje?`);
-        respostasDiretas.push(`R: ${vendasHoje.length} ${vendasHoje.length === 1 ? 'venda' : 'vendas'} hoje (${hojeISO}), total ${fmtBRL(totalVendasHoje)}.`);
+
+        respostasDiretas.push(`P: Quanto vendi hoje? / Quais vendas fiz hoje?`);
+        if (vendasHoje.length) {
+          respostasDiretas.push(`R: ${vendasHoje.length} ${vendasHoje.length === 1 ? 'venda' : 'vendas'} hoje, total ${fmtBRL(totalVendasHoje)}:`);
+          vendasHoje.forEach(v => respostasDiretas.push(`   • ${v.clienteNome || 'Cliente'} — ${fmtBRL(v.total)} — ${v.status}`));
+        } else {
+          respostasDiretas.push('R: Nenhuma venda registrada hoje.');
+        }
         respostasDiretas.push('');
-        respostasDiretas.push(`P: Quais clientes estão me devendo? / Quem está em débito?`);
+
+        respostasDiretas.push(`P: Quais clientes estão me devendo? / Quem está em débito? / Liste os fiados`);
         if (clientesDevendo.length) {
-          respostasDiretas.push(`R: ${clientesDevendo.length} ${clientesDevendo.length === 1 ? 'cliente' : 'clientes'} com saldo devedor, total ${fmtBRL(totalReceberClientes)} a receber.`);
+          respostasDiretas.push(`R: ${clientesDevendo.length} ${clientesDevendo.length === 1 ? 'cliente' : 'clientes'} com saldo devedor (total ${fmtBRL(totalReceberClientes)} a receber):`);
+          clientesDevendo.slice().sort((a, b) => (b.saldoDevedor || 0) - (a.saldoDevedor || 0)).forEach(c => {
+            respostasDiretas.push(`   • ${c.nome}: ${fmtBRL(c.saldoDevedor)}`);
+          });
         } else {
           respostasDiretas.push('R: Nenhum cliente em débito no momento.');
         }
         respostasDiretas.push('');
-        respostasDiretas.push(`P: Tenho produtos com estoque baixo?`);
+
+        respostasDiretas.push(`P: Quais vendas pendentes/fiado tenho? / Quais vendas não foram pagas?`);
+        if (vendasPendentes.length) {
+          respostasDiretas.push(`R: ${vendasPendentes.length} ${vendasPendentes.length === 1 ? 'venda pendente' : 'vendas pendentes'} (total ${fmtBRL(totalPendenteVendas)}):`);
+          vendasPendentes.slice().sort((a, b) => (a.data || '').localeCompare(b.data || '')).forEach(v => {
+            respostasDiretas.push(`   • ${v.data} — ${v.clienteNome || 'Cliente'} — ${fmtBRL(v.total)} (${v.status})`);
+          });
+        } else {
+          respostasDiretas.push('R: Nenhuma venda pendente — todas pagas! ✓');
+        }
+        respostasDiretas.push('');
+
+        respostasDiretas.push(`P: Tenho produtos com estoque baixo? / Quais produtos estão acabando?`);
         if (baixoEstoque.length || semEstoque.length) {
-          respostasDiretas.push(`R: Sim — ${baixoEstoque.length} com estoque baixo e ${semEstoque.length} sem estoque.`);
+          respostasDiretas.push(`R: Sim — ${baixoEstoque.length} ${baixoEstoque.length === 1 ? 'produto' : 'produtos'} com estoque baixo e ${semEstoque.length} sem estoque:`);
+          baixoEstoque.forEach(p => respostasDiretas.push(`   • ${p.nome}: ${p.estoque} un. (mínimo ${p.estoqueMinimo})`));
+          semEstoque.forEach(p => respostasDiretas.push(`   • ${p.nome}: ZERADO`));
         } else {
           respostasDiretas.push('R: Não, todos os produtos têm estoque acima do mínimo.');
         }
@@ -661,52 +753,88 @@ const LLM = (() => {
         linhas.push(`  • Tarefas SEM PRAZO definido: ${tarefasSemPrazo.length}`);
 
         if (tarefasAtrasadas.length) {
-          linhas.push('Lista de tarefas atrasadas:');
-          tarefasAtrasadas.slice(0, 5).forEach(t => {
+          linhas.push(`■ LISTA COMPLETA DAS ${tarefasAtrasadas.length} TAREFAS ATRASADAS:`);
+          tarefasAtrasadas.slice().sort((a, b) => (a.data || '').localeCompare(b.data || '')).forEach(t => {
             linhas.push(`  • ${t.titulo} (era ${t.data}) [prioridade: ${t.prioridade || 'normal'}]`);
           });
         }
         if (tarefasHoje.length) {
-          linhas.push('Lista de tarefas de hoje:');
-          tarefasHoje.slice(0, 5).forEach(t => {
+          linhas.push(`■ LISTA COMPLETA DAS ${tarefasHoje.length} TAREFAS DE HOJE:`);
+          tarefasHoje.forEach(t => {
             linhas.push(`  • ${t.titulo}${t.hora ? ' às ' + t.hora : ''} [prioridade: ${t.prioridade || 'normal'}]`);
           });
         }
+        if (tarefasSemPrazo.length) {
+          linhas.push(`■ LISTA DAS ${Math.min(tarefasSemPrazo.length, 20)} TAREFAS PENDENTES SEM PRAZO:`);
+          tarefasSemPrazo.slice(0, 20).forEach(t => {
+            linhas.push(`  • ${t.titulo} [prioridade: ${t.prioridade || 'normal'}]`);
+          });
+        }
         if (eventosHoje.length) {
-          linhas.push(`Eventos de HOJE (${eventosHoje.length}):`);
-          eventosHoje.forEach(e => linhas.push(`  • ${e.hora || ''} — ${e.titulo}`));
+          linhas.push(`■ LISTA COMPLETA DOS ${eventosHoje.length} EVENTOS DE HOJE:`);
+          eventosHoje.forEach(e => linhas.push(`  • ${e.hora || ''} — ${e.titulo}${e.descricao ? ' (' + e.descricao + ')' : ''}`));
         }
         if (eventosSemana.length) {
-          linhas.push(`Eventos nos próximos 7 dias (até ${daquiSeteDias}): ${eventosSemana.length}`);
-          eventosSemana.slice(0, 8).forEach(e => {
+          linhas.push(`■ LISTA DOS ${eventosSemana.length} EVENTOS DOS PRÓXIMOS 7 DIAS (até ${daquiSeteDias}):`);
+          eventosSemana.forEach(e => {
             linhas.push(`  • ${e.data} ${e.hora || ''} — ${e.titulo}`);
           });
         }
-        if (meds.length) linhas.push(`Medicamentos cadastrados: ${meds.length}`);
+        if (meds.length) {
+          linhas.push(`■ LISTA DOS ${meds.length} MEDICAMENTOS CADASTRADOS:`);
+          meds.forEach(m => {
+            linhas.push(`  • ${m.nome || 'Medicamento'}${m.dosagem ? ' — ' + m.dosagem : ''}${m.frequencia ? ' — ' + m.frequencia : ''}`);
+          });
+        }
 
-        /* Respostas Diretas — Pessoal */
-        respostasDiretas.push(`P: Quais tarefas tenho hoje?`);
+        /* ─── RESPOSTAS DIRETAS — Pessoal ─── */
+        respostasDiretas.push(`P: Quais tarefas tenho hoje? / O que tenho que fazer hoje?`);
         if (tarefasHoje.length) {
           respostasDiretas.push(`R: ${tarefasHoje.length} ${tarefasHoje.length === 1 ? 'tarefa' : 'tarefas'} para hoje:`);
-          tarefasHoje.slice(0, 5).forEach(t => {
-            respostasDiretas.push(`   • ${t.titulo}${t.hora ? ' às ' + t.hora : ''}`);
+          tarefasHoje.forEach(t => {
+            respostasDiretas.push(`   • ${t.titulo}${t.hora ? ' às ' + t.hora : ''} [${t.prioridade || 'normal'}]`);
           });
         } else {
           respostasDiretas.push('R: Nenhuma tarefa cadastrada para hoje.');
         }
         respostasDiretas.push('');
-        respostasDiretas.push(`P: Tenho tarefas atrasadas?`);
+
+        respostasDiretas.push(`P: Tenho tarefas atrasadas? / Quais tarefas atrasadas?`);
         if (tarefasAtrasadas.length) {
-          respostasDiretas.push(`R: Sim, ${tarefasAtrasadas.length} ${tarefasAtrasadas.length === 1 ? 'tarefa atrasada' : 'tarefas atrasadas'}.`);
+          respostasDiretas.push(`R: Sim, ${tarefasAtrasadas.length} ${tarefasAtrasadas.length === 1 ? 'tarefa atrasada' : 'tarefas atrasadas'}:`);
+          tarefasAtrasadas.forEach(t => respostasDiretas.push(`   • ${t.titulo} (era ${t.data}) [${t.prioridade || 'normal'}]`));
         } else {
           respostasDiretas.push('R: Não, nenhuma tarefa atrasada.');
         }
         respostasDiretas.push('');
+
+        respostasDiretas.push(`P: Quais tarefas pendentes tenho? / Liste todas tarefas que faltam fazer`);
+        if (tarefasPendentes.length) {
+          respostasDiretas.push(`R: Você tem ${tarefasPendentes.length} ${tarefasPendentes.length === 1 ? 'tarefa pendente' : 'tarefas pendentes'}:`);
+          tarefasPendentes.slice().sort((a, b) => (a.data || '9999').localeCompare(b.data || '9999')).forEach(t => {
+            const quando = t.data ? `(${t.data}${t.hora ? ' ' + t.hora : ''})` : '(sem prazo)';
+            respostasDiretas.push(`   • ${t.titulo} ${quando} [${t.prioridade || 'normal'}]`);
+          });
+        } else {
+          respostasDiretas.push('R: Nenhuma tarefa pendente! ✓');
+        }
+        respostasDiretas.push('');
+
         respostasDiretas.push(`P: Quais eventos tenho hoje? / O que tenho na agenda hoje?`);
         if (eventosHoje.length) {
-          respostasDiretas.push(`R: ${eventosHoje.length} ${eventosHoje.length === 1 ? 'evento' : 'eventos'} hoje: ${eventosHoje.map(e => `${e.hora || ''} ${e.titulo}`).join('; ')}.`);
+          respostasDiretas.push(`R: ${eventosHoje.length} ${eventosHoje.length === 1 ? 'evento' : 'eventos'} hoje:`);
+          eventosHoje.forEach(e => respostasDiretas.push(`   • ${e.hora || ''} — ${e.titulo}`));
         } else {
           respostasDiretas.push('R: Nenhum evento cadastrado para hoje.');
+        }
+        respostasDiretas.push('');
+
+        respostasDiretas.push(`P: O que tenho na agenda essa semana? / Eventos próximos`);
+        if (eventosSemana.length) {
+          respostasDiretas.push(`R: ${eventosSemana.length} ${eventosSemana.length === 1 ? 'evento' : 'eventos'} nos próximos 7 dias:`);
+          eventosSemana.forEach(e => respostasDiretas.push(`   • ${e.data} ${e.hora || ''} — ${e.titulo}`));
+        } else {
+          respostasDiretas.push('R: Nenhum evento cadastrado para os próximos 7 dias.');
         }
         respostasDiretas.push('');
       }
