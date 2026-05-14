@@ -129,11 +129,13 @@ const LLM = (() => {
     const provider = PROVIDERS[cfg.provider];
     const sugestoes = [
       'Quanto eu devo este mês?',
-      'Quanto eu já paguei este mês?',
-      'Quais tarefas tenho hoje?',
-      'Resumo das minhas vendas do mês',
+      'E mês passado, quanto eu devia?',
+      'Tenho alguma conta para hoje?',
+      'Quais vendas fiz essa semana?',
       'Quais clientes estão me devendo?',
+      'Quais tarefas tenho hoje?',
       'Como está meu saldo?',
+      'Tenho produtos com estoque baixo?',
     ];
     return `
       <div class="llm-welcome">
@@ -374,14 +376,14 @@ const LLM = (() => {
     try {
       const cfg = DB.getLlmConfig();
 
-      /* Enriquece systemPrompt com snapshot atual dos dados do usuário.
-         A IA recebe contexto fresco a cada mensagem para responder perguntas
-         sobre contas, vendas, tarefas, etc. com dados reais. */
+      /* SystemPrompt enriquecido com contexto leve (identidade + datas) +
+         instruções para usar Function Calling quando precisar de dados.
+         A IA puxa os dados via tools dinamicamente — sem snapshot gigante. */
       const cfgComContexto = Object.assign({}, cfg, {
-        systemPrompt: (cfg.systemPrompt || '') + '\n\n' + buildUserContext(),
+        systemPrompt: (cfg.systemPrompt || '') + '\n\n' + buildLightContext(),
       });
 
-      const response = await callProvider(conversa.msgs, cfgComContexto);
+      const response = await callWithTools(conversa.msgs, cfgComContexto);
 
       conversa.msgs.push({ role: 'assistant', content: response });
       DB.saveLlmConversa(conversa);
@@ -392,6 +394,294 @@ const LLM = (() => {
 
     isLoading = false;
     render();
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     TOOL CALLING LOOP — Provedor-agnóstico
+     A IA pode chamar tools várias vezes. Loop até gerar resposta final.
+  ═══════════════════════════════════════════════════════════ */
+  async function callWithTools(msgs, cfg) {
+    const provider = cfg.provider;
+    const supportsTools = ['openrouter', 'openai', 'groq', 'claude', 'gemini'].includes(provider);
+
+    if (!supportsTools) {
+      /* Fallback: provider sem tools — usa o contexto antigo pesado */
+      const fallbackCfg = Object.assign({}, cfg, {
+        systemPrompt: cfg.systemPrompt + '\n\n' + buildUserContext(),
+      });
+      return callProvider(msgs, fallbackCfg);
+    }
+
+    let currentMsgs = msgs.slice();
+    const MAX_ITER = 6;
+
+    for (let i = 0; i < MAX_ITER; i++) {
+      const result = await callProviderWithTools(currentMsgs, cfg);
+
+      /* Se não retornou tool_calls, é a resposta final */
+      if (!result.tool_calls || !result.tool_calls.length) {
+        return result.content || '(sem resposta)';
+      }
+
+      /* Executa cada tool e adiciona ao histórico */
+      const toolResults = result.tool_calls.map(tc => {
+        let args = {};
+        try { args = typeof tc.arguments === 'string' ? JSON.parse(tc.arguments) : (tc.arguments || {}); }
+        catch (e) { args = {}; }
+        const result = LLMTools.execute(tc.name, args);
+        console.log(`[LLM Tool] ${tc.name}(${JSON.stringify(args)})`, result);
+        return { tool_call_id: tc.id, name: tc.name, result };
+      });
+
+      /* Adiciona ao histórico (formato específico do provider é tratado em callProviderWithTools) */
+      currentMsgs = currentMsgs.concat([
+        { role: 'assistant', tool_calls: result.tool_calls, content: result.content || '' },
+        ...toolResults.map(tr => ({
+          role: 'tool',
+          tool_call_id: tr.tool_call_id,
+          name: tr.name,
+          content: JSON.stringify(tr.result),
+        })),
+      ]);
+    }
+
+    return 'Desculpe, não consegui processar sua pergunta após várias tentativas. Pode reformular?';
+  }
+
+  /* Dispatcher: chama o caller específico que suporta tools */
+  async function callProviderWithTools(msgs, cfg) {
+    switch (cfg.provider) {
+      case 'openrouter': return callOpenAIStyleTools(msgs, cfg, 'https://openrouter.ai/api/v1/chat/completions', {
+        'HTTP-Referer': window.location.href,
+        'X-Title': 'Mentor24h',
+      });
+      case 'openai': return callOpenAIStyleTools(msgs, cfg, 'https://api.openai.com/v1/chat/completions', {});
+      case 'groq':   return callOpenAIStyleTools(msgs, cfg, 'https://api.groq.com/openai/v1/chat/completions', {});
+      case 'claude': return callClaudeTools(msgs, cfg);
+      case 'gemini': return callGeminiTools(msgs, cfg);
+      default: throw new Error('Provider sem suporte a tools: ' + cfg.provider);
+    }
+  }
+
+  /* ─── OpenAI / Groq / OpenRouter — mesmo formato ─── */
+  async function callOpenAIStyleTools(msgs, cfg, url, extraHeaders) {
+    const systemPrompt = cfg.systemPrompt || '';
+    /* Converte mensagens internas → formato OpenAI */
+    const messages = [];
+    if (systemPrompt) messages.push({ role: 'system', content: systemPrompt });
+    msgs.forEach(m => {
+      if (m.role === 'tool') {
+        messages.push({ role: 'tool', tool_call_id: m.tool_call_id, content: m.content });
+      } else if (m.tool_calls) {
+        messages.push({
+          role: 'assistant',
+          content: m.content || null,
+          tool_calls: m.tool_calls.map(tc => ({
+            id: tc.id,
+            type: 'function',
+            function: { name: tc.name, arguments: typeof tc.arguments === 'string' ? tc.arguments : JSON.stringify(tc.arguments || {}) },
+          })),
+        });
+      } else {
+        messages.push({ role: m.role, content: m.content });
+      }
+    });
+
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: Object.assign({
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${cfg.apiKey}`,
+      }, extraHeaders),
+      body: JSON.stringify({
+        model: cfg.model,
+        messages,
+        tools: LLMTools.TOOLS,
+        tool_choice: 'auto',
+      }),
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error?.message || `HTTP ${res.status}`);
+    }
+    const data = await res.json();
+    const msg = data.choices?.[0]?.message;
+    if (!msg) return { content: '(sem resposta)', tool_calls: [] };
+
+    return {
+      content: msg.content || '',
+      tool_calls: (msg.tool_calls || []).map(tc => ({
+        id: tc.id,
+        name: tc.function.name,
+        arguments: tc.function.arguments,
+      })),
+    };
+  }
+
+  /* ─── Anthropic Claude — formato próprio ─── */
+  async function callClaudeTools(msgs, cfg) {
+    const systemPrompt = cfg.systemPrompt || '';
+    /* Claude usa "tool_use" no role assistant e "tool_result" no role user */
+    const messages = [];
+    msgs.forEach(m => {
+      if (m.role === 'tool') {
+        /* Agrupa tool results em uma mensagem user com content array */
+        const last = messages[messages.length - 1];
+        if (last && last.role === 'user' && Array.isArray(last.content)) {
+          last.content.push({ type: 'tool_result', tool_use_id: m.tool_call_id, content: m.content });
+        } else {
+          messages.push({ role: 'user', content: [{ type: 'tool_result', tool_use_id: m.tool_call_id, content: m.content }] });
+        }
+      } else if (m.tool_calls) {
+        const content = [];
+        if (m.content) content.push({ type: 'text', text: m.content });
+        m.tool_calls.forEach(tc => {
+          let input = {};
+          try { input = typeof tc.arguments === 'string' ? JSON.parse(tc.arguments) : (tc.arguments || {}); } catch (e) {}
+          content.push({ type: 'tool_use', id: tc.id, name: tc.name, input });
+        });
+        messages.push({ role: 'assistant', content });
+      } else {
+        messages.push({ role: m.role === 'assistant' ? 'assistant' : 'user', content: m.content });
+      }
+    });
+
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': cfg.apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify({
+        model: cfg.model,
+        max_tokens: 2048,
+        system: systemPrompt || undefined,
+        messages,
+        tools: LLMTools.forAnthropic(),
+      }),
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error?.message || `HTTP ${res.status}`);
+    }
+    const data = await res.json();
+    const blocks = data.content || [];
+    const textBlocks = blocks.filter(b => b.type === 'text').map(b => b.text).join('\n');
+    const toolBlocks = blocks.filter(b => b.type === 'tool_use');
+
+    return {
+      content: textBlocks,
+      tool_calls: toolBlocks.map(b => ({
+        id: b.id,
+        name: b.name,
+        arguments: b.input || {},
+      })),
+    };
+  }
+
+  /* ─── Google Gemini — formato próprio ─── */
+  async function callGeminiTools(msgs, cfg) {
+    const systemPrompt = cfg.systemPrompt || '';
+    /* Gemini usa parts com functionCall/functionResponse */
+    const contents = [];
+    msgs.forEach(m => {
+      if (m.role === 'tool') {
+        contents.push({
+          role: 'user',
+          parts: [{ functionResponse: { name: m.name, response: { result: JSON.parse(m.content) } } }],
+        });
+      } else if (m.tool_calls) {
+        const parts = [];
+        if (m.content) parts.push({ text: m.content });
+        m.tool_calls.forEach(tc => {
+          let args = {};
+          try { args = typeof tc.arguments === 'string' ? JSON.parse(tc.arguments) : (tc.arguments || {}); } catch (e) {}
+          parts.push({ functionCall: { name: tc.name, args } });
+        });
+        contents.push({ role: 'model', parts });
+      } else {
+        contents.push({
+          role: m.role === 'assistant' ? 'model' : 'user',
+          parts: [{ text: m.content }],
+        });
+      }
+    });
+
+    const body = {
+      contents,
+      tools: LLMTools.forGemini(),
+    };
+    if (systemPrompt) body.systemInstruction = { parts: [{ text: systemPrompt }] };
+
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${cfg.model}:generateContent?key=${cfg.apiKey}`;
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error?.message || `HTTP ${res.status}`);
+    }
+    const data = await res.json();
+    const parts = data.candidates?.[0]?.content?.parts || [];
+    const textParts = parts.filter(p => p.text).map(p => p.text).join('\n');
+    const fnCalls = parts.filter(p => p.functionCall).map((p, i) => ({
+      id: `gemini-${Date.now()}-${i}`,
+      name: p.functionCall.name,
+      arguments: p.functionCall.args || {},
+    }));
+
+    return {
+      content: textParts,
+      tool_calls: fnCalls,
+    };
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     CONTEXTO LEVE — só identidade + data + capacidades
+     Os dados reais são puxados via Function Calling.
+  ═══════════════════════════════════════════════════════════ */
+  function buildLightContext() {
+    const cfg = DB.getConfig();
+    const hoje = new Date();
+    const hojeISO = hoje.toISOString().slice(0, 10);
+    const mesAtual = hojeISO.slice(0, 7);
+
+    return [
+      '═══ CONTEXTO DO USUÁRIO ═══',
+      `Nome: ${cfg.nomeUsuario || 'Você'}`,
+      `Data de hoje: ${hojeISO} (${hoje.toLocaleDateString('pt-BR', { weekday: 'long' })})`,
+      `Mês atual: ${mesAtual}`,
+      `Moeda do app: ${cfg.moeda || 'BRL'}`,
+      '',
+      '═══ FERRAMENTAS DISPONÍVEIS ═══',
+      'Você TEM ACESSO aos dados do app via Function Calling. Use as ferramentas:',
+      '• getDataAtual() — sempre que precisar entender termos relativos (hoje, ontem, mês passado, dezembro, etc.)',
+      '• getContas(filtros) — listar contas/dívidas/boletos',
+      '• getResumoFinanceiroMes({mes}) — resumo financeiro de um mês específico',
+      '• getVendas(filtros) — listar vendas do negócio',
+      '• getClientes(filtros) — listar clientes (com/sem débito)',
+      '• getProdutos(filtros) — listar produtos do catálogo',
+      '• getTarefas(filtros) — listar tarefas/lembretes',
+      '• getEventos(filtros) — listar eventos da agenda',
+      '• getMedicamentos() — listar medicamentos cadastrados',
+      '• getMetas() — listar metas/caixinhas com progresso',
+      '• getConfigUsuario() — dados básicos do usuário',
+      '',
+      '═══ COMO USAR ═══',
+      '1. Quando o usuário pedir dados, CHAME a ferramenta apropriada. Não invente nada.',
+      '2. Para datas relativas ("mês passado", "amanhã", "essa semana"), chame getDataAtual() PRIMEIRO para obter as datas exatas.',
+      '3. Você pode chamar várias ferramentas em sequência se precisar.',
+      '4. Os valores retornados JÁ ESTÃO CALCULADOS. NÃO faça aritmética — apenas apresente.',
+      '5. Se não encontrar nada, diga "Essa informação não está cadastrada no app".',
+      '6. Responda em português brasileiro, formato R$ X.XXX,XX para valores.',
+    ].join('\n');
   }
 
   /* ═══════════════════════════════════════════════════════════
