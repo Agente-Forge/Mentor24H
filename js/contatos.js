@@ -1,13 +1,13 @@
 /* ═══════════════════════════════════════════════════════════
    CONTATOS — Agenda com Contexto Duplo (Pessoal + Trabalho)
-   Views: Cards · Lista · Kanban | Import/Export vCard & CSV
+   Views: Cards · Lista · Temperatura | Import/Export vCard & CSV
 ═══════════════════════════════════════════════════════════ */
 
 const Contatos = (() => {
 
   /* ── Estado ── */
   let st = {
-    view: 'cards',       // 'cards' | 'lista' | 'kanban'
+    view: 'cards',       // 'cards' | 'lista' | 'temperatura'
     contexto: 'todos',
     tag: null,
     busca: '',
@@ -24,11 +24,13 @@ const Contatos = (() => {
     { id: 'familia',    label: 'Família',    icon: 'heart',       cor: '#F472B6' },
   ];
 
-  const STAGES = [
-    { id: 'prospect',  label: 'Prospect',  cor: 'amber' },
-    { id: 'ativo',     label: 'Ativo',     cor: 'green' },
-    { id: 'inativo',   label: 'Inativo',   cor: 'muted' },
-    { id: 'arquivado', label: 'Arquivado', cor: 'red'   },
+  const TEMPS = [
+    { id: 'vip',     label: 'VIP',     cor: '#D4A574', icon: 'star'         },
+    { id: 'quente',  label: 'Quente',  cor: '#C49454', icon: 'flame'        },
+    { id: 'morno',   label: 'Morno',   cor: '#8B9A6E', icon: 'thermometer'  },
+    { id: 'lead',    label: 'Lead',    cor: '#6D8EA8', icon: 'user'         },
+    { id: 'frio',    label: 'Frio',    cor: '#7B8088', icon: 'minus-circle' },
+    { id: 'inativo', label: 'Inativo', cor: '#4D5258', icon: 'archive'      },
   ];
 
   /* ── Form drawer state ── */
@@ -202,11 +204,11 @@ const Contatos = (() => {
                     title="Visualizar como lista">
               ${Icons.html('list', 13)} <span>Lista</span>
             </button>
-            <button class="ctto-seg-btn ${st.view === 'kanban' ? 'active' : ''}"
-                    onclick="Contatos.setView('kanban')"
-                    aria-pressed="${st.view === 'kanban'}"
-                    title="Visualizar kanban de clientes">
-              ${Icons.html('columns', 13)} <span>Kanban</span>
+            <button class="ctto-seg-btn ${st.view === 'temperatura' ? 'active' : ''}"
+                    onclick="Contatos.setView('temperatura')"
+                    aria-pressed="${st.view === 'temperatura'}"
+                    title="Temperatura de contatos">
+              ${Icons.html('thermometer', 13)} <span>Temperatura</span>
             </button>
           </div>
         </div>
@@ -238,6 +240,13 @@ const Contatos = (() => {
     if (!el) return;
     const lista = getFiltered();
 
+    // Temperatura always shows 6 columns (even empty), per Cenário 4
+    if (st.view === 'temperatura') {
+      renderTemperatura(el, lista);
+      Icons.render(el);
+      return;
+    }
+
     if (!lista.length) {
       el.innerHTML = `
         <div class="empty" style="padding:var(--s-12) var(--s-6)">
@@ -257,8 +266,7 @@ const Contatos = (() => {
     }
 
     if (st.view === 'cards') renderCards(el, lista);
-    else if (st.view === 'lista') renderLista(el, lista);
-    else renderKanban(el, lista);
+    else renderLista(el, lista);
     Icons.render(el);
   }
 
@@ -410,33 +418,26 @@ const Contatos = (() => {
     `;
   }
 
-  /* ══ View: KANBAN ══ */
-  function renderKanban(el, lista) {
-    const clientes = lista.filter(c => (c.contextos || []).includes('cliente'));
-    if (!clientes.length) {
-      el.innerHTML = `
-        <div class="empty" style="padding:var(--s-12) var(--s-6)">
-          <div class="empty-icon">${Icons.html('columns', 26)}</div>
-          <h4>Kanban é para contatos com contexto "Cliente"</h4>
-          <p>Classifique um contato como <strong>Cliente</strong> para vê-lo aqui.</p>
-        </div>
-      `;
-      Icons.render(el);
-      return;
-    }
-
+  /* ══ View: TEMPERATURA ══ */
+  function renderTemperatura(el, lista) {
     el.innerHTML = `
-      <div class="ctto-kanban">
-        ${STAGES.map(stage => {
-          const cols = clientes.filter(c => (c.kanbanStage || 'ativo') === stage.id);
+      <div class="ctto-temp">
+        ${TEMPS.map(temp => {
+          const cols = lista.filter(c => (c.temperatura || 'lead') === temp.id);
           return `
-            <div class="ctto-kanban-col">
-              <div class="ctto-kanban-header">
-                <span class="badge badge-${stage.cor}">${stage.label}</span>
-                <span class="ctto-kanban-count">${cols.length}</span>
+            <div class="ctto-temp-col" style="--temp-cor:${temp.cor}">
+              <div class="ctto-temp-header">
+                <div class="ctto-temp-label">
+                  ${Icons.html(temp.icon, 13)}
+                  <span>${temp.label}</span>
+                </div>
+                <span class="ctto-temp-count">${cols.length}</span>
               </div>
-              <div class="ctto-kanban-cards" data-stage="${stage.id}">
-                ${cols.map(c => kanbanCardHTML(c)).join('')}
+              <div class="ctto-temp-cards" data-temp="${temp.id}">
+                ${cols.length
+                  ? cols.map(c => tempCardHTML(c, temp)).join('')
+                  : `<div class="ctto-temp-empty"><span class="ctto-temp-empty-txt">Nenhum contato</span></div>`
+                }
               </div>
             </div>
           `;
@@ -445,25 +446,33 @@ const Contatos = (() => {
     `;
   }
 
-  function kanbanCardHTML(c) {
+  function tempCardHTML(c, temp) {
     const ini = (c.nome || '?')[0].toUpperCase();
+    const cor = avatarCor(c.nome);
+    const tel = (c.telefone || '').replace(/\D/g, '');
+    const sub = [c.cargo, c.empresa].filter(Boolean).join(' · ');
+
     return `
-      <div class="ctto-kb-card" onclick="Contatos.abrirDetalhe('${esc(c.id)}')">
-        <div class="ctto-kb-top">
-          <div class="ctto-avatar sm" style="--av-cor:${avatarCor(c.nome)}">${ini}</div>
-          <div>
-            <div class="ctto-kb-nome">${esc(c.nome)}</div>
-            ${c.empresa ? `<div class="ctto-kb-empresa">${esc(c.empresa)}</div>` : ''}
+      <div class="ctto-tc-card" data-contact-id="${esc(c.id)}"
+           onclick="Contatos.abrirDetalhe('${esc(c.id)}')">
+        <div class="ctto-tc-top">
+          <div class="ctto-avatar sm" style="--av-cor:${cor}">${ini}</div>
+          <div class="ctto-tc-info">
+            <div class="ctto-tc-nome">${esc(c.nome)}</div>
+            ${sub ? `<div class="ctto-tc-sub">${esc(sub)}</div>` : ''}
           </div>
         </div>
-        ${c.telefone ? `<div class="ctto-kb-tel">${Icons.html('phone', 10)} ${esc(c.telefone)}</div>` : ''}
-        <div class="ctto-kb-stages">
-          ${STAGES.filter(s => s.id !== (c.kanbanStage || 'ativo')).map(s => `
-            <button class="ctto-kb-move badge-${s.cor}" title="Mover para ${s.label}"
-                    onclick="event.stopPropagation(); Contatos.moverStage('${esc(c.id)}','${s.id}')">
-              → ${s.label}
-            </button>
-          `).join('')}
+        <div class="ctto-tc-footer">
+          <button class="ctto-temp-badge" style="--temp-cor:${temp.cor}"
+                  onclick="event.stopPropagation(); Contatos._abrirTempMenu(event,'${esc(c.id)}')"
+                  title="Trocar temperatura">
+            ${Icons.html(temp.icon, 10)} ${temp.label}
+          </button>
+          ${tel ? `
+          <a class="ctto-tc-wa" href="https://wa.me/55${tel}" target="_blank" rel="noopener"
+             onclick="event.stopPropagation()" title="WhatsApp">
+            ${Icons.html('message-circle', 13)}
+          </a>` : ''}
         </div>
       </div>
     `;
@@ -542,18 +551,18 @@ const Contatos = (() => {
           ${(c.tags).map(t => `<span class="ctto-tag-pill">#${esc(t)}</span>`).join('')}
         </div>` : ''}
 
-        ${(c.contextos||[]).includes('cliente') ? `
         <div class="ctto-detail-stage">
-          <div class="ctto-detail-stage-label">Estágio no funil</div>
-          <div class="ctto-kanban-stages-sel">
-            ${STAGES.map(s => `
-              <button class="ctto-stage-sel-btn ${(c.kanbanStage||'ativo') === s.id ? 'active badge-' + s.cor : ''}"
-                      onclick="Contatos.moverStage('${esc(c.id)}','${s.id}')">
-                ${s.label}
+          <div class="ctto-detail-stage-label">Temperatura</div>
+          <div class="ctto-temp-sel">
+            ${TEMPS.map(t => `
+              <button class="ctto-temp-sel-btn ${(c.temperatura||'lead') === t.id ? 'active' : ''}"
+                      style="--temp-cor:${t.cor}"
+                      onclick="Contatos.trocarTemperatura('${esc(c.id)}','${t.id}')">
+                ${Icons.html(t.icon, 10)} ${t.label}
               </button>
             `).join('')}
           </div>
-        </div>` : ''}
+        </div>
 
         <div class="ctto-detail-footer">
           <button class="btn btn-danger btn-sm" onclick="Contatos.confirmarDeletar('${esc(c.id)}')">
@@ -611,6 +620,7 @@ const Contatos = (() => {
       tags: [...(c?.tags || [])],
       phoneType: c?.phoneType || 'celular',
       country: COUNTRIES[0],
+      temperatura: c?.temperatura || 'lead',
     };
 
     // Sempre recriar para evitar estado obsoleto
@@ -935,6 +945,7 @@ const Contatos = (() => {
       notas:       document.getElementById('cf-notas')?.value.trim()    || '',
       contextos,
       tags: [..._formSt.tags],
+      temperatura: _formSt.temperatura || 'lead',
     };
 
     if (id) data.id = id;
@@ -1304,12 +1315,36 @@ const Contatos = (() => {
     );
   }
 
-  function moverStage(id, stage) {
-    DB.saveContato({ id, kanbanStage: stage });
+  function trocarTemperatura(id, temp) {
+    DB.saveContato({ id, temperatura: temp });
     const c = DB.getContatos().find(x => x.id === id);
-    Toast.success(`${c?.nome} → ${STAGES.find(s => s.id === stage)?.label}`);
+    const t = TEMPS.find(t => t.id === temp);
+    Toast.success(`${c?.nome} → ${t?.label}`);
     renderContent();
     if (st.ativoId === id) abrirDetalhe(id);
+  }
+
+  function _abrirTempMenu(e, id) {
+    e.stopPropagation();
+    const existing = document.getElementById('ctto-temp-menu');
+    if (existing) { existing.remove(); return; }
+    const btn  = e.currentTarget;
+    const rect = btn.getBoundingClientRect();
+    const menu = document.createElement('div');
+    menu.id = 'ctto-temp-menu';
+    menu.className = 'ctto-temp-dropdown';
+    // posiciona abaixo do badge, alinhado à esquerda
+    const left = Math.min(rect.left, window.innerWidth - 160);
+    menu.style.cssText = `top:${rect.bottom + 4}px;left:${left}px`;
+    menu.innerHTML = TEMPS.map(t => `
+      <button class="ctto-td-item" style="--temp-cor:${t.cor}"
+              onclick="Contatos.trocarTemperatura('${esc(id)}','${t.id}'); document.getElementById('ctto-temp-menu')?.remove()">
+        ${Icons.html(t.icon, 12)} ${t.label}
+      </button>
+    `).join('');
+    document.body.appendChild(menu);
+    Icons.render(menu);
+    setTimeout(() => document.addEventListener('click', () => menu.remove(), { once: true }), 0);
   }
 
   /* ════════════════════════════════════════════
@@ -1448,7 +1483,7 @@ const Contatos = (() => {
     abrirForm, _salvarForm, _fecharDrawer,
     _updateAvatar, _setPhoneType, _toggleCountry, _selectCountry, _maskTel,
     _addFormTag, _removeFormTag,
-    confirmarDeletar, moverStage,
+    confirmarDeletar, trocarTemperatura, _abrirTempMenu,
     abrirImport, _impTab, _onVcfFile, _onCsvFile, _confirmarImport,
     toggleExportMenu, _exportVcf, _exportCsv, _exportJson,
     _conectarGoogle, _toggleSidebar,

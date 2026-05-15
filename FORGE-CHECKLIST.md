@@ -2,7 +2,7 @@
 
 **Projeto:** Mentor24h — Hub Pessoal + Empreendedor  
 **Iniciado:** 2026-05-12  
-**Última atualização:** 2026-05-14 (sessão 2)  
+**Última atualização:** 2026-05-15 (sessão 3)  
 **Status geral:** FASE 7 — Deploy COMPLETA → FASE 8 (Monitoramento) próxima
 
 ---
@@ -165,10 +165,13 @@
 
 | 2026-05-14 (s2) | Contatos-UX-BugFix-18 | Auditoria de 18 problemas + correções completas em `contatos.js` + `pages.css`. **JS:** `data-contact-id` nos cards (detecção de ativo confiável), botão Fechar movido para direita com label "Fechar X", `abrirForm` sempre recria drawer (sem estado obsoleto), `_fecharDrawer` remove do DOM após animação, `_refreshToolbar` via DOM replacement (sem perda de event listeners), `_toggleSidebar` + backdrop mobile da sidebar, `_closeSidebarMobile` ao mudar filtro. **CSS:** bottom sheet detalhe com `translateY` (abre/fecha suave), handle visual no topo do sheet, backdrop usa `visibility` (transição fade correta), card actions visíveis em touch (`@media hover:none`), sidebar toggle + backdrop no mobile, `min-width:0` no content, kanban `minmax(160px,1fr)` sem min-width:720, `will-change:transform` no drawer, `safe-area-inset-bottom` no footer. |
 | 2026-05-14 (s2) | Contatos-Toolbar-Premium | Redesign Premium da toolbar de Contatos. **Layout:** duas linhas no mobile (Row1: toggle+busca / Row2: views+ações) — uma linha no desktop. **Busca:** pill arredondado com ícone, foco glow violet, contagem de contatos quando vazia ("12 contatos" / "5 de 12" com filtro), botão limpar como X-circle. **View toggle:** substituído por segmented control (Cards/Lista/Kanban) com ícone + label — labels somem em ≤600px para economizar espaço. **Ações desktop:** Importar+Exportar com texto completo + "Novo contato" proeminente. **Ações mobile:** ícones compactos para import/export + botão "Novo" que não sai da tela. Sidebar toggle sempre visível no mobile. |
+| 2026-05-15 | Temperatura-Contatos | **skill-construtor v5.1 (PAE #1):** Substituição completa do Kanban-Contatos pelo sistema Temperatura de Contatos. **contatos.js:** `STAGES` (4 estágios) → `TEMPS` (6 status: VIP/Quente/Morno/Lead/Frio/Inativo com hex OBSIDIAN + ícone); botão "Kanban" → "Temperatura" (icon: thermometer); `renderKanban()`+`kanbanCardHTML()` → `renderTemperatura()`+`tempCardHTML()`; `moverStage()` → `trocarTemperatura(id, temp)` com Toast + re-render; `_abrirTempMenu(e, id)` dropdown flutuante com overflow guard; painel de detalhe usa selector de temperatura para TODOS os contatos (removida restrição `contextos.includes('cliente')`); campo `temperatura` adicionado ao form state + `_salvarForm` (default: `'lead'`). **pages.css:** bloco `.ctto-kanban*`/`.ctto-kb-*` → `.ctto-temp*`: grid 6 colunas desktop, border-top 3px `var(--temp-cor)`, header Fraunces italic, `.ctto-temp-badge` com `color-mix()`, hover `translateY(-1px)` + `--shadow-elevated`, focus ring `var(--signature)`, `@keyframes fadeSlideIn` para dropdown; responsivo: 3 colunas em 768px, scroll-snap horizontal 6 colunas em ≤600px. **index.html:** cache-bust `?v=8` → `?v=9`. Kanban global (`js/kanban.js`) intocado. |
+| 2026-05-15 | Temperatura-Edge-Cases | **skill-construtor + skill-forge-visual (PAE #1 — fix):** 2 correções pós-auditoria. **(1) Cenário 4 — 6 colunas vazias:** `renderContent()` em `contatos.js` agora roteia `view === 'temperatura'` ANTES do guard `!lista.length` — view Temperatura sempre exibe 6 colunas mesmo sem contatos, com empty state elegante em cada coluna. **(2) Light mode focus ring:** `pages.css` `.ctto-tc-card:focus-visible` corrigido de `var(--signature, #D4A574)` → `var(--color-gold, #D4A574)` — usa o token correto que adapta automaticamente entre dark (#D4A574) e light (#9B6E3A), garantindo contraste WCAG em ambos os temas. |
 
 ---
 
 ## PRÓXIMA AÇÃO
 
-> **Contatos polimento** — formulário de novo contato / edição pode receber melhorias de UX  
+> **PAE #2** — próxima entrada em `pae-prompts/prompts-2026-05.md` quando Léo criar  
+> **Testes manuais Temperatura** — abrir no Chrome, criar contato, trocar temperatura, verificar localStorage  
 > **8.1** — skill-health-monitor → Relatório semanal de saúde do projeto (opcional, Haiku 4.5)

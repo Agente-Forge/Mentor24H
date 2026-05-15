@@ -3298,22 +3298,25 @@
   .ctto-row { min-height: 54px; padding: 0 var(--s-3); }
 }
 
-/* ── Kanban view ── */
-.ctto-kanban {
+/* ── Temperatura view ── */
+.ctto-temp {
   display: grid;
-  grid-template-columns: repeat(4, minmax(160px, 1fr));
-  gap: var(--s-4);
+  grid-template-columns: repeat(6, minmax(180px, 1fr));
+  gap: var(--s-3);
   align-items: start;
+  min-width: 0;
 }
 
-.ctto-kanban-col {
+.ctto-temp-col {
   background: var(--surface-2);
   border: 1px solid var(--line-2);
+  border-top: 3px solid var(--temp-cor);
   border-radius: var(--r-lg);
   overflow: hidden;
+  transition: border-color 240ms var(--ease-out, cubic-bezier(0.32, 0.72, 0, 1));
 }
 
-.ctto-kanban-header {
+.ctto-temp-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -3322,96 +3325,190 @@
   background: var(--surface-1);
 }
 
-.ctto-kanban-count {
+.ctto-temp-label {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  font-family: var(--font-display, 'Fraunces', serif);
+  font-style: italic;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--temp-cor);
+}
+
+.ctto-temp-count {
   font-size: 11px;
   font-weight: 700;
   color: var(--text-4);
   background: var(--surface-3);
   border-radius: var(--r-full);
   padding: 0 7px;
+  min-width: 20px;
+  text-align: center;
 }
 
-.ctto-kanban-cards {
+.ctto-temp-cards {
   padding: var(--s-3);
   display: flex;
   flex-direction: column;
   gap: var(--s-2);
-  min-height: 100px;
+  min-height: 80px;
 }
 
-.ctto-kb-card {
+.ctto-temp-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--s-6) var(--s-3);
+}
+
+.ctto-temp-empty-txt {
+  font-size: 11px;
+  color: var(--text-4);
+  text-align: center;
+  font-style: italic;
+}
+
+/* Card individual dentro de cada coluna */
+.ctto-tc-card {
   background: var(--surface-3);
   border: 1px solid var(--line-2);
   border-radius: var(--r-md);
   padding: var(--s-3);
   cursor: pointer;
-  transition: all var(--d-fast);
+  transition: transform 240ms var(--ease-out, cubic-bezier(0.32, 0.72, 0, 1)),
+              box-shadow 240ms var(--ease-out, cubic-bezier(0.32, 0.72, 0, 1)),
+              background 160ms ease;
 }
 
-.ctto-kb-card:hover {
-  background: var(--surface-4);
-  border-color: var(--line-3);
+.ctto-tc-card:hover {
   transform: translateY(-1px);
-  box-shadow: var(--shadow-1);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+  background: var(--surface-4);
 }
 
-.ctto-kb-top {
+.ctto-tc-card:focus-visible {
+  outline: 1.5px solid var(--color-gold, #D4A574);
+  outline-offset: 3px;
+}
+
+.ctto-tc-top {
   display: flex;
   align-items: center;
   gap: var(--s-2);
   margin-bottom: var(--s-2);
 }
 
-.ctto-kb-nome {
-  font-size: var(--t-xs);
+.ctto-tc-info { min-width: 0; flex: 1; }
+
+.ctto-tc-nome {
+  font-size: var(--t-xs, 11px);
   font-weight: 600;
   color: var(--text-1);
+  font-family: var(--font-ui, 'Switzer', sans-serif);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.ctto-kb-empresa {
+.ctto-tc-sub {
   font-size: 10px;
   color: var(--text-4);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  margin-top: 1px;
 }
 
-.ctto-kb-tel {
+.ctto-tc-footer {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  gap: var(--s-2);
+}
+
+/* Badge clicável de temperatura */
+.ctto-temp-badge {
+  display: inline-flex;
+  align-items: center;
   gap: 4px;
-  font-size: 10px;
-  color: var(--text-3);
-  font-family: var(--font-mono);
-  margin-bottom: var(--s-2);
-}
-
-.ctto-kb-stages {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 3px;
-}
-
-.ctto-kb-move {
-  font-size: 9px;
-  font-weight: 600;
-  padding: 1px 7px;
+  font-size: var(--t-sm, 13px);
+  font-weight: 500;
+  font-family: var(--font-ui, 'Switzer', sans-serif);
+  padding: 2px 8px;
   border-radius: var(--r-full);
-  border: 1px solid transparent;
+  border: 1px solid color-mix(in srgb, var(--temp-cor) 40%, transparent);
+  background: color-mix(in srgb, var(--temp-cor) 12%, transparent);
+  color: var(--temp-cor);
   cursor: pointer;
-  transition: all var(--d-fast);
+  transition: background 160ms ease, transform 160ms ease;
+  line-height: 1.4;
+}
+
+.ctto-temp-badge:hover {
+  background: color-mix(in srgb, var(--temp-cor) 22%, transparent);
+  transform: scale(1.03);
+}
+
+/* Botão WhatsApp no card */
+.ctto-tc-wa {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--r-full);
   background: var(--surface-2);
   color: var(--text-3);
-  opacity: 0;
-  transform: translateY(2px);
-  transition: all var(--d-fast);
+  border: 1px solid var(--line-2);
+  transition: all 160ms ease;
+  flex-shrink: 0;
 }
 
-.ctto-kb-card:hover .ctto-kb-move { opacity: 1; transform: translateY(0); }
-.ctto-kb-move:hover { background: var(--surface-4); color: var(--text-1); border-color: var(--line-3); }
+.ctto-tc-wa:hover {
+  background: #25D36620;
+  color: #25D366;
+  border-color: #25D36640;
+}
+
+/* Dropdown de troca de temperatura */
+.ctto-temp-dropdown {
+  position: fixed;
+  z-index: 9999;
+  background: var(--surface-3, #1D2125);
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-lg);
+  padding: var(--s-1);
+  min-width: 150px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.32);
+  animation: fadeSlideIn 160ms var(--ease-out, cubic-bezier(0.32, 0.72, 0, 1)) both;
+}
+
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.ctto-td-item {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  width: 100%;
+  padding: var(--s-2) var(--s-3);
+  border-radius: var(--r-md);
+  font-size: var(--t-sm, 13px);
+  font-weight: 500;
+  color: var(--temp-cor);
+  background: transparent;
+  cursor: pointer;
+  transition: background 120ms ease;
+  text-align: left;
+  border: none;
+}
+
+.ctto-td-item:hover {
+  background: color-mix(in srgb, var(--temp-cor) 12%, transparent);
+}
 
 /* ── Detail panel (slide-in) ── */
 .ctto-detail-backdrop {
@@ -3610,26 +3707,41 @@
   margin-bottom: var(--s-2);
 }
 
-.ctto-kanban-stages-sel {
+/* Seletor de temperatura no detail panel */
+.ctto-temp-sel {
   display: flex;
   flex-wrap: wrap;
   gap: var(--s-2);
 }
 
-.ctto-stage-sel-btn {
+.ctto-temp-sel-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   padding: var(--s-1) var(--s-3);
   border-radius: var(--r-full);
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 500;
+  font-family: var(--font-ui, 'Switzer', sans-serif);
   cursor: pointer;
-  border: 1px solid var(--line-2);
-  background: var(--surface-2);
-  color: var(--text-3);
-  transition: all var(--d-fast);
+  border: 1px solid color-mix(in srgb, var(--temp-cor) 30%, transparent);
+  background: color-mix(in srgb, var(--temp-cor) 8%, transparent);
+  color: var(--temp-cor);
+  transition: all 160ms ease;
+  opacity: 0.65;
 }
 
-.ctto-stage-sel-btn:hover { background: var(--surface-3); color: var(--text-1); }
-.ctto-stage-sel-btn.active { font-weight: 700; }
+.ctto-temp-sel-btn:hover {
+  background: color-mix(in srgb, var(--temp-cor) 18%, transparent);
+  opacity: 1;
+}
+
+.ctto-temp-sel-btn.active {
+  background: color-mix(in srgb, var(--temp-cor) 22%, transparent);
+  border-color: var(--temp-cor);
+  font-weight: 700;
+  opacity: 1;
+}
 
 /* ── Footer ── */
 .ctto-detail-footer {
@@ -3968,12 +4080,23 @@
     flex-shrink: 0;
   }
 
-  .ctto-kanban { grid-template-columns: repeat(2, 1fr); min-width: 0; }
+  .ctto-temp {
+    grid-template-columns: repeat(3, minmax(180px, 1fr));
+    overflow-x: auto;
+    padding-bottom: var(--s-3);
+  }
 }
 
 @media (max-width: 600px) {
   .ctto-cards-grid { grid-template-columns: 1fr; }
-  .ctto-kanban { grid-template-columns: 1fr; }
+  .ctto-temp {
+    grid-template-columns: repeat(6, minmax(220px, 1fr));
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: var(--s-4);
+  }
+  .ctto-temp-col { scroll-snap-align: start; }
   .ctto-content { padding: var(--s-3); }
 }
 
