@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR" data-theme="dark">
+<html lang="pt-BR" data-theme="dark" data-mode="pessoal">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -15,7 +15,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=Switzer:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
   <link rel="stylesheet" href="css/tokens.css">
   <link rel="stylesheet" href="css/base.css">
-  <link rel="stylesheet" href="css/layout.css?v=8">
+  <link rel="stylesheet" href="css/layout.css?v=10">
   <link rel="stylesheet" href="css/bento.css?v=8">
   <link rel="stylesheet" href="css/components.css?v=8">
   <link rel="stylesheet" href="css/pages.css?v=9">
@@ -32,6 +32,18 @@
       <div class="brand-text">
         <span class="name">Mentor<em>24h</em></span>
         <span class="tag">Seu Hub Pessoal</span>
+      </div>
+
+      <!-- Modo Switcher -->
+      <div class="modo-switcher">
+        <button class="modo-btn modo-pessoal-btn" data-modo="pessoal" title="Modo Pessoal">
+          <span data-icon="user-circle" data-size="14"></span>
+          <span class="modo-label">Pessoal</span>
+        </button>
+        <button class="modo-btn modo-negocio-btn" data-modo="negocio" title="Modo Negócio">
+          <span data-icon="briefcase" data-size="14"></span>
+          <span class="modo-label">Negócio</span>
+        </button>
       </div>
     </div>
 
@@ -51,54 +63,35 @@
         <span class="nav-label">Dashboard</span>
       </div>
 
-      <!-- Grupo: Chat -->
-      <div class="nav-group" id="group-chat">
-        <div class="nav-group-header" data-group="chat">
-          <span data-icon="message-square"></span>
-          <span class="nav-label">Chat</span>
+      <!-- Grupo: Pessoal (Agenda, Tarefas, Medicamentos, Contatos, Finanças) -->
+      <div class="nav-group" id="group-pessoal" data-context="pessoal">
+        <div class="nav-group-header" data-group="pessoal">
+          <span data-icon="user-circle"></span>
+          <span class="nav-label">Vida Pessoal</span>
           <span class="nav-group-arrow" data-icon="chevron-right" data-size="14"></span>
         </div>
         <div class="nav-group-items">
-          <div class="nav-item nav-sub" data-nav="chat-ai">
-            <span data-icon="bot" data-size="14"></span>
-            <span class="nav-label">Chat AI</span>
+          <div class="nav-item nav-sub" data-nav="agenda">
+            <span data-icon="calendar" data-size="14"></span>
+            <span class="nav-label">Agenda</span>
           </div>
-          <div class="nav-item nav-sub" data-nav="chat-wa">
-            <span data-icon="message-circle" data-size="14"></span>
-            <span class="nav-label">WhatsApp</span>
+          <div class="nav-item nav-sub" data-nav="tarefas">
+            <span data-icon="check-square" data-size="14"></span>
+            <span class="nav-label">Tarefas</span>
+          </div>
+          <div class="nav-item nav-sub" data-nav="medicamentos">
+            <span data-icon="pill" data-size="14"></span>
+            <span class="nav-label">Saúde & Hábitos</span>
+          </div>
+          <div class="nav-item nav-sub" data-nav="contatos">
+            <span data-icon="address-book" data-size="14"></span>
+            <span class="nav-label">Contatos</span>
           </div>
         </div>
       </div>
 
-      <!-- Grupo: Negócio -->
-      <div class="nav-group" id="group-negocio">
-        <div class="nav-group-header" data-group="negocio">
-          <span data-icon="briefcase"></span>
-          <span class="nav-label">Meu Negócio</span>
-          <span class="nav-group-arrow" data-icon="chevron-right" data-size="14"></span>
-        </div>
-        <div class="nav-group-items">
-          <div class="nav-item nav-sub" data-nav="produtos">
-            <span data-icon="package" data-size="14"></span>
-            <span class="nav-label">Produtos</span>
-          </div>
-          <div class="nav-item nav-sub" data-nav="vendas">
-            <span data-icon="shopping-cart" data-size="14"></span>
-            <span class="nav-label">Vendas</span>
-          </div>
-          <div class="nav-item nav-sub" data-nav="estoque">
-            <span data-icon="archive" data-size="14"></span>
-            <span class="nav-label">Estoque</span>
-          </div>
-          <div class="nav-item nav-sub" data-nav="clientes">
-            <span data-icon="users" data-size="14"></span>
-            <span class="nav-label">Clientes</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Grupo: Finanças -->
-      <div class="nav-group" id="group-financas">
+      <!-- Grupo: Finanças (Contas, Transações, Metas) -->
+      <div class="nav-group" id="group-financas" data-context="pessoal">
         <div class="nav-group-header" data-group="financas">
           <span data-icon="wallet"></span>
           <span class="nav-label">Finanças</span>
@@ -121,29 +114,29 @@
         </div>
       </div>
 
-      <!-- Grupo: Pessoal -->
-      <div class="nav-group" id="group-pessoal">
-        <div class="nav-group-header" data-group="pessoal">
-          <span data-icon="user-circle"></span>
-          <span class="nav-label">Vida Pessoal</span>
+      <!-- Grupo: Negócio (Clientes, Produtos, Vendas, Estoque) -->
+      <div class="nav-group" id="group-negocio" data-context="negocio">
+        <div class="nav-group-header" data-group="negocio">
+          <span data-icon="briefcase"></span>
+          <span class="nav-label">Meu Negócio</span>
           <span class="nav-group-arrow" data-icon="chevron-right" data-size="14"></span>
         </div>
         <div class="nav-group-items">
-          <div class="nav-item nav-sub" data-nav="agenda">
-            <span data-icon="calendar" data-size="14"></span>
-            <span class="nav-label">Agenda</span>
+          <div class="nav-item nav-sub" data-nav="clientes">
+            <span data-icon="users" data-size="14"></span>
+            <span class="nav-label">Clientes</span>
           </div>
-          <div class="nav-item nav-sub" data-nav="medicamentos">
-            <span data-icon="pill" data-size="14"></span>
-            <span class="nav-label">Medicamentos</span>
+          <div class="nav-item nav-sub" data-nav="produtos">
+            <span data-icon="package" data-size="14"></span>
+            <span class="nav-label">Produtos</span>
           </div>
-          <div class="nav-item nav-sub" data-nav="tarefas">
-            <span data-icon="check-square" data-size="14"></span>
-            <span class="nav-label">Tarefas</span>
+          <div class="nav-item nav-sub" data-nav="vendas">
+            <span data-icon="shopping-cart" data-size="14"></span>
+            <span class="nav-label">Vendas</span>
           </div>
-          <div class="nav-item nav-sub" data-nav="contatos">
-            <span data-icon="address-book" data-size="14"></span>
-            <span class="nav-label">Contatos</span>
+          <div class="nav-item nav-sub" data-nav="estoque">
+            <span data-icon="archive" data-size="14"></span>
+            <span class="nav-label">Estoque</span>
           </div>
         </div>
       </div>
@@ -185,6 +178,7 @@
           <span id="topbar-title-text">Visão geral </span>
           <em class="display-italic" id="topbar-title-em">do dia</em>
         </h1>
+        <span class="modo-label-header" id="modo-label-header" style="display:none; font-size:var(--type-xs); color:var(--text-quiet); margin-top:var(--s-1)">— Modo Pessoal</span>
       </div>
       <div class="topbar-actions">
 
@@ -602,7 +596,7 @@
 <script src="js/clientes.js?v=8"></script>
 <script src="js/command-palette.js?v=8"></script>
 <script src="js/leo-data.js?v=8"></script>
-<script src="js/app.js?v=8"></script>
+<script src="js/app.js?v=10"></script>
 
 </body>
 </html>

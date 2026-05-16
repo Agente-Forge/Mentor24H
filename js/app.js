@@ -7,6 +7,7 @@ const App = (() => {
     importarDadosLeo();
     DB.updateStatusContas();
     Theme.init();
+    initModoSwitcher();        /* Iniciá-lo ANTES de initSidebar */
     initSidebar();
     initNavGroups();   /* precisa ser antes de initRouter para o navigate wrapper estar pronto */
     initRouter();
@@ -15,6 +16,46 @@ const App = (() => {
     Alarm.init();
     CommandPalette.init();
     Icons.render();
+  }
+
+  function initModoSwitcher() {
+    const modo = localStorage.getItem('mentor24h_modoAtivo') || 'pessoal';
+    applyMode(modo);
+
+    document.querySelectorAll('.modo-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        applyMode(btn.dataset.modo);
+      });
+    });
+  }
+
+  function applyMode(modo) {
+    if (!['pessoal', 'negocio'].includes(modo)) modo = 'pessoal';
+    localStorage.setItem('mentor24h_modoAtivo', modo);
+    document.documentElement.setAttribute('data-mode', modo);
+
+    /* Atualizar botões do switcher */
+    document.querySelectorAll('.modo-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.modo === modo);
+    });
+
+    /* Atualizar saudação no header */
+    const modoLabel = modo === 'pessoal' ? 'Modo Pessoal' : 'Modo Negócio';
+    const headerLabel = document.getElementById('modo-label-header');
+    if (headerLabel) {
+      headerLabel.textContent = `— ${modoLabel}`;
+    }
+
+    /* Visibilidade dos grupos */
+    document.querySelectorAll('[data-context]').forEach(group => {
+      const visible = group.dataset.context === modo;
+      group.style.display = visible ? '' : 'none';
+    });
+
+    /* Fechar todos os grupos e abrir o primeiro do modo ativo */
+    document.querySelectorAll('.nav-group').forEach(g => g.classList.remove('open'));
+    const firstGroup = document.querySelector(`[data-context="${modo}"]`);
+    if (firstGroup) firstGroup.classList.add('open');
   }
 
   function initNavGroups() {
@@ -33,7 +74,6 @@ const App = (() => {
     /* Abrir automaticamente o grupo da página ativa */
     const openGroupFor = (page) => {
       const groupMap = {
-        'chat-ai': 'group-chat', 'chat-wa': 'group-chat',
         'produtos': 'group-negocio', 'vendas': 'group-negocio', 'estoque': 'group-negocio', 'clientes': 'group-negocio',
         'contas': 'group-financas', 'transacoes': 'group-financas', 'metas': 'group-financas',
         'agenda': 'group-pessoal', 'medicamentos': 'group-pessoal', 'tarefas': 'group-pessoal', 'contatos': 'group-pessoal',
@@ -130,7 +170,6 @@ const App = (() => {
   }
 
   const BNAV_GROUP = {
-    'chat-ai': 'chat-ai', 'chat-wa': 'chat-ai',
     'produtos': 'vendas', 'vendas': 'vendas', 'estoque': 'vendas', 'clientes': 'vendas',
     'contas': 'contas', 'transacoes': 'contas', 'metas': 'contas',
     'kanban': 'contas', 'categorias': 'contas',

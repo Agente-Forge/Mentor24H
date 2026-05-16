@@ -973,6 +973,83 @@
 }
 
 /* ─────────────────────────────────────────────
+   MODO SWITCHER — Pessoal / Negócio
+─────────────────────────────────────────────── */
+.modo-switcher {
+  display: flex;
+  gap: 4px;
+  padding: var(--s-2);
+  background: var(--bg-surface);
+  border-radius: 100px;
+  margin-top: var(--s-3);
+}
+
+.modo-btn {
+  flex: 1;
+  padding: 6px 12px;
+  border-radius: 100px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-2);
+  cursor: pointer;
+  font-family: var(--font-ui);
+  font-size: var(--type-sm);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  transition: all var(--d-base) var(--ease-out);
+  white-space: nowrap;
+}
+
+.modo-btn:hover:not(.active) {
+  opacity: 0.7;
+}
+
+.modo-pessoal-btn.active {
+  background: var(--signature);
+  color: var(--base);
+  border-color: var(--signature);
+}
+
+.modo-negocio-btn.active {
+  background: var(--info);
+  color: var(--base);
+  border-color: var(--info);
+}
+
+.modo-btn:focus-visible {
+  outline: 1.5px solid var(--signature);
+  outline-offset: 3px;
+}
+
+.modo-label {
+  display: none;
+}
+
+/* Mostrar label em desktop */
+@media (min-width: 768px) {
+  .modo-label { display: inline; }
+}
+
+/* Contexto: grupos visíveis conforme o modo */
+html[data-mode="pessoal"] [data-context="negocio"] { display: none !important; }
+html[data-mode="negocio"] [data-context="pessoal"] { display: none !important; }
+
+/* Transição ao trocar modo */
+[data-context] {
+  transition: opacity 240ms var(--ease-out), visibility 240ms var(--ease-out);
+}
+
+.modo-label-header {
+  font-size: var(--type-xs);
+  color: var(--text-quiet);
+  margin-top: var(--s-1);
+  font-family: var(--font-ui);
+}
+
+/* ─────────────────────────────────────────────
    RESPONSIVE — Mobile
 ─────────────────────────────────────────────── */
 @media (max-width: 640px) {
