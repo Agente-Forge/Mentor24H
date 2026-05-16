@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ANATOMIA — Mentor24h v5.2</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: linear-gradient(135deg, #0F0F1E 0%, #1A1A2E 100%);
+            color: #E0E0E0;
+            line-height: 1.6;
+            padding: 2rem;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            border-bottom: 2px solid #D4A574;
+            padding-bottom: 2rem;
+        }
+        .header h1 {
+            font-size: 2.5rem;
+            color: #D4A574;
+            margin-bottom: 0.5rem;
+        }
+        .header p {
+            font-size: 1.1rem;
+            color: #A0A0A0;
+            margin-bottom: 1rem;
+        }
+        .status-badge {
+            display: inline-block;
+            background: #5EE39A;
+            color: #0F0F1E;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin-bottom: 2rem; }
+
+        .card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(212, 165, 116, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            backdrop-filter: blur(10px);
+        }
+        .card h3 {
+            color: #D4A574;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .card p, .card li {
+            color: #C0C0C0;
+            margin-bottom: 0.5rem;
+        }
+        .card ul { padding-left: 1.5rem; }
+
+        .icon { width: 20px; height: 20px; }
+
+        .section-title {
+            font-size: 1.8rem;
+            color: #D4A574;
+            margin: 2rem 0 1rem 0;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid rgba(212, 165, 116, 0.3);
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        .feature-item {
+            background: rgba(94, 227, 154, 0.1);
+            border-left: 4px solid #5EE39A;
+            padding: 1rem;
+            border-radius: 8px;
+        }
+        .feature-item strong { color: #5EE39A; }
+
+        .module-box {
+            background: rgba(123, 182, 255, 0.1);
+            border: 2px solid #7BB6FF;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+        .module-box h4 {
+            color: #7BB6FF;
+            margin-bottom: 0.5rem;
+        }
+        .module-box .sub-items {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        .sub-item {
+            background: rgba(123, 182, 255, 0.2);
+            padding: 0.5rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        .tech-stack {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+        }
+        .tech-item {
+            background: rgba(244, 114, 182, 0.1);
+            border: 1px solid #F472B6;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .tech-item strong {
+            display: block;
+            color: #F472B6;
+            margin-bottom: 0.5rem;
+        }
+        .tech-item span { font-size: 0.9rem; color: #A0A0A0; }
+
+        .timeline {
+            margin: 2rem 0;
+            position: relative;
+            padding-left: 2rem;
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(180deg, #D4A574, transparent);
+        }
+        .timeline-item {
+            margin-bottom: 2rem;
+            position: relative;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -2.5rem;
+            top: 0.5rem;
+            width: 10px;
+            height: 10px;
+            background: #D4A574;
+            border-radius: 50%;
+            border: 2px solid #1A1A2E;
+        }
+        .timeline-item strong {
+            color: #D4A574;
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+        .timeline-item em {
+            color: #5EE39A;
+            font-style: normal;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .comparison-table th {
+            background: rgba(212, 165, 116, 0.2);
+            color: #D4A574;
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 2px solid rgba(212, 165, 116, 0.3);
+        }
+        .comparison-table td {
+            padding: 0.8rem 1rem;
+            border-bottom: 1px solid rgba(212, 165, 116, 0.1);
+        }
+        .comparison-table tr:hover {
+            background: rgba(212, 165, 116, 0.05);
+        }
+
+        .alert {
+            background: rgba(255, 107, 122, 0.1);
+            border-left: 4px solid #FF6B7A;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+        .alert strong { color: #FF6B7A; }
+
+        .success {
+            background: rgba(94, 227, 154, 0.1);
+            border-left: 4px solid #5EE39A;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+        .success strong { color: #5EE39A; }
+
+        code {
+            background: rgba(255,255,255,0.05);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            color: #FBBF24;
+        }
+
+        .blueprint {
+            background: rgba(123, 182, 255, 0.05);
+            border: 2px dashed #7BB6FF;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 2rem 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: #7BB6FF;
+            overflow-x: auto;
+            line-height: 1.4;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(212, 165, 116, 0.2);
+            color: #808080;
+            font-size: 0.9rem;
+        }
+
+        .tag {
+            display: inline-block;
+            background: rgba(94, 227, 154, 0.2);
+            color: #5EE39A;
+            padding: 0.25rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            margin: 0.25rem;
+        }
+        .tag.critical { background: rgba(255, 107, 122, 0.2); color: #FF6B7A; }
+        .tag.medium { background: rgba(251, 191, 36, 0.2); color: #FBBF24; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- HEADER -->
+    <div class="header">
+        <h1>🏗️ ANATOMIA — Mentor24h</h1>
+        <p>Hub Pessoal & Empreendedor v5.2 — Deploy Completo</p>
+        <span class="status-badge">✅ Fase 7 (Deploy) Concluída</span>
+    </div>
+
+    <!-- RESUMO EXECUTIVO -->
+    <div class="card" style="margin-bottom: 2rem;">
+        <h3>📊 Resumo Executivo</h3>
+        <p><strong>Projeto:</strong> Transformação de "controle-financeiro v2" (FinFlow) → Mentor24h (Hub Pessoal + Empreendedor)</p>
+        <p><strong>Iniciado:</strong> 2026-05-12 | <strong>Status:</strong> Fase 7 (Deploy) Completa → Fase 8 (Monitoramento) próxima</p>
+        <p><strong>Stack:</strong> HTML + CSS + JavaScript puro (zero dependências externas)</p>
+        <p><strong>Storage:</strong> LocalStorage + GitHub Pages Deploy</p>
+        <p><strong>Design:</strong> Aurora Design System OBSIDIAN (paleta premium editorial)</p>
+        <p><strong>IA Integrada:</strong> OpenAI, Groq, OpenRouter, Anthropic, Gemini (Function Calling)</p>
+    </div>
+
+    <!-- MÓDULOS PRINCIPAIS -->
+    <div class="section-title">🎯 Módulos Implementados</div>
+
+    <div class="grid">
+        <!-- FINANÇAS -->
+        <div class="card">
+            <h3>💰 Finanças Pessoais</h3>
+            <div class="sub-items" style="display: grid; gap: 0.5rem;">
+                <div class="sub-item">💳 Contas a pagar</div>
+                <div class="sub-item">📊 Transações</div>
+                <div class="sub-item">🎯 Metas</div>
+                <div class="sub-item">📈 Relatórios</div>
+            </div>
+            <p style="margin-top: 1rem; font-size: 0.9rem;"><strong>Recursos:</strong> Contas recorrentes, parceladas, filtros avançados, data de pagamento inteligente</p>
+        </div>
+
+        <!-- NEGÓCIO -->
+        <div class="card">
+            <h3>💼 Meu Negócio</h3>
+            <div class="sub-items" style="display: grid; gap: 0.5rem;">
+                <div class="sub-item">📦 Produtos</div>
+                <div class="sub-item">🛒 Vendas</div>
+                <div class="sub-item">📋 Estoque</div>
+                <div class="sub-item">👥 Clientes (CRM)</div>
+            </div>
+            <p style="margin-top: 1rem; font-size: 0.9rem;"><strong>Recursos:</strong> CRUD completo, cálculo de margem de lucro, alertas de estoque</p>
+        </div>
+
+        <!-- PESSOAL -->
+        <div class="card">
+            <h3>👤 Vida Pessoal</h3>
+            <div class="sub-items" style="display: grid; gap: 0.5rem;">
+                <div class="sub-item">📅 Agenda</div>
+                <div class="sub-item">💊 Medicamentos</div>
+                <div class="sub-item">✅ Tarefas</div>
+                <div class="sub-item">👥 Contatos (v2)</div>
+            </div>
+            <p style="margin-top: 1rem; font-size: 0.9rem;"><strong>Recursos:</strong> Contexto duplo de contatos, import vCard/CSV, kanban de clientes</p>
+        </div>
+
+        <!-- CHAT IA -->
+        <div class="card">
+            <h3>🤖 Chat & IA</h3>
+            <div class="sub-items" style="display: grid; gap: 0.5rem;">
+                <div class="sub-item">🧠 Chat AI (Claude)</div>
+                <div class="sub-item">💬 WhatsApp CRM</div>
+                <div class="sub-item">🛠️ Function Calling</div>
+            </div>
+            <p style="margin-top: 1rem; font-size: 0.9rem;"><strong>Recursos:</strong> RAG + Function Calling dinâmico, 11 ferramentas de contexto, systemPrompt v4</p>
+        </div>
+    </div>
+
+    <!-- ARQUITETURA -->
+    <div class="section-title">🏗️ Arquitetura & Estrutura</div>
+
+    <div class="blueprint">controle-financeiro v2/
+├── index.html                  (Ponto de entrada, CSP meta-tag SEC-01)
+├── css/
+│   ├── tokens.css             (Paleta OBSIDIAN: gold #D4A574, etc.)
+│   ├── base.css               (Reset + normalize)
+│   ├── layout.css             (Sidebar, topbar, bottom nav, grid)
+│   ├── bento.css              (Dashboard grid assimétrico)
+│   ├── components.css         (Card, Button, Modal, Toast, Badge)
+│   ├── pages.css              (CSS específico por módulo)
+│   └── motion.css             (Transições, animações)
+│
+├── js/
+│   ├── db.js                  (LocalStorage 16 schemas + migrations)
+│   ├── router.js              (SPA router — Dashboard → Contatos)
+│   ├── utils.js               (Funções utilitárias: uid(), formatCurrency, etc.)
+│   ├── modal.js               (Sistema de modais/forms)
+│   ├── toast.js               (Notificações)
+│   ├── icons.js               (SVG icons inline)
+│   │
+│   ├── llm.js                 (5 provedores LLM + chat interface)
+│   ├── llm-tools.js           (11 function calling tools)
+│   │
+│   ├── config.js              (Preferências, export/import)
+│   ├── transacoes.js          (Histórico de transações)
+│   ├── contas.js              (Bills com filtros avançados)
+│   ├── metas.js               (Savings goals — caixinhas)
+│   ├── kanban.js              (Drag & drop task board)
+│   ├── categorias.js          (Tag system — cores + ícones)
+│   ├── chat-wa.js             (WhatsApp CRM + bubbles)
+│   ├── contatos.js            (Contexto duplo, 3 views, kanban cliente)
+│   ├── produtos.js            (Catálogo c/ margem de lucro)
+│   ├── vendas.js              (Carrinho + history)
+│   ├── estoque.js             (Inventory management)
+│   ├── agenda.js              (Calendário + eventos)
+│   ├── medicamentos.js        (Dose tracking)
+│   ├── tarefas.js             (TODO list + kanban)
+│   ├── charts.js              (SVG chart rendering)
+│   │
+│   ├── app.js                 (Inicialização, router principal)
+│   ├── leo-data.js            (Seed data demo)
+│   └── leo-import.json        (Importação de dados exemplo)
+│
+├── .github/
+│   └── workflows/
+│       └── deploy.yml         (GitHub Actions → GitHub Pages)
+│
+├── .anatomia/
+│   ├── ANATOMIA-COMPLETA.html (Este arquivo — relatório visual)
+│   └── [outros relatórios]
+│
+├── FORGE-CHECKLIST.md         (Histórico FORGE: 0-7 fases)
+├── PLANO-MENTOR24H.md         (Visão do produto, módulos)
+└── README.md                  (Setup + instruções)
+    </div>
+
+    <!-- STACK TÉCNICO -->
+    <div class="section-title">⚙️ Stack Técnico</div>
+
+    <div class="tech-stack">
+        <div class="tech-item">
+            <strong>Frontend</strong>
+            <span>HTML5 + CSS3 + ES6+ JavaScript</span>
+        </div>
+        <div class="tech-item">
+            <strong>Storage</strong>
+            <span>LocalStorage (JSON) + GitHub Pages</span>
+        </div>
+        <div class="tech-item">
+            <strong>Design System</strong>
+            <span>Aurora OBSIDIAN (custom tokens)</span>
+        </div>
+        <div class="tech-item">
+            <strong>Tipografia</strong>
+            <span>Fraunces + Switzer + JetBrains Mono</span>
+        </div>
+        <div class="tech-item">
+            <strong>LLM Providers</strong>
+            <span>OpenAI, Groq, OpenRouter, Anthropic, Gemini</span>
+        </div>
+        <div class="tech-item">
+            <strong>Deploy</strong>
+            <span>GitHub Actions → GitHub Pages</span>
+        </div>
+    </div>
+
+    <!-- FUNCIONALIDADES CHAVE -->
+    <div class="section-title">✨ Funcionalidades Chave</div>
+
+    <div class="grid" style="grid-template-columns: 1fr;">
+        <div class="card">
+            <h3>💎 Features Premium</h3>
+            <div class="feature-grid">
+                <div class="feature-item">
+                    <strong>🎨 Theme Toggle</strong> Dark/Light com persistência
+                </div>
+                <div class="feature-item">
+                    <strong>📱 Responsive</strong> Desktop, tablet, mobile com bottom nav
+                </div>
+                <div class="feature-item">
+                    <strong>🔐 Security</strong> CSP meta-tag (SEC-01), XSS escaped, API key segura
+                </div>
+                <div class="feature-item">
+                    <strong>⚡ Performance</strong> Google Fonts preconnect, debounce 150ms, will-change CSS
+                </div>
+                <div class="feature-item">
+                    <strong>🎯 Function Calling</strong> IA puxa dados sob demanda (não RAG estático)
+                </div>
+                <div class="feature-item">
+                    <strong>🔄 Auto-Migration</strong> Schemas evoluem automaticamente v1→v4
+                </div>
+                <div class="feature-item">
+                    <strong>📊 Smart Filtering</strong> Segmented control + range picker + presets
+                </div>
+                <div class="feature-item">
+                    <strong>📥 Import/Export</strong> JSON backup + vCard/CSV parsing
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CICLO FORGE -->
+    <div class="section-title">🚀 Histórico FORGE (Sistema SDD)</div>
+
+    <div class="timeline">
+        <div class="timeline-item">
+            <strong>Fase 0 — Fundação</strong>
+            <em>2026-05-12</em> — Estrutura base + AGENTS.md
+        </div>
+        <div class="timeline-item">
+            <strong>Fase 1 — Estratégia & Produto</strong>
+            <em>2026-05-12</em> — PRD + CONSTITUTION + Planning (5 sprints, 40 tasks)
+        </div>
+        <div class="timeline-item">
+            <strong>Fase 2 — Design System</strong>
+            <em>2026-05-13</em> — Tokens + Components + Layout + Páginas + Polish
+        </div>
+        <div class="timeline-item">
+            <strong>Fase 3 — Documentação Técnica</strong>
+            <em>2026-05-13</em> — SPEC.md (19 seções) + EXAMPLES.md (15 seções)
+        </div>
+        <div class="timeline-item">
+            <strong>Fase 4 — Segurança</strong>
+            <em>2026-05-13</em> — SBOM.json + CVE baseline + security-policies (10 riscos, 1 crítico)
+        </div>
+        <div class="timeline-item">
+            <strong>Fase 5 — Desenvolvimento</strong>
+            <em>2026-05-13</em> — 5 sprints: DB → LLM → Chat → Pessoal → Negócio
+        </div>
+        <div class="timeline-item">
+            <strong>Fase 6 — Revisão & Qualidade</strong>
+            <em>2026-05-13</em> — Code review (4 issues fixadas) + Performance (3 otimizações)
+        </div>
+        <div class="timeline-item">
+            <strong>Fase 7 — Deploy</strong>
+            <em>2026-05-13</em> — GitHub Actions CI/CD + GitHub Pages ✅ COMPLETA
+        </div>
+        <div class="timeline-item">
+            <strong>Fase 8 — Monitoramento</strong>
+            <em>próximo</em> — skill-health-monitor (semanal)
+        </div>
+    </div>
+
+    <!-- DADOS SCHEMA -->
+    <div class="section-title">🗂️ Schema de Dados (16 Collections)</div>
+
+    <table class="comparison-table">
+        <thead>
+            <tr>
+                <th>Collection</th>
+                <th>LocalStorage Key</th>
+                <th>Campos Principais</th>
+                <th>Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>config</strong></td>
+                <td>finflow.config</td>
+                <td>nomeUsuario, saldoInicial, moeda, tema, avatarCor</td>
+                <td>✅</td>
+            </tr>
+            <tr>
+                <td><strong>contas</strong></td>
+                <td>finflow.contas</td>
+                <td>id, descricao, valor, dataVencimento, status, categoria, recorrente, parcelado</td>
+                <td>✅</td>
+            </tr>
+            <tr>
+                <td><strong>transacoes</strong></td>
+                <td>finflow.txs</td>
+                <td>id, descricao, valor, data, tipo (entrada/saida), categoria</td>
+                <td>✅</td>
+            </tr>
+            <tr>
+                <td><strong>metas</strong></td>
+                <td>finflow.metas</td>
+                <td>id, nome, valorAlvo, valorAtual, dataCriacao, depositos[], saques[]</td>
+                <td>✅</td>
+            </tr>
+            <tr>
+                <td><strong>categorias</strong></td>
+                <td>finflow.cats</td>
+                <td>id, nome, cor, icone, ordem</td>
+                <td>✅</td>
+            </tr>
+            <tr>
+                <td><strong>agenda</strong></td>
+                <td>mentor24h.agenda</td>
+                <td>id, titulo, data, hora, tipo, recorrente, descricao</td>
+                <td>✅</td>
+            </tr>
+            <tr>
+                <td><strong>medicamentos</strong></td>
+                <td>mentor24h.medicamentos</td>
+                <td>id, nome, dosagem, horarios[], frequencia, historico[]</td>
+                <td>✅</td>
+            </tr>
+            <tr>
+                <td><strong>tarefas</strong></td>
+                <td>mentor24h.tarefas</td>
+                <td>id, titulo, data, prioridade, status, subtarefas[], kanbanStage</td>
+                <td>✅</td>
+            </tr>
+            <tr>
+                <td><strong>contatos</strong></td>
+                <td>mentor24h.contatos</td>
+                <td>id, nome, telefone, email, contextos[], tags, kanbanStage, atualizadoEm</td>
+                <td>✅ v2</td>
+            </tr>
+            <tr>
+                <td><strong>produtos</strong></td>
+                <td>mentor24h.produtos</td>
+                <td>id, nome, preco, custo, categoria, estoque, estoqueMinimo</td>
+                <td>✅</td>
+            </tr>
+            <tr>
+                <td><strong>vendas</strong></td>
+                <td>mentor24h.vendas</td>
+                <td>id, cliente, items[], total, data, pagamento, lucro</td>
+                <td>✅</td>
+            </tr>
+            <tr>
+                <td><strong>clientes</strong></td>
+                <td>mentor24h.clientes-neg</td>
+                <td>id, nome, telefone, email, historico[], saldoDevedor, anotacoes</td>
+                <td>✅</td>
+            </tr>
+            <tr>
+                <td><strong>chat (contatos)</strong></td>
+                <td>mentor24h.chat-contatos</td>
+                <td>id, contatoId, ultimaMensagem, data</td>
+                <td>✅</td>
+            </tr>
+            <tr>
+                <td><strong>chat (mensagens)</strong></td>
+                <td>mentor24h.chat-msgs</td>
+                <td>id, contatoId, texto, autor, timestamp</td>
+                <td>✅</td>
+            </tr>
+            <tr>
+                <td><strong>llmConfig</strong></td>
+                <td>mentor24h.llm-config</td>
+                <td>provider, apiKeys {}, models {}, systemPrompt (v4)</td>
+                <td>✅</td>
+            </tr>
+            <tr>
+                <td><strong>llmConversas</strong></td>
+                <td>mentor24h.llm-conversas</td>
+                <td>id, data, titulo, mensagens[], contexto (snapshot)</td>
+                <td>✅</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- SEGURANÇA -->
+    <div class="section-title">🔐 Segurança & Compliance</div>
+
+    <div class="grid" style="grid-template-columns: 1fr;">
+        <div class="alert">
+            <strong>⚠️ Risco Crítico:</strong> API keys LLM em localStorage (plaintext).
+            <strong>Status:</strong> Mitigado com CSP + aviso visual + função <code>friendlyApiError()</code>
+        </div>
+
+        <div class="success">
+            <strong>✅ Implementado:</strong> CSP meta-tag (SEC-01) bloqueia exfiltração localStorage
+        </div>
+
+        <div class="card">
+            <h3>🛡️ Medidas Implementadas</h3>
+            <ul>
+                <li><strong>SEC-01:</strong> Content Security Policy (default-src 'self', connect-src whitelisted)</li>
+                <li><strong>SEC-02:</strong> XSS Protection — todas as renderizações com <code>esc()</code></li>
+                <li><strong>SEC-03:</strong> Modal ao invés de <code>prompt()</code> — consistência UX</li>
+                <li><strong>SEC-05:</strong> Aviso visual ao salvar API key — "⚠️ Armazenado em localStorage"</li>
+                <li><strong>SEC-06/07:</strong> Google Fonts CSP allowlist</li>
+                <li><strong>SEC-08/09/10/11:</strong> Provider whitelisting (OpenAI, Groq, etc.)</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- RECENTES MUDANÇAS -->
+    <div class="section-title">🔥 Mudanças Recentes (2026-05-14)</div>
+
+    <div class="grid" style="grid-template-columns: 1fr;">
+        <div class="card">
+            <h3>UI — Contas (Data de Pagamento)</h3>
+            <p>Cards de contas pagas exibem data inteligente: "Pago hoje", "Pago ontem", ou "Pago em DD/MM/AAAA". Badge "· com atraso" se pago após vencimento.</p>
+            <span class="tag">UI Enhancement</span>
+        </div>
+
+        <div class="card">
+            <h3>UI — Contas (Filtros Redesenhados)</h3>
+            <p>Segmented control Dia/Semana/Mês/Intervalo + navegador de período dinâmico + range personalizado + faixa de contadores + filtros avançados com destaque visual.</p>
+            <span class="tag">UX Redesign</span>
+        </div>
+
+        <div class="card">
+            <h3>Contatos — Contexto Duplo v2</h3>
+            <p>Completo redesenho: 6 contextos (pessoal/trabalho/cliente/parceiro/fornecedor/família), 3 views (Cards/Lista/Kanban), import vCard+CSV com detecção de duplicatas, export por contexto, kanban 4 estágios para clientes.</p>
+            <span class="tag">Major Feature</span> <span class="tag critical">18 Bugs Fixed</span>
+        </div>
+
+        <div class="card">
+            <h3>Contatos — Toolbar Premium</h3>
+            <p>Duas linhas mobile, uma desktop. Segmented control para views, busca com contagem inteligente ("5 de 12"), ações desktop vs mobile responsivas.</p>
+            <span class="tag">UX Polish</span>
+        </div>
+    </div>
+
+    <!-- PRÓXIMOS PASSOS -->
+    <div class="section-title">🎯 Próximos Passos</div>
+
+    <div class="grid" style="grid-template-columns: 1fr;">
+        <div class="card">
+            <h3>Fase 8 — Monitoramento</h3>
+            <p><strong>8.1:</strong> skill-health-monitor (Haiku 4.5) — Relatório semanal de saúde do projeto</p>
+            <p><strong>Objetivo:</strong> Acompanhamento contínuo de bugs, performance, cobertura.</p>
+        </div>
+
+        <div class="card">
+            <h3>Polimento Contatos</h3>
+            <p>Formulário de novo contato / edição pode receber melhorias UX: validação inline, placeholders melhorados, inteligência de autopreenchimento.</p>
+        </div>
+
+        <div class="card">
+            <h3>Módulos Futuros</h3>
+            <p><strong>Saúde & Hábitos:</strong> Tracker com streak, métricas, metas de hábitos.</p>
+            <p><strong>Relatórios Avançados:</strong> Analytics por período, gráficos de tendência.</p>
+            <p><strong>Sincronização:</strong> Supabase para dados cloud-sync (fase posterior).</p>
+        </div>
+    </div>
+
+    <!-- METRICS -->
+    <div class="section-title">📊 Métricas do Projeto</div>
+
+    <div class="grid">
+        <div class="card" style="text-align: center;">
+            <h3 style="font-size: 2rem; color: #5EE39A;">16</h3>
+            <p>Collections no schema</p>
+        </div>
+        <div class="card" style="text-align: center;">
+            <h3 style="font-size: 2rem; color: #7BB6FF;">8</h3>
+            <p>Módulos principais</p>
+        </div>
+        <div class="card" style="text-align: center;">
+            <h3 style="font-size: 2rem; color: #F472B6;">11</h3>
+            <p>Function calling tools (IA)</p>
+        </div>
+        <div class="card" style="text-align: center;">
+            <h3 style="font-size: 2rem; color: #FBBF24;">5</h3>
+            <p>Provedores LLM</p>
+        </div>
+        <div class="card" style="text-align: center;">
+            <h3 style="font-size: 2rem; color: #D4A574;">40+</h3>
+            <p>Tasks FORGE planejadas</p>
+        </div>
+        <div class="card" style="text-align: center;">
+            <h3 style="font-size: 2rem; color: #5EE39A;">94</h3>
+            <p>Health Score (Sentinela)</p>
+        </div>
+    </div>
+
+    <!-- BLUEPRINT NAVEGAÇÃO -->
+    <div class="section-title">🗺️ Navegação do App</div>
+
+    <div class="blueprint">Sidebar (Desktop)
+├── 🏠 Dashboard
+├── 💬 Chat
+│   ├── 🧠 Chat AI (Claude + Function Calling)
+│   └── 💬 WhatsApp CRM (bubble interface)
+├── 💼 Meu Negócio
+│   ├── 📦 Produtos
+│   ├── 🛒 Vendas
+│   ├── 📋 Estoque
+│   └── 👥 Clientes (CRM)
+├── 💰 Finanças
+│   ├── 💳 Contas (+ filtros smart)
+│   ├── 📊 Transações
+│   └── 🎯 Metas
+├── 👤 Vida Pessoal
+│   ├── 📅 Agenda
+│   ├── 💊 Medicamentos
+│   ├── ✅ Tarefas (Kanban)
+│   └── 👥 Contatos (v2 + Contextos)
+└── ⚙️ Configurações
+
+Bottom Nav (Mobile)
+🏠 Dashboard | 💬 Chat | 💼 Negócio | 💰 Finanças | ⚙️ Config
+    </div>
+
+    <!-- QUICKSTART -->
+    <div class="section-title">🚀 Quick Start</div>
+
+    <div class="card">
+        <h3>Como Rodar</h3>
+        <p><strong>Opção 1 (Recomendado):</strong> VS Code Live Server</p>
+        <code>Botão direito em index.html → Open with Live Server</code>
+
+        <p style="margin-top: 1rem;"><strong>Opção 2:</strong> Python</p>
+        <code>python -m http.server 8000</code>
+
+        <p style="margin-top: 1rem;"><strong>Opção 3:</strong> Node.js</p>
+        <code>npx serve .</code>
+
+        <p style="margin-top: 1rem; color: #5EE39A;"><strong>⚠️ Importante:</strong> Requer servidor local (file:// não funciona — bloqueado por CORS/CSP)</p>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer">
+        <p><strong>Documento de Anatomia Gerado:</strong> 2026-05-14</p>
+        <p>Mentor24h v5.2 — Hub Pessoal & Empreendedor | Fase 7 (Deploy) Completa</p>
+        <p style="margin-top: 1rem; color: #606060;">Desenvolvido com ❤️ usando FORGE System (Structured Design Development)</p>
+    </div>
+
+</div>
+
+</body>
+</html>

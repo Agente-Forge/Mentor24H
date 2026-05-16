@@ -127,18 +127,45 @@
 
 ---
 
-## 📋 MISSÃO SPRINT 2 · PASSO 2 — skill-forge-visual
+## ✅ SPRINT 2 · PASSO 2 — skill-forge-visual — CONCLUÍDO
 
-Aplicar o visual corporativo do modo Negócio:
-- [ ] Navbar premium: accent `--info` (#6D8EA8 safira) no background ativo
-- [ ] `.painel-kpi-card` — surface-lifted, hover elevado, sombra premium
-- [ ] `.painel-kpi-valor` — JetBrains Mono, weight 600, --type-2xl
-- [ ] Transição visual ao trocar de modo: 240ms var(--ease-out)
-- [ ] CSS em arquivo novo `css/negocio.css` (criar + linkar no index.html)
+- [x] `css/negocio.css` criado com identidade visual corporativa completa
+- [x] Aliases semânticos globais definidos: `--info` (#6D8EA8 safira), `--signature`, `--border-soft`, `--shadow-elevated`, `--surface-lifted`, `--text-prime/secondary/quiet/mute`, `--bg-elevated/sunken`
+- [x] Accent safira aplicado em `html[data-mode="negocio"]`: ícones ativos, `::before` bar, focus rings
+- [x] Navbar corporativa: Switzer 500, separador `border-top: 1px solid var(--line-2)`, stroke 1.5 nos ícones
+- [x] KPI cards: `background: var(--surface-3)`, hover `translateY(-2px)` + `var(--shadow-2)`, `border-color` elevação
+- [x] `.painel-kpi-valor`: JetBrains Mono, weight 600, `--t-2xl`, `--text-1`
+- [x] `.painel-kpi-label`: Switzer weight 400, `--t-sm`, `--text-2`
+- [x] Ícone KPI header: `color: var(--info)`, 20×20px
+- [x] `.painel-kpi-embreve`: background `--base`, opacity 0.4 ícone, cursor default, hover cancelado
+- [x] Atividade recente: ícones receita (verde) / saída (vermelho), `font-mono` nos valores
+- [x] Header: `<em>` Fraunces italic, border-bottom estrutural, Switzer 300 no subtítulo
+- [x] Transição 240ms ao trocar modo: `color` + `background-color` nas nav items
+- [x] Light mode: `--info: #3D6480` (contraste no creme), overrides pontuais
+- [x] `negocio.css?v=1` linkado no `index.html` após `motion.css`
+- [!] Saudação "Léo" em Fraunces no cabeçalho: requer mudança em `painel.js` — adiado para Sprint 3 (JS escopo)
+- Arquivos alterados: `css/negocio.css` (novo) | `index.html` (link)
 
-**⚠️ Atenção:** A lógica **já existe** — Passo 2 apenas estiliza.
+## ✅ SPRINT 3 · PASSO 1 — skill-construtor — CONCLUÍDO
 
----
+**Commit:** `[SPRINT 3]` — feat(sprint-3/final): Contatos CRM — Modo Negócio com Interações
+
+### Arquivos Criados
+- [ ] Nenhum arquivo novo (expandiu contatos.js + negocio.css)
+
+### Arquivos Modificados
+- [x] `js/contatos.js` — Estendido com negocio schema (tipo[], etiquetas[], idNegocio, historicoInteracoes[])
+- [x] `css/negocio.css` — Adicionadas classes CRM (.ctto-negocio-section, .ctto-negocio-tipo-badge, .ctto-negocio-historico, .ctto-crm-type-btn, .ctto-interacao-type-btn)
+- [x] `index.html` — Atualizado cache-bust: contatos.js ?v=10, negocio.css ?v=2
+
+### Funcionalidades Implementadas
+- [x] **Schema negócio:** tipo[], etiquetas[], idNegocio, historicoInteracoes[] com migração segura (null para contatos antigos)
+- [x] **Seção CRM em detalhe** — renderizada APENAS em html[data-mode="negocio"]
+- [x] **Registrar Interação** — modal com selector (call/email/meeting/message) + descrição + timestamp automático
+- [x] **Histórico de Interações** — últimas 5 ordenadas desc, com tipo/descricao/data
+- [x] **Campos no formulário** — ID CRM + tipo (5 opções: cliente/prospecto/parceiro/concorrente/fornecedor) + etiquetas com input com chips removíveis
+- [x] **Classes semânticas** — `.ctto-negocio-*`, `.ctto-crm-*`, `.ctto-interacao-*` com identidade Fraunces italic títulos + info safira accent
+- [x] **Zero regressões** — Modo pessoal idêntico, Temperatura intacto, import/export funcional, dark/light adapta
 
 ## 🚦 STATUS DO PIPELINE
 
@@ -146,9 +173,9 @@ Aplicar o visual corporativo do modo Negócio:
 |--------|-------|--------|----------------|
 | **1 — Estrutura** | — | ✅ CONCLUÍDO | Switcher, navbar dupla, localStorage, transição |
 | **2 — Visual Negócio** | **1/2** | ✅ CONCLUÍDO | Painel com KPIs reais, atividade recente |
-| **2 — Visual Negócio** | **2/2** | ⏳ AGUARDANDO | forge-visual estiliza + navbar premium |
-| **3 — Contatos Aprimorados** | — | 🔒 BLOQUEADO | Após Sprint 2 |
-| **DEPLOY** | — | 🔒 BLOQUEADO | Após Sprint 3 |
+| **2 — Visual Negócio** | **2/2** | ✅ CONCLUÍDO | `negocio.css` — accent safira, navbar premium, KPI cards APPLE+ |
+| **3 — Contatos Aprimorados** | — | ✅ CONCLUÍDO | CRM com registrar interações, tipos, etiquetas, histórico |
+| **DEPLOY** | — | ✅ LIBERADO | Após Sprint 3 — Ready para produção |
 
 ---
 

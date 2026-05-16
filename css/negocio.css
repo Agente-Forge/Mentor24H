@@ -1,0 +1,683 @@
+/* ═══════════════════════════════════════════════════════════
+   NEGÓCIO — Identidade Visual Corporativa
+   Scope: html[data-mode="negocio"] + .painel-*
+   Mentor24h | OBSIDIAN Design System | Forge v5.2
+   skill-forge-visual v5.0 | 2026-05-16
+═══════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────────────────
+   1. SEMANTIC TOKEN ALIASES
+   Tokens semânticos usados pela spec mas não definidos nos
+   arquivos base — definidos aqui como aliases globais.
+───────────────────────────────────────────────────────────  */
+:root {
+  --signature:        var(--color-gold);       /* ouro líquido */
+  --info:             #6D8EA8;                 /* safira opaca — accent negócio */
+  --border-soft:      var(--line-2);
+  --shadow-elevated:  var(--shadow-2);
+  --surface-lifted:   var(--surface-3);
+  --text-prime:       var(--text-1);
+  --text-secondary:   var(--text-2);
+  --text-quiet:       var(--text-3);
+  --text-mute:        var(--text-4);
+  --bg-elevated:      var(--surface-2);
+  --bg-sunken:        var(--base);
+}
+
+/* Safira mais escura para contraste no creme */
+[data-theme="light"] {
+  --info: #3D6480;
+}
+
+/* ─────────────────────────────────────────────────────────
+   2. ACCENT SAFIRA — RF01
+   Todos os elementos de destaque usam --info no modo Negócio.
+   Zero impacto no modo Pessoal.
+───────────────────────────────────────────────────────────  */
+
+/* Ícone ativo na navbar */
+html[data-mode="negocio"] .nav-item.active svg {
+  color: var(--info);
+  transition: color 240ms var(--ease-out);
+}
+
+/* Barra vertical de destaque (::before) */
+html[data-mode="negocio"] .nav-item.active::before {
+  background: var(--info) !important;
+  transition: background-color 240ms var(--ease-out);
+}
+
+/* Focus rings → safira */
+html[data-mode="negocio"] .nav-item:focus-visible,
+html[data-mode="negocio"] .nav-group-header:focus-visible,
+html[data-mode="negocio"] .modo-btn:focus-visible {
+  outline-color: var(--info);
+}
+
+/* Transição suave de cor ao trocar entre Pessoal e Negócio */
+.nav-item svg,
+.nav-item::before,
+.nav-item .nav-label {
+  transition: color 240ms var(--ease-out),
+              background-color 240ms var(--ease-out);
+}
+
+/* ─────────────────────────────────────────────────────────
+   3. NAVBAR CORPORATIVA — RF02
+   Visual mais técnico e estruturado quando em modo Negócio.
+───────────────────────────────────────────────────────────  */
+
+/* Labels com peso maior — aparência corporativa */
+html[data-mode="negocio"] #group-negocio .nav-label,
+html[data-mode="negocio"] #group-negocio .nav-group-header .nav-label {
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+/* Separador estrutural acima do grupo Negócio */
+html[data-mode="negocio"] #group-negocio {
+  border-top: 1px solid var(--line-2);
+  margin-top: var(--s-2);
+  padding-top: var(--s-2);
+}
+
+/* Ícones com stroke fino — precisão técnica (Linear/Stripe) */
+html[data-mode="negocio"] #group-negocio .nav-group-header svg,
+html[data-mode="negocio"] #group-negocio .nav-item svg {
+  stroke-width: 1.5;
+}
+
+/* ─────────────────────────────────────────────────────────
+   4. PAINEL — ESTRUTURA BASE
+───────────────────────────────────────────────────────────  */
+
+.painel-negocio {
+  padding: var(--s-6) var(--s-7);
+  max-width: 1100px;
+}
+
+@media (max-width: 768px) {
+  .painel-negocio {
+    padding: var(--s-4) var(--s-4);
+  }
+}
+
+/* ─────────────────────────────────────────────────────────
+   5. PAINEL — HEADER — RF04
+   Saudação com estrutura editorial e separador visual.
+───────────────────────────────────────────────────────────  */
+
+.painel-negocio .page-head {
+  border-bottom: 1px solid var(--line-2);
+  padding-bottom: var(--s-5);
+  margin-bottom: var(--s-6);
+}
+
+/* "negócio" em Fraunces italic no título */
+.painel-negocio .page-title em {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 400;
+}
+
+.painel-negocio .page-sub {
+  font-family: var(--font-body);
+  font-weight: 300;
+  font-size: var(--t-sm);
+  color: var(--text-3);
+  margin-top: var(--s-1);
+}
+
+/* ─────────────────────────────────────────────────────────
+   6. KPI GRID — RF03
+   Layout em grid responsivo para os cards de métricas.
+───────────────────────────────────────────────────────────  */
+
+.painel-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--s-4);
+  margin-bottom: var(--s-7);
+}
+
+@media (max-width: 1024px) {
+  .painel-kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .painel-kpi-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────
+   7. KPI CARD — RF03
+   Surface lifted com hover de elevação — acabamento APPLE+
+───────────────────────────────────────────────────────────  */
+
+.painel-kpi-card {
+  background: var(--surface-3);
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-lg);
+  padding: var(--s-5);
+  transition: transform 200ms var(--ease-out),
+              box-shadow 200ms var(--ease-out),
+              border-color 200ms var(--ease-out);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Reflexo sutil no topo do card */
+.painel-kpi-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.06) 50%,
+    transparent
+  );
+  pointer-events: none;
+}
+
+.painel-kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-2);
+  border-color: var(--line-3);
+}
+
+.painel-kpi-header {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  margin-bottom: var(--s-4);
+}
+
+/* Ícone do KPI em safira — RF03 */
+.painel-kpi-header svg {
+  color: var(--info);
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.painel-kpi-label {
+  font-family: var(--font-body);
+  font-size: var(--t-sm);
+  font-weight: 400;
+  color: var(--text-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Valor principal — JetBrains Mono, grande, prime — RF03 */
+.painel-kpi-valor {
+  font-family: var(--font-mono);
+  font-size: var(--t-2xl);
+  font-weight: 600;
+  color: var(--text-1);
+  letter-spacing: -0.02em;
+  line-height: 1;
+  margin-bottom: var(--s-2);
+}
+
+.painel-kpi-sub {
+  font-size: var(--t-xs);
+  font-weight: 400;
+  color: var(--text-4);
+  margin-top: var(--s-1);
+}
+
+/* ─────────────────────────────────────────────────────────
+   8. KPI "EM BREVE" — RF05
+   Card recuado e apagado — claramente não clicável.
+───────────────────────────────────────────────────────────  */
+
+.painel-kpi-embreve {
+  background: var(--base);
+  border-color: var(--line-1);
+  cursor: default;
+}
+
+.painel-kpi-embreve::before { display: none; }
+
+.painel-kpi-embreve:hover {
+  transform: none;
+  box-shadow: none;
+  border-color: var(--line-1);
+}
+
+.painel-kpi-embreve .painel-kpi-header svg {
+  opacity: 0.4;
+}
+
+.painel-kpi-embreve .painel-kpi-label {
+  color: var(--text-4);
+}
+
+.painel-kpi-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px var(--s-3);
+  background: var(--surface-2);
+  border: 1px solid var(--line-1);
+  border-radius: var(--r-full);
+  font-size: var(--t-xs);
+  font-weight: 500;
+  color: var(--text-4);
+  letter-spacing: 0.02em;
+  margin-top: var(--s-2);
+}
+
+/* ─────────────────────────────────────────────────────────
+   9. ATIVIDADE RECENTE
+   Lista de transações com ícones de direção e valores.
+───────────────────────────────────────────────────────────  */
+
+.painel-atividade-section {
+  margin-top: var(--s-2);
+}
+
+.painel-atividade-title {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: var(--t-md);
+  font-weight: 400;
+  color: var(--text-1);
+  letter-spacing: -0.01em;
+  margin-bottom: var(--s-4);
+}
+
+.painel-atividade-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+
+.painel-atividade-item {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-3) var(--s-4);
+  background: var(--surface-2);
+  border: 1px solid var(--line-1);
+  border-radius: var(--r-md);
+  transition: background 160ms var(--ease-out),
+              border-color 160ms var(--ease-out);
+}
+
+.painel-atividade-item:hover {
+  background: var(--surface-3);
+  border-color: var(--line-2);
+}
+
+.painel-atividade-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--r-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.painel-atividade-icon.receita {
+  background: var(--green-bg);
+  color: var(--green);
+}
+
+.painel-atividade-icon.saida {
+  background: var(--red-bg);
+  color: var(--red);
+}
+
+.painel-atividade-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.painel-atividade-desc {
+  font-size: var(--t-base);
+  font-weight: 500;
+  color: var(--text-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.painel-atividade-data {
+  font-size: var(--t-xs);
+  color: var(--text-4);
+  margin-top: 2px;
+}
+
+.painel-atividade-valor {
+  font-family: var(--font-mono);
+  font-size: var(--t-sm);
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.painel-atividade-valor.receita { color: var(--green); }
+.painel-atividade-valor.saida   { color: var(--red); }
+
+/* ─────────────────────────────────────────────────────────
+   10. ESTADO VAZIO
+───────────────────────────────────────────────────────────  */
+
+.painel-estado-vazio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--s-9) var(--s-6);
+  color: var(--text-3);
+  gap: var(--s-2);
+}
+
+.painel-estado-vazio p {
+  font-size: var(--t-md);
+  color: var(--text-2);
+  margin: 0;
+}
+
+.painel-vazio-hint {
+  font-size: var(--t-xs);
+  color: var(--text-4);
+  font-style: italic;
+}
+
+/* ─────────────────────────────────────────────────────────
+   11. LIGHT MODE — overrides pontuais
+   A maioria dos tokens já se adapta via themes.css.
+───────────────────────────────────────────────────────────  */
+
+[data-theme="light"] .painel-kpi-card {
+  background: var(--surface-3);
+}
+
+[data-theme="light"] .painel-kpi-embreve {
+  background: var(--surface-1);
+}
+
+[data-theme="light"] .painel-kpi-card::before {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(0, 0, 0, 0.04) 50%,
+    transparent
+  );
+}
+
+/* ─────────────────────────────────────────────────────────
+   12. CONTATOS — SEÇÃO CRM (Negócio)
+   Visível apenas quando html[data-mode="negocio"]
+───────────────────────────────────────────────────────────  */
+
+.ctto-negocio-section {
+  margin-top: var(--s-6);
+  padding-top: var(--s-6);
+  border-top: 1px solid var(--line-2);
+}
+
+.ctto-negocio-header {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  margin-bottom: var(--s-5);
+}
+
+.ctto-negocio-title {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: var(--t-md);
+  font-weight: 400;
+  color: var(--text-1);
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+
+.ctto-negocio-title svg {
+  color: var(--info);
+}
+
+/* Tipos de Negócio — Pills coloridas */
+.ctto-negocio-tipos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  margin-bottom: var(--s-3);
+}
+
+.ctto-negocio-tipo-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px var(--s-3);
+  background: var(--info);
+  color: white;
+  border-radius: var(--r-full);
+  font-size: var(--t-xs);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+/* Etiquetas de Negócio */
+.ctto-negocio-etiquetas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  margin-bottom: var(--s-4);
+}
+
+.ctto-negocio-etiqueta-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px var(--s-3);
+  background: var(--surface-3);
+  color: var(--text-2);
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-md);
+  font-size: var(--t-xs);
+  font-weight: 400;
+}
+
+/* Histórico de Interações */
+.ctto-negocio-historico {
+  padding: var(--s-4);
+  background: var(--surface-1);
+  border: 1px solid var(--line-1);
+  border-radius: var(--r-md);
+}
+
+.ctto-negocio-historico-title {
+  font-size: var(--t-sm);
+  font-weight: 600;
+  color: var(--text-2);
+  margin-bottom: var(--s-3);
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+
+.ctto-negocio-historico-item {
+  padding: var(--s-2) var(--s-3);
+  background: var(--base);
+  border-left: 2px solid var(--info);
+  border-radius: var(--r-sm);
+  margin-bottom: var(--s-2);
+}
+
+.ctto-negocio-historico-item:last-child {
+  margin-bottom: 0;
+}
+
+.ctto-negocio-interacao-tipo {
+  display: inline-block;
+  padding: 2px var(--s-2);
+  background: var(--info);
+  color: white;
+  border-radius: var(--r-sm);
+  font-size: var(--t-xs);
+  font-weight: 600;
+  text-transform: capitalize;
+  margin-bottom: var(--s-1);
+}
+
+.ctto-negocio-interacao-desc {
+  font-size: var(--t-sm);
+  color: var(--text-1);
+  margin-bottom: var(--s-1);
+  word-wrap: break-word;
+}
+
+.ctto-negocio-interacao-data {
+  font-size: var(--t-xs);
+  color: var(--text-4);
+}
+
+/* ─────────────────────────────────────────────────────────
+   13. FORMULÁRIO — CAMPOS CRM
+───────────────────────────────────────────────────────────  */
+
+.ctto-crm-type-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  margin-bottom: var(--s-3);
+}
+
+.ctto-crm-type-btn {
+  flex: 1;
+  min-width: 100px;
+  padding: var(--s-2) var(--s-3);
+  background: var(--surface-2);
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-md);
+  font-size: var(--t-xs);
+  font-weight: 500;
+  color: var(--text-2);
+  cursor: pointer;
+  transition: all 160ms var(--ease-out);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-1);
+}
+
+.ctto-crm-type-btn:hover {
+  background: var(--surface-3);
+  border-color: var(--line-3);
+}
+
+.ctto-crm-type-btn.active {
+  background: var(--info);
+  border-color: var(--info);
+  color: white;
+}
+
+/* Tags CRM — similar às tags regulares mas com color info */
+.ctto-crm-tags-field {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  align-items: center;
+  padding: var(--s-2);
+  background: var(--surface-1);
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-md);
+  min-height: 40px;
+  cursor: text;
+  transition: border-color 160ms var(--ease-out);
+}
+
+.ctto-crm-tags-field:focus-within {
+  border-color: var(--info);
+}
+
+.ctto-crm-tags-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}
+
+.ctto-crm-chip-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-1);
+  padding: 3px var(--s-2);
+  background: var(--info);
+  color: white;
+  border-radius: var(--r-full);
+  font-size: var(--t-xs);
+  font-weight: 500;
+}
+
+.ctto-crm-chip-remove {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  padding: 0 2px;
+  font-size: var(--t-sm);
+  line-height: 1;
+  transition: color 160ms var(--ease-out);
+}
+
+.ctto-crm-chip-remove:hover {
+  color: white;
+}
+
+.ctto-crm-tags-input {
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: var(--t-sm);
+  color: var(--text-1);
+  flex: 1;
+  min-width: 150px;
+}
+
+.ctto-crm-tags-input::placeholder {
+  color: var(--text-4);
+}
+
+/* Modal para registrar interação */
+.ctto-interacao-type-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--s-2);
+  margin-bottom: var(--s-4);
+}
+
+.ctto-interacao-type-btn {
+  padding: var(--s-3) var(--s-3);
+  background: var(--surface-2);
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-md);
+  font-size: var(--t-sm);
+  font-weight: 500;
+  color: var(--text-2);
+  cursor: pointer;
+  transition: all 160ms var(--ease-out);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-2);
+}
+
+.ctto-interacao-type-btn:hover {
+  background: var(--surface-3);
+  border-color: var(--line-3);
+}
+
+.ctto-interacao-type-btn.active {
+  background: var(--info);
+  border-color: var(--info);
+  color: white;
+}

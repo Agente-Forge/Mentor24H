@@ -564,6 +564,55 @@ const Contatos = (() => {
           </div>
         </div>
 
+        <!-- SEÇÃO CRM — apenas modo Negócio -->
+        ${document.documentElement.dataset.mode === 'negocio' ? `
+        <div class="ctto-negocio-section">
+          <div class="ctto-negocio-header">
+            <div class="ctto-negocio-title">${Icons.html('briefcase', 14)} Informações do Negócio</div>
+          </div>
+
+          ${c.negocio?.idNegocio ? `
+          <div class="ctto-detail-field">
+            <span class="ctto-detail-field-icon">${Icons.html('code', 12)}</span>
+            <div>
+              <div class="ctto-detail-field-label">ID do Negócio</div>
+              <div class="ctto-detail-field-value">${esc(c.negocio.idNegocio)}</div>
+            </div>
+          </div>
+          ` : ''}
+
+          ${(c.negocio?.tipo || []).length ? `
+          <div class="ctto-negocio-tipos">
+            ${(c.negocio.tipo).map(t => `<span class="ctto-negocio-tipo-badge">${esc(t)}</span>`).join('')}
+          </div>
+          ` : ''}
+
+          ${(c.negocio?.etiquetas || []).length ? `
+          <div class="ctto-negocio-etiquetas">
+            ${(c.negocio.etiquetas).map(e => `<span class="ctto-negocio-etiqueta-badge">${esc(e)}</span>`).join('')}
+          </div>
+          ` : ''}
+
+          <button class="btn btn-ghost btn-sm" onclick="Contatos._abrirRegistrarInteracao('${esc(c.id)}')" style="margin-top:var(--s-3)">
+            ${Icons.html('plus', 12)} Registrar Interação
+          </button>
+
+          ${(c.negocio?.historicoInteracoes || []).length ? `
+          <div class="ctto-negocio-historico" style="margin-top:var(--s-4)">
+            <div class="ctto-negocio-historico-title">Histórico de Interações</div>
+            ${(c.negocio.historicoInteracoes).slice(-5).reverse().map(h => `
+              <div class="ctto-negocio-historico-item">
+                <div class="ctto-negocio-interacao-tipo">${esc(h.tipo || 'nota')}</div>
+                <div class="ctto-negocio-interacao-desc">${esc(h.descricao || '—')}</div>
+                <div class="ctto-negocio-interacao-data">${h.data ? fmtDate(h.data) : '—'}</div>
+              </div>
+            `).join('')}
+          </div>
+          ` : ''}
+        </div>
+        ` : ''}
+
+
         <div class="ctto-detail-footer">
           <button class="btn btn-danger btn-sm" onclick="Contatos.confirmarDeletar('${esc(c.id)}')">
             ${Icons.html('trash-2', 12)} Excluir
@@ -621,6 +670,7 @@ const Contatos = (() => {
       phoneType: c?.phoneType || 'celular',
       country: COUNTRIES[0],
       temperatura: c?.temperatura || 'lead',
+      negocio: c?.negocio ? { ...c.negocio } : { tipo: [], etiquetas: [], idNegocio: '', historicoInteracoes: [] },
     };
 
     // Sempre recriar para evitar estado obsoleto
@@ -648,6 +698,10 @@ const Contatos = (() => {
 
     _renderFormTags();
     _bindFormTagInput();
+    if (document.documentElement.dataset.mode === 'negocio') {
+      _renderFormCrmTags();
+      _bindFormCrmTagInput();
+    }
     setTimeout(() => drawer.querySelector('#cf-nome')?.focus(), 320);
   }
 
@@ -779,6 +833,47 @@ const Contatos = (() => {
             <textarea id="cf-notas" class="ctto-fd-input ctto-fd-textarea"
                       rows="3" placeholder="Observações, histórico, informações importantes…">${esc(c?.notas || '')}</textarea>
           </div>
+
+          <!-- CRM Fields — apenas modo Negócio -->
+          ${document.documentElement.dataset.mode === 'negocio' ? `
+          <div class="ctto-fd-section">
+            <div class="ctto-fd-section-label">${Icons.html('briefcase', 11)} Informações do Negócio</div>
+            <div class="field">
+              <label class="field-label">ID do Negócio (CRM)</label>
+              <input id="cf-crm-id" type="text" class="ctto-fd-input"
+                     placeholder="ID externo ou código do CRM" value="${esc(c?.negocio?.idNegocio || '')}">
+            </div>
+            <div class="field">
+              <label class="field-label">Tipo de Negócio</label>
+              <div class="ctto-crm-type-row" id="ctto-crm-types">
+                ${[
+                  { id: 'cliente',     label: 'Cliente',     icon: 'user-check'  },
+                  { id: 'prospecto',   label: 'Prospecto',   icon: 'target'      },
+                  { id: 'parceiro',    label: 'Parceiro',    icon: 'link-2'      },
+                  { id: 'concorrente', label: 'Concorrente', icon: 'bar-chart-2' },
+                  { id: 'fornecedor',  label: 'Fornecedor',  icon: 'package'     },
+                ].map(t => `
+                  <button class="ctto-crm-type-btn ${(c?.negocio?.tipo || []).includes(t.id) ? 'active' : ''}"
+                          data-crm-type="${t.id}"
+                          onclick="this.classList.toggle('active')" type="button">
+                    ${Icons.html(t.icon, 12)} ${t.label}
+                  </button>
+                `).join('')}
+              </div>
+            </div>
+            <div class="field">
+              <label class="field-label">Etiquetas de Negócio</label>
+              <div class="ctto-crm-tags-field" id="ctto-crm-tags-wrap"
+                   onclick="document.getElementById('cf-crm-tags-input')?.focus()">
+                <div class="ctto-crm-tags-chips" id="ctto-crm-tag-chips"></div>
+                <input id="cf-crm-tags-input" class="ctto-crm-tags-input"
+                       type="text" placeholder="${_formSt.negocio.etiquetas.length ? '' : 'Adicionar etiqueta…'}"
+                       autocomplete="off">
+              </div>
+              <p class="ctto-fd-hint">Enter ou vírgula para adicionar · clique no chip para remover</p>
+            </div>
+          </div>
+          ` : ''}
 
         </div>
 
@@ -921,6 +1016,49 @@ const Contatos = (() => {
     inp.addEventListener('blur', () => { if (inp.value.trim()) _addFormTag(inp.value); });
   }
 
+  function _addFormCrmTag(val) {
+    const tag = val.trim().replace(/^#/, '').toLowerCase();
+    if (!tag || _formSt.negocio.etiquetas.includes(tag)) return;
+    _formSt.negocio.etiquetas.push(tag);
+    _renderFormCrmTags();
+    const inp = document.getElementById('cf-crm-tags-input');
+    if (inp) { inp.value = ''; inp.placeholder = ''; }
+  }
+
+  function _removeFormCrmTag(tag) {
+    _formSt.negocio.etiquetas = _formSt.negocio.etiquetas.filter(t => t !== tag);
+    _renderFormCrmTags();
+    if (!_formSt.negocio.etiquetas.length) {
+      const inp = document.getElementById('cf-crm-tags-input');
+      if (inp) inp.placeholder = 'Adicionar etiqueta…';
+    }
+  }
+
+  function _renderFormCrmTags() {
+    const el = document.getElementById('ctto-crm-tag-chips');
+    if (!el) return;
+    el.innerHTML = _formSt.negocio.etiquetas.map(t => `
+      <span class="ctto-crm-chip-tag">
+        ${esc(t)}
+        <button class="ctto-crm-chip-remove" onclick="Contatos._removeFormCrmTag('${esc(t)}')" title="Remover">×</button>
+      </span>
+    `).join('');
+  }
+
+  function _bindFormCrmTagInput() {
+    const inp = document.getElementById('cf-crm-tags-input');
+    if (!inp) return;
+    inp.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ',') {
+        e.preventDefault();
+        if (inp.value.trim()) _addFormCrmTag(inp.value);
+      } else if (e.key === 'Backspace' && !inp.value && _formSt.negocio.etiquetas.length) {
+        _removeFormCrmTag(_formSt.negocio.etiquetas[_formSt.negocio.etiquetas.length - 1]);
+      }
+    });
+    inp.addEventListener('blur', () => { if (inp.value.trim()) _addFormCrmTag(inp.value); });
+  }
+
   /* ── Salvar ── */
   function _salvarForm(id) {
     const nome = document.getElementById('cf-nome')?.value.trim();
@@ -947,6 +1085,20 @@ const Contatos = (() => {
       tags: [..._formSt.tags],
       temperatura: _formSt.temperatura || 'lead',
     };
+
+    // Salvar dados de negócio (apenas em modo negócio)
+    if (document.documentElement.dataset.mode === 'negocio') {
+      const tipoButtons = Array.from(document.querySelectorAll('.ctto-crm-type-btn.active[data-crm-type]'));
+      data.negocio = {
+        tipo: tipoButtons.map(b => b.dataset.crmType),
+        etiquetas: [..._formSt.negocio.etiquetas],
+        idNegocio: document.getElementById('cf-crm-id')?.value.trim() || '',
+        historicoInteracoes: _formSt.negocio.historicoInteracoes || [],
+      };
+    } else {
+      // No modo pessoal, manter negocio como null ou vazio
+      data.negocio = null;
+    }
 
     if (id) data.id = id;
 
@@ -1347,6 +1499,71 @@ const Contatos = (() => {
     setTimeout(() => document.addEventListener('click', () => menu.remove(), { once: true }), 0);
   }
 
+  function _abrirRegistrarInteracao(id) {
+    const c = DB.getContatos().find(x => x.id === id);
+    if (!c) return;
+
+    Modal.open(`
+      <div class="modal-header">
+        <h3>${Icons.html('message-circle', 16)} Registrar Interação</h3>
+      </div>
+      <div class="modal-body">
+        <p class="modal-subtitle">com ${esc(c.nome)}</p>
+        <div class="field">
+          <label class="field-label">Tipo de Interação</label>
+          <div class="ctto-interacao-type-row">
+            <button class="ctto-interacao-type-btn active" data-tipo="call" onclick="this.parentElement.querySelectorAll('button').forEach(b => b.classList.remove('active')); this.classList.add('active')">
+              ${Icons.html('phone', 14)} Ligação
+            </button>
+            <button class="ctto-interacao-type-btn" data-tipo="email" onclick="this.parentElement.querySelectorAll('button').forEach(b => b.classList.remove('active')); this.classList.add('active')">
+              ${Icons.html('mail', 14)} E-mail
+            </button>
+            <button class="ctto-interacao-type-btn" data-tipo="meeting" onclick="this.parentElement.querySelectorAll('button').forEach(b => b.classList.remove('active')); this.classList.add('active')">
+              ${Icons.html('calendar', 14)} Reunião
+            </button>
+            <button class="ctto-interacao-type-btn" data-tipo="message" onclick="this.parentElement.querySelectorAll('button').forEach(b => b.classList.remove('active')); this.classList.add('active')">
+              ${Icons.html('message-circle', 14)} Mensagem
+            </button>
+          </div>
+        </div>
+        <div class="field">
+          <label class="field-label">Descrição</label>
+          <textarea id="interacao-desc" class="ctto-fd-input ctto-fd-textarea" rows="3" placeholder="O que conversaram ou qual foi a interação…"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="Modal.close()">Cancelar</button>
+        <button class="btn btn-primary" onclick="Contatos._confirmarInteracao('${esc(id)}')">
+          ${Icons.html('check', 13)} Registrar
+        </button>
+      </div>
+    `, 'modal-md');
+    Icons.render(document.querySelector('.modal-content'));
+  }
+
+  function _confirmarInteracao(id) {
+    const tipoBtn = document.querySelector('.ctto-interacao-type-btn.active');
+    const tipo = tipoBtn?.dataset.tipo || 'nota';
+    const descricao = document.getElementById('interacao-desc')?.value.trim() || '';
+
+    const c = DB.getContatos().find(x => x.id === id);
+    if (!c) return;
+
+    if (!c.negocio) c.negocio = { tipo: [], etiquetas: [], idNegocio: '', historicoInteracoes: [] };
+    if (!Array.isArray(c.negocio.historicoInteracoes)) c.negocio.historicoInteracoes = [];
+
+    c.negocio.historicoInteracoes.push({
+      tipo,
+      descricao,
+      data: new Date().toISOString(),
+    });
+
+    DB.saveContato(c);
+    Modal.close();
+    Toast.success(`Interação registrada com ${c.nome}`);
+    abrirDetalhe(id);
+  }
+
   /* ════════════════════════════════════════════
      FILTROS
   ════════════════════════════════════════════ */
@@ -1483,7 +1700,9 @@ const Contatos = (() => {
     abrirForm, _salvarForm, _fecharDrawer,
     _updateAvatar, _setPhoneType, _toggleCountry, _selectCountry, _maskTel,
     _addFormTag, _removeFormTag,
+    _addFormCrmTag, _removeFormCrmTag,
     confirmarDeletar, trocarTemperatura, _abrirTempMenu,
+    _abrirRegistrarInteracao, _confirmarInteracao,
     abrirImport, _impTab, _onVcfFile, _onCsvFile, _confirmarImport,
     toggleExportMenu, _exportVcf, _exportCsv, _exportJson,
     _conectarGoogle, _toggleSidebar,
