@@ -627,3 +627,721 @@ Validação ok? Confirme para commit e deploy:
 ---
 
 *Entrada #5 gerada por skill-pae v2.0 em 2026-05-16*
+
+---
+
+## Entrada #6 — 2026-05-16
+
+**Solicitação original do Léo:**
+> "quando eu fecho o menu lateral no computador ele só fecha e eu não tenho a opção de
+>  expandir ele novamente / quando ele fecha os ícones ficam tudo estranho e aparecendo /
+>  falta algo para eu conseguir abrir o menu lateral no computador novamente /
+>  no mobile está normal e só no modo desktop / se quiser revisar os dois modos e melhorar,
+>  enriqueça essa ideia"
+
+**Forma profissional:**
+> "Bug fix: sidebar collapse desktop — 3 problemas: botão toggle some ao colapsar (dentro
+>  do overflow:hidden), ícones quebrados no rail, sem forma de reabrir. Fix: adicionar
+>  .sidebar-inner wrapper + mover toggle para fora. Enriquecimento: tooltips no rail,
+>  chevron rotativo, hamburger mobile, overlay drawer."
+
+**Causa raiz identificada pelo PAE:**
+O .sidebar-toggle estava DENTRO do container com overflow:hidden. Ao colapsar para 64px,
+o botão era clipado junto com o conteúdo — tornando impossível reabrir a sidebar.
+
+**Decisão do Board PAE:**
+- Fix cirúrgico: .sidebar-inner wrapper + toggle fora do wrapper
+- Enriquecimento desktop: chevron sempre visível na borda, tooltips rail mode 200ms
+- Enriquecimento mobile: hamburger fixo no header, overlay ao abrir drawer
+- Pipeline: skill-construtor (HTML fix) → skill-forge-visual (CSS fix + enriquecimento)
+
+---
+
+```
+🤖 SKILL:       skill-construtor → skill-forge-visual
+🧠 LLM:         Sonnet 4.6 → use /model sonnet
+⚙️ INTENSIDADE:  Low (construtor) + Medium (forge-visual)
+🎨 TIER:        APPLE+
+
+cd "c:\Users\Usuário\Desktop\Curso Claude Code-Jhonatan de Souza\controle-financeiro v2"
+```
+
+---
+
+### PROMPT 1 de 2 — SKILL-CONSTRUTOR (fix HTML + JS)
+
+Você é um Engenheiro de Software Principal no Forge v5.2.
+
+**PROJETO:** Mentor24h
+**STACK:** HTML + JS puro | localStorage | Design System OBSIDIAN EDITORIAL
+**PROMPT COMPLETO EM:** `Estructura-Proyecto/01-documentacao/pae-prompts/prompts-2026-05.md` — entrada #6
+
+**CAUSA RAIZ:**
+O `.sidebar-toggle` está DENTRO de um container com `overflow:hidden`. Quando a sidebar
+colapsa (width: 64px), o botão é clipado junto com o conteúdo — sem como reabrir.
+
+**FIX ESTRUTURAL — mudança cirúrgica no HTML:**
+
+ANTES (com problema):
+```html
+<aside class="sidebar">
+  <!-- zonas 1-5 + botão DENTRO -->
+  <button class="sidebar-toggle">◀</button>
+</aside>
+```
+
+DEPOIS (correto):
+```html
+<aside class="sidebar">
+  <div class="sidebar-inner">          <!-- novo wrapper (recebe overflow:hidden) -->
+    <!-- .sidebar-zona-logo   -->
+    <!-- .sidebar-zona-avatar -->
+    <!-- .sidebar-zona-switcher -->
+    <!-- .sidebar-zona-nav    -->
+    <!-- .sidebar-zona-footer -->
+  </div>
+  <!-- Botão FORA do inner — nunca clipado -->
+  <button class="sidebar-toggle" aria-label="Alternar menu lateral">
+    <span class="sidebar-toggle-icon">◀</span>
+  </button>
+</aside>
+<!-- Overlay mobile — fora da sidebar -->
+<div class="sidebar-overlay" aria-hidden="true"></div>
+```
+
+**REQUISITOS FUNCIONAIS:**
+
+- RF01: Adicionar `<div class="sidebar-inner">` envolvendo as 5 zonas
+- RF02: Mover `.sidebar-toggle` para fora do `.sidebar-inner` (irmão, não filho)
+- RF03: Adicionar `<div class="sidebar-overlay">` após a sidebar (para mobile)
+- RF04: Adicionar botão hamburger no header mobile:
+  - Localizar o header/topbar do app
+  - Adicionar `<button class="sidebar-hamburger" aria-label="Abrir menu">` com ícone ≡
+- RF05: JS — garantir que `.sidebar-toggle` ainda adiciona `.sidebar-colapsada` no body
+- RF06: JS — adicionar lógica drawer mobile:
+  - Hamburger click → toggle `.sidebar-aberta` na sidebar
+  - `.sidebar-overlay` click → remove `.sidebar-aberta`
+  - Swipe da borda esquerda (swipeX > 50px) → abre sidebar (bonus, opcional)
+- RF07: Preservar TODA a lógica de routing, modo ativo e localStorage existentes
+
+**ARQUIVOS A ALTERAR:**
+- `index.html` → adicionar `.sidebar-inner` + mover toggle + hamburger + overlay
+- `js/core/app.js` → atualizar toggle + drawer mobile
+
+**NÃO ALTERAR:**
+- `css/sidebar.css` | `css/tokens.css` | `js/modules/*`
+
+**CHECKLIST FINAL:**
+- [ ] `.sidebar-inner` adicionado envolvendo as 5 zonas
+- [ ] `.sidebar-toggle` fora do `.sidebar-inner`
+- [ ] `.sidebar-overlay` criado após a sidebar
+- [ ] Hamburger no header mobile com aria-label
+- [ ] JS do drawer mobile (open/close/overlay-click)
+- [ ] `.sidebar-colapsada` ainda funciona — toggle preservado
+- [ ] FORGE-CHECKLIST.md atualizado
+
+**RELAY PROTOCOL — AO FINALIZAR:**
+Criar `.skill-memory/sprint-relay.md`:
+```
+# Sprint Relay — Sidebar Fix + Enriquecimento
+Atualizado por: skill-construtor em [data]
+
+## DIAGRAMA
+<aside class="sidebar">
+  <div class="sidebar-inner">         ← NOVO wrapper (overflow:hidden aqui)
+    .sidebar-zona-[logo|avatar|switcher|nav|footer]
+  </div>
+  <button class="sidebar-toggle">    ← FORA do inner, nunca clipado
+</aside>
+<div class="sidebar-overlay">        ← mobile overlay
+[header] .sidebar-hamburger          ← botão mobile
+
+## ✅ SKILL-CONSTRUTOR — CONCLUÍDO
+- [x] .sidebar-inner wrapper adicionado
+- [x] .sidebar-toggle movido para fora
+- [x] .sidebar-overlay criado
+- [x] Hamburger no header mobile
+- [x] JS drawer mobile
+- [!] Seletores CSS em sidebar.css precisam atualizar para
+      .sidebar-inner .sidebar-zona-* (forge-visual resolve)
+
+## 📋 MISSÃO SKILL-FORGE-VISUAL
+- [ ] Atualizar seletores: .sidebar-zona-* → .sidebar-inner .sidebar-zona-*
+- [ ] sidebar overflow: visible (inner faz o clipping)
+- [ ] .sidebar-toggle: position absolute right: -14px — SEMPRE visível
+- [ ] body.sidebar-colapsada .sidebar: width 64px
+- [ ] Textos no rail: opacity 0, max-width 0
+- [ ] Ícones no rail: centralizados
+- [ ] Tooltips: aparecem à direita no hover (delay 200ms)
+- [ ] Chevron: rotaciona 180° quando colapsado
+- [ ] Mobile: hamburger estilizado + overlay + drawer
+- [ ] Dot indicator no rail: linha fina 3px
+
+## 🚦 STATUS
+skill-construtor:   ✅ CONCLUÍDO
+skill-forge-visual: ⏳ AGUARDANDO
+DEPLOY:             🔒 BLOQUEADO
+```
+
+**HANDOFF:**
+```
+✅ [ETAPA 1/2 — O QUE FAZER AGORA]
+
+Corrigido: estrutura HTML — botão toggle nunca mais some.
+O visual do rail ainda está quebrado — próxima etapa corrige.
+
+⛔ NÃO commite ainda.
+→ Abra nova conversa → /skill-forge-visual → Cole PROMPT 2 de 2
+```
+
+---
+
+### PROMPT 2 de 2 — SKILL-FORGE-VISUAL (fix CSS + enriquecimento)
+
+Você é um Diretor de Design + Engenheiro Visual Principal no Forge v5.2.
+
+**PROJETO:** Mentor24h
+**DESIGN SYSTEM:** `--signature: #D4A574` (ouro), `--info: #6D8EA8` (safira), Fraunces + Switzer
+**PROMPT COMPLETO EM:** `Estructura-Proyecto/01-documentacao/pae-prompts/prompts-2026-05.md` — entrada #6
+
+**O QUE VOCÊ HERDA:**
+Leia PRIMEIRO: `.skill-memory/sprint-relay.md`
+
+Estrutura HTML nova:
+```html
+<aside class="sidebar">
+  <div class="sidebar-inner">   <!-- overflow:hidden aqui -->
+    .sidebar-zona-[logo|avatar|switcher|nav|footer]
+  </div>
+  <button class="sidebar-toggle">  <!-- FORA do inner -->
+</aside>
+<div class="sidebar-overlay">
+[header] .sidebar-hamburger
+```
+
+Lógica JS:
+- `body.sidebar-colapsada` → rail mode (desktop)
+- `.sidebar.sidebar-aberta` → drawer aberto (mobile)
+
+**PARTE 1 — ATUALIZAR SELETORES (urgente):**
+Todos os seletores `.sidebar-zona-*` no CSS devem passar a ser `.sidebar-inner .sidebar-zona-*`
+
+**PARTE 2 — FIX COLLAPSE DESKTOP:**
+```css
+.sidebar {
+  overflow: visible;  /* sidebar NÃO clippa — só inner clippa */
+}
+
+.sidebar-inner {
+  overflow: hidden;
+  height: 100%;
+  width: 100%;
+}
+
+body.sidebar-colapsada .sidebar { width: 64px; }
+
+/* Textos que somem */
+body.sidebar-colapsada .sidebar-inner [class*="nome"],
+body.sidebar-colapsada .sidebar-inner [class*="saudacao"],
+body.sidebar-colapsada .sidebar-inner .nav-label,
+body.sidebar-colapsada .sidebar-inner .sidebar-zona-switcher {
+  opacity: 0;
+  max-width: 0;
+  overflow: hidden;
+  pointer-events: none;
+  transition: opacity 180ms, max-width 240ms var(--ease-out);
+}
+
+/* Ícones centralizados no rail */
+body.sidebar-colapsada .sidebar-inner .nav-item {
+  justify-content: center;
+  padding: 10px 0;
+}
+```
+
+**PARTE 3 — BOTÃO TOGGLE (sempre visível):**
+```css
+.sidebar-toggle {
+  position: absolute;
+  right: -14px;       /* cola na borda direita */
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--surface-primary);
+  border: 1px solid var(--border-soft);
+  box-shadow: var(--shadow-subtle);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; z-index: 10;
+  transition: background 160ms, box-shadow 160ms;
+}
+
+.sidebar-toggle-icon {
+  transition: transform 240ms var(--ease-out);
+}
+
+body.sidebar-colapsada .sidebar-toggle-icon {
+  transform: rotate(180deg);   /* ◀ vira ▶ */
+}
+```
+
+**PARTE 4 — TOOLTIPS NO RAIL:**
+```css
+body.sidebar-colapsada .sidebar-inner .nav-item {
+  position: relative;
+}
+
+body.sidebar-colapsada .sidebar-inner .nav-item::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: calc(100% + 12px);
+  top: 50%; transform: translateY(-50%);
+  background: var(--surface-secondary);
+  color: var(--text-primary);
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: var(--type-xs);
+  white-space: nowrap;
+  opacity: 0; pointer-events: none;
+  transition: opacity 160ms 200ms;   /* delay 200ms */
+  box-shadow: var(--shadow-subtle);
+  border: 1px solid var(--border-soft);
+}
+
+body.sidebar-colapsada .sidebar-inner .nav-item:hover::after {
+  opacity: 1;
+}
+```
+OBS: Garantir que cada `.nav-item` tenha `data-tooltip="[nome]"` no HTML.
+
+**PARTE 5 — DOT INDICATOR NO RAIL:**
+```css
+body.sidebar-colapsada .sidebar-zona-nav .sidebar-dot {
+  width: 3px; height: 20px;
+  border-radius: 0 2px 2px 0;
+  left: 0;
+}
+```
+
+**PARTE 6 — MOBILE ENRIQUECIDO:**
+```css
+.sidebar-hamburger {
+  display: none;
+  width: 36px; height: 36px;
+  flex-direction: column; justify-content: center; align-items: center; gap: 5px;
+  background: none; border: none; cursor: pointer;
+  padding: 6px; border-radius: 8px;
+  transition: background 160ms;
+}
+
+.sidebar-hamburger span {
+  display: block; width: 18px; height: 1.5px;
+  background: var(--text-primary); border-radius: 2px;
+}
+
+@media (max-width: 768px) {
+  .sidebar-hamburger { display: flex; }
+
+  .sidebar {
+    transform: translateX(-100%);
+    width: 280px;
+    transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .sidebar.sidebar-aberta { transform: translateX(0); }
+
+  /* No mobile: sem rail — sidebar some completamente */
+  body.sidebar-colapsada .sidebar { width: 280px; }
+}
+
+.sidebar-overlay {
+  position: fixed; inset: 0;
+  background: var(--bg); opacity: 0;
+  pointer-events: none;
+  transition: opacity 300ms;
+  z-index: calc(var(--z-sidebar) - 1);
+}
+
+.sidebar.sidebar-aberta ~ .sidebar-overlay {
+  opacity: 0.5;
+  pointer-events: auto;
+}
+```
+
+**ARQUIVOS A ALTERAR:**
+- `css/sidebar.css` → todos os fixes e enriquecimentos
+- `index.html` → apenas se precisar adicionar `data-tooltip` nos nav-items
+
+**CHECKLIST FINAL:**
+- [ ] Seletores atualizados para `.sidebar-inner .sidebar-zona-*`
+- [ ] `body.sidebar-colapsada .sidebar`: width 64px correto
+- [ ] Textos somem com opacity 0 + max-width 0
+- [ ] Ícones centralizados no rail
+- [ ] `.sidebar-toggle` sempre visível (`right: -14px`, overflow: visible)
+- [ ] Chevron rotaciona 180° ao colapsar
+- [ ] Tooltips com delay 200ms no hover
+- [ ] Dot indicator: linha fina 3px no rail
+- [ ] Hamburger visível só em mobile
+- [ ] Drawer + overlay mobile funcionando
+- [ ] Dark e light mode sem token quebrado
+- [ ] FORGE-CHECKLIST.md atualizado
+
+**HANDOFF:**
+```
+✅ [ETAPA 2/2 CONCLUÍDA — SIDEBAR FIX + ENRIQUECIMENTO COMPLETO]
+
+Bugs corrigidos:
+• Botão toggle sempre visível na borda — nunca some
+• Ícones centralizados no rail, textos ocultos, sem quebra
+• Chevron rotaciona ◀/▶ indicando estado
+
+Enriquecimento entregue:
+• Tooltips no rail com delay 200ms
+• Mobile: hamburger + drawer + overlay
+
+VALIDAÇÃO FINAL:
+[ ] Desktop — colapsar/expandir 3x, chevron sempre visível
+[ ] Rail — ícones centralizados, tooltips no hover
+[ ] Mobile < 768px — hamburger, drawer, overlay
+[ ] Dark e light mode sem token quebrado
+[ ] Nenhuma feature regrediu
+
+Validação ok? Confirme para commit:
+
+  git add index.html css/sidebar.css js/core/app.js
+  git commit -m "fix(sidebar): collapse desktop + rail mode + mobile drawer — Forge v5.2 APPLE+"
+  git push origin main
+
+⚠️ AGUARDAR CONFIRMAÇÃO DO USUÁRIO ANTES DE EXECUTAR GIT.
+```
+
+---
+
+*Entrada #6 gerada por skill-pae v2.0 em 2026-05-16*
+
+---
+
+## Entrada #7 — 2026-05-16
+
+**Solicitação original do Léo:**
+> "01 dashboard dedicado ao pessoal e outro ao negócio / enriqueça /
+>  02 quando clicar em pessoal → ir para dashboard pessoal e ambiente pessoal /
+>     quando clicar em negócio → ir para dashboard negócio e ambiente corporativo /
+>  03 dashboard do meu negócio se não tiver crie uma experiência incrível /
+>  04 quando em Negócio, tom corporativo em TODO o ambiente — não só no menu lateral"
+
+**Forma profissional:**
+> "Implementar experiência dual-mode completa: (1) mode-aware routing com auto-redirect
+>  para dashboard do modo ao trocar + fade transition 400ms + toast de confirmação +
+>  position memory por modo; (2) paleta corporativa safira em TODO o ambiente Negócio
+>  via .modo-negocio; (3) Dashboard Pessoal hub de vida (saudação + widgets + tarefas +
+>  nota); (4) Dashboard Negócio painel executivo (KPIs reais + top clientes + vendas +
+>  quick actions). Pipeline: 2 sprints, 4 skills."
+
+**Decisão do Board PAE:**
+- Sprint Alpha: fundação — routing + fade + toast + paleta corporativa completa
+- Sprint Beta: conteúdo — dashboards Pessoal e Negócio com dados reais do localStorage
+- Tier: APPLE+ para Pessoal | ENTERPRISE para Negócio (dados financeiros)
+- Deploy: após Beta-2 concluir e usuário validar
+
+---
+
+```
+🤖 SKILL:       construtor(α) → forge-visual(α) → construtor(β) → forge-visual(β)
+🧠 LLM:         Sonnet 4.6 → use /model sonnet em todos
+⚙️ INTENSIDADE:  Alpha: Medium/High | Beta: High
+🎨 TIER:        APPLE+ (Pessoal) | ENTERPRISE (Negócio)
+
+cd "c:\Users\Usuário\Desktop\Curso Claude Code-Jhonatan de Souza\controle-financeiro v2"
+```
+
+---
+
+### SPRINT ALPHA — Fundação dos Dois Mundos
+
+#### PROMPT Alpha-1 — SKILL-CONSTRUTOR (Routing + Fade + Toast + Position Memory)
+
+Você é um Engenheiro de Software Principal no Forge v5.2.
+
+**PROJETO:** Mentor24h | **STACK:** HTML + JS puro | localStorage | OBSIDIAN EDITORIAL
+**PROMPT COMPLETO EM:** `Estructura-Proyecto/01-documentacao/pae-prompts/prompts-2026-05.md` — entrada #7
+
+**CONTEXTO:** O Mentor24h tem dois modos. Ao trocar de modo, o usuário deve ser transportado para outro ambiente com fade suave e aterrissar no dashboard do modo.
+
+**SUA MISSÃO:** Atualizar a lógica de troca de modo (app.js) para incluir:
+
+**RF01 — FADE TRANSITION (400ms):**
+Ao trocar modo:
+① `.env-transitioning` no `#main-content` (opacity 0, 160ms)
+② Após 160ms: troca o modo (class, localStorage, navbar)
+③ Navega para módulo correto (dashboard ou posição salva)
+④ Remove `.env-transitioning` (fade-in 240ms)
+⑤ Mostra toast de confirmação
+`pointer-events: none` durante toda a transição.
+
+**RF02 — POSITION MEMORY:**
+- Ao clicar em qualquer nav item: salvar `mentor24h_pos_pessoal` ou `mentor24h_pos_negocio` no localStorage
+- Ao entrar em um modo: SE primeira vez → ir para dashboard/painel | SE retornando → restaurar posição salva
+
+**RF03 — DASHBOARD É HOME:**
+- Modo Pessoal → `#dashboard-pessoal`
+- Modo Negócio → `#painel-negocio`
+
+**RF04 — TOAST:**
+Função `showToast(mensagem, tipo)`:
+- `tipo: "pessoal"` → borda --signature | `tipo: "negocio"` → borda --info
+- Some após 2500ms com fade-out
+- HTML: `<div class="app-toast app-toast--[tipo]"><span class="app-toast-icon"></span><span class="app-toast-text"></span></div>`
+- Container: `<div class="app-toast-container" aria-live="polite">` (fora da sidebar/main)
+
+**RF05:** Verificar se função de troca já existe em app.js → SE sim: atualizar | SE não: criar (IIFE pattern)
+**RF06:** Event listeners dos nav items devem chamar `savePosition(modulo)` antes de navegar
+**RF07:** Preservar TUDO existente: `mentor24h_modoAtivo`, `.modo-negocio`, routing das duas navbars
+
+**ARQUIVOS:** `js/core/app.js` + `index.html` (toast container)
+**NÃO ALTERAR:** `css/*` | `js/modules/*`
+
+**CHECKLIST:**
+- [ ] Fade 400ms (160ms out + 240ms in) com pointer-events: none
+- [ ] Position memory salva/restaura por modo
+- [ ] Dashboard = home na primeira entrada em cada modo
+- [ ] Toast aparece e some em 2500ms com tipo ouro/safira
+- [ ] `.app-toast-container` no HTML com aria-live
+- [ ] Toda lógica existente preservada
+
+**RELAY:** Criar `.skill-memory/sprint-relay.md` documentando: fade transition implementado, classes CSS pendentes (.env-transitioning, .app-toast*), missão forge-visual Alpha (paleta corporativa completa).
+
+**HANDOFF:**
+```
+✅ [Alpha-1/4 CONCLUÍDA]
+Troca de modo com fade + position memory + toast funcionando.
+CSS do fade e da paleta corporativa → próxima etapa.
+⛔ NÃO commite → /skill-forge-visual → PROMPT Alpha-2
+```
+
+---
+
+#### PROMPT Alpha-2 — SKILL-FORGE-VISUAL (Paleta Corporativa Completa + CSS Fade + Toast)
+
+Você é um Diretor de Design + Engenheiro Visual Principal no Forge v5.2.
+
+**PROJETO:** Mentor24h | **DESIGN SYSTEM:** --signature ouro, --info safira #6D8EA8, Fraunces + Switzer
+**PROMPT COMPLETO EM:** `Estructura-Proyecto/01-documentacao/pae-prompts/prompts-2026-05.md` — entrada #7
+
+**O QUE VOCÊ HERDA:** Leia `.skill-memory/sprint-relay.md`
+- JS de fade + toast pronto, CSS pendente
+- `.modo-negocio` no body quando em Negócio (já existia)
+- `css/negocio.css` JÁ EXISTE (Sprint 2) — expandir, não recriar
+
+**OBJETIVO A — CSS DO FADE E TOAST:**
+```css
+.env-transitioning { opacity: 0; pointer-events: none; transition: opacity 160ms var(--ease-out); }
+#main-content { opacity: 1; transition: opacity 240ms var(--ease-out); }
+.app-toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+.app-toast { display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-radius: 10px; background: var(--surface-primary); border-left: 3px solid transparent; box-shadow: var(--shadow-elevated); font-family: Switzer, sans-serif; font-size: var(--type-sm); animation: toast-in 300ms var(--ease-out) forwards; }
+.app-toast--pessoal { border-left-color: var(--signature); }
+.app-toast--negocio { border-left-color: var(--info); }
+.app-toast.removing { animation: toast-out 240ms var(--ease-out) forwards; }
+@keyframes toast-in { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes toast-out { from { opacity: 1; } to { opacity: 0; transform: translateX(20px); } }
+```
+
+**OBJETIVO B — PALETA CORPORATIVA COMPLETA (em css/negocio.css, dentro de `body.modo-negocio {}`):**
+
+Referência central: `--accent-modo: var(--info)` | `--accent-modo-hover: #5A7A96` | `--accent-modo-subtle: rgba(109,142,168,0.15)`
+
+Cobrir:
+- Botões primários: background var(--info)
+- Focus rings: outline-color var(--info)
+- Estados ativos/selecionados: color var(--info)
+- Nav items ativos (sidebar): cor safira
+- Switcher tab ativa: background var(--info)
+- Avatar ring: border-color var(--info)
+- Progress bars / KPI bars: gradient safira
+- Links e text-accent: color var(--info)
+- Badges corporativos: background var(--accent-modo-subtle), border safira
+- Scrollbar thumb: rgba(109,142,168,0.4) → var(--info) no hover
+- Gradients: linear-gradient(135deg, var(--info), #3D6480)
+- Surfaces cards: `background-image: linear-gradient(135deg, rgba(109,142,168,0.04), transparent 60%)`
+- Seleção de texto: background var(--accent-modo-subtle)
+
+**REGRAS CRÍTICAS:**
+- NUNCA hardcoded fora dos overrides explícitos
+- Todos os seletores DENTRO de `body.modo-negocio {}` — zero vazamento no Pessoal
+- Dark + light mode preservados (tokens OBSIDIAN respondem automaticamente)
+- Zero `filter: hue-rotate()` no body — apenas CSS custom properties
+
+**ARQUIVOS:** `css/negocio.css` (expandir) | NÃO ALTERAR: `css/tokens.css`, qualquer JS
+
+**CHECKLIST:**
+- [ ] Fade 160ms/240ms funcionando visualmente
+- [ ] Toast slide-in, some em 2500ms
+- [ ] Todos os accents safira em .modo-negocio
+- [ ] Focus rings safira | Progress bars safira | Scrollbar safira
+- [ ] Nenhum ouro vazando para o modo Negócio
+- [ ] Dark + light mode funcionando com paleta corporativa
+
+**RELAY:** Atualizar sprint-relay.md: Alpha completo, missão Beta — dashboards precisam de classes `.dp-*` (Pessoal) e `.pn-*` (Negócio) estilizadas.
+
+**HANDOFF:**
+```
+✅ [Alpha-2/4 CONCLUÍDA — SPRINT ALPHA COMPLETO]
+Fade + toast + paleta corporativa safira em todo o ambiente Negócio.
+⛔ NÃO commite → /skill-construtor → PROMPT Beta-1
+```
+
+---
+
+### SPRINT BETA — Os Dois Dashboards
+
+#### PROMPT Beta-1 — SKILL-CONSTRUTOR (Dashboards JS + HTML + dados localStorage)
+
+Você é um Engenheiro de Software Principal + Lead Architect no Forge v5.2.
+
+**PROJETO:** Mentor24h | **STACK:** HTML + JS puro | localStorage | OBSIDIAN EDITORIAL
+**PROMPT COMPLETO EM:** `Estructura-Proyecto/01-documentacao/pae-prompts/prompts-2026-05.md` — entrada #7
+
+**O QUE VOCÊ HERDA:** Leia `.skill-memory/sprint-relay.md`
+- Alpha completo: routing → #dashboard-pessoal / #painel-negocio (IDs que você vai criar)
+- Paleta corporativa aplicada — Negócio herdará safira automaticamente
+- Verificar: `js/modules/painel.js` existe do Sprint 2? SE sim: expandir | SE não: criar
+
+**[A] DASHBOARD PESSOAL** — `js/modules/dashboard-pessoal.js` (novo) + `<section id="dashboard-pessoal">`
+
+- **RF-A01 Saudação dinâmica:** `.dp-greeting` com h1 Fraunces italic (Bom dia/tarde/noite, Léo!) + data completa (dia semana, dia, mês por extenso, ano)
+- **RF-A02 4 Widgets** em `.dp-widgets-grid`:
+  - `.dp-widget--agenda`: ler `mentor24h_tarefas` → "N compromissos hoje" ou fallback elegante
+  - `.dp-widget--saude`: ler `mentor24h_saude` → último registro ou placeholder
+  - `.dp-widget--financas`: ler `mentor24h_financas` → saldo atual + delta do dia
+  - `.dp-widget--contatos`: ler contatos → aniversários da semana ou "N contatos"
+- **RF-A03 Tarefas prioritárias** (`.dp-tarefas`): top 3 pendentes do localStorage, checkbox funcional que persiste ao clicar, fallback "Nenhuma tarefa pendente 🎉"
+- **RF-A04 Nota rápida** (`.dp-nota`): textarea com auto-save no localStorage `mentor24h_nota_rapida`, debounce 800ms, restaura ao abrir
+
+**[B] DASHBOARD NEGÓCIO** — `js/modules/painel.js` (criar/expandir) + `<section id="painel-negocio">`
+
+- **RF-B01 Header** (`.pn-header`): "Painel Executivo" + mês/ano + delta vs mês anterior (calculado de finanças)
+- **RF-B02 4 KPIs** em `.pn-kpis-grid`:
+  - `.pn-kpi--receita`: soma entradas do mês de finanças | meta: R$ 20.000 | progress bar %
+  - `.pn-kpi--clientes`: count contatos modo Negócio com temp != Inativo | meta: 30
+  - `.pn-kpi--ticket`: receita / clientes (Intl.NumberFormat BRL) | delta ↑↓
+  - `.pn-kpi--pendencias`: count tarefas urgentes/vencidas | `data-urgente="true"` se > 0
+- **RF-B03 Top Clientes** (`.pn-top-clientes`): top 3 contatos ordenados por temperatura (VIP→Quente→Morno...), progress bar proporcional ao 1°
+- **RF-B04 Últimas Vendas** (`.pn-vendas-recentes`): últimas 5 entradas de finanças, fallback elegante
+- **RF-B05 Quick Actions** (`.pn-quick-actions`): [+ Registrar Venda] → finanças | [+ Novo Cliente] → contatos + modal | [📊 Relatório] → relatórios/placeholder
+
+**REGRAS CRÍTICAS:**
+- ZERO crash com localStorage vazio — fallback elegante em TODOS os campos
+- Valores monetários: `Intl.NumberFormat('pt-BR', {style:'currency', currency:'BRL'})`
+- ZERO CSS de aparência — apenas estrutura e lógica
+
+**ARQUIVOS:** `js/modules/dashboard-pessoal.js` (novo) | `js/modules/painel.js` (criar/expandir) | `index.html` (seções + links CSS/JS)
+
+**CHECKLIST:**
+- [ ] #dashboard-pessoal: saudação + 4 widgets + tarefas (checkbox funcional) + nota (auto-save)
+- [ ] #painel-negocio: header + 4 KPIs calculados + top 3 clientes + vendas + quick actions
+- [ ] Todos os dados vêm do localStorage com fallback seguro
+- [ ] Nenhum crash com dados vazios
+
+**RELAY:** Atualizar sprint-relay.md: listar todas as classes .dp-* e .pn-* criadas (forge-visual Beta precisa saber o que estilizar).
+
+**HANDOFF:**
+```
+✅ [Beta-1/4 CONCLUÍDA]
+Dashboards Pessoal e Negócio funcionando com dados reais.
+Visual sem estilo → próxima etapa entrega o premium.
+⛔ NÃO commite → /skill-forge-visual → PROMPT Beta-2
+```
+
+---
+
+#### PROMPT Beta-2 — SKILL-FORGE-VISUAL (Visual Premium dos Dois Dashboards)
+
+Você é um Diretor de Design + Engenheiro Visual Principal no Forge v5.2.
+
+**PROJETO:** Mentor24h | **DESIGN SYSTEM:** --signature ouro, --info safira, Fraunces + Switzer
+**PROMPT COMPLETO EM:** `Estructura-Proyecto/01-documentacao/pae-prompts/prompts-2026-05.md` — entrada #7
+
+**O QUE VOCÊ HERDA:** Leia `.skill-memory/sprint-relay.md`
+- Sprint Alpha: paleta corporativa safira em .modo-negocio (automática)
+- Beta-1: classes .dp-* (Dashboard Pessoal) e .pn-* (Painel Negócio) sem estilo
+- Negócio herda safira AUTOMATICAMENTE — apenas layout e componentes específicos
+
+**ARQUIVO A: `css/dashboard-pessoal.css` (NOVO) — warm, humano, ouro:**
+- `#dashboard-pessoal`: padding 28px, max-width 1100px, flex-column, gap 24px
+- `.dp-greeting-texto`: Fraunces italic, var(--type-2xl), color text-primary
+- `.dp-greeting-data`: Switzer 400, var(--type-sm), text-quiet
+- `.dp-widgets-grid`: grid 2×2, gap 16px
+- `.dp-widget`: surface-secondary, border-radius 14px, padding 18px, hover translateY(-2px) + shadow-elevated
+- `.dp-widget-valor`: Switzer 600, var(--type-lg) | `.dp-widget-label`: xs, text-quiet
+- `.dp-widget--financas .dp-widget-valor`: color var(--signature) — ouro no destaque
+- `.dp-tarefas`: surface-secondary, border-radius 14px | `.dp-tarefas-titulo`: uppercase, letter-spacing 0.06em
+- `.dp-tarefa-item`: flex, gap 10px, border-bottom border-soft
+- `.dp-tarefa-check`: 18px circular, border 1.5px border-soft, checked → background+border-color var(--signature)
+- `.dp-tarefa-check:checked + .dp-tarefa-texto`: text-decoration line-through, text-mute
+- `.dp-nota-input`: background none, border none, Switzer, min-height 80px, resize none
+
+**ARQUIVO B: `css/painel-negocio.css` (NOVO) — corporativo, preciso (safira via .modo-negocio):**
+- `#painel-negocio`: padding 28px, max-width 1200px, flex-column, gap 24px
+- `.pn-header`: flex space-between, border-bottom border-soft, padding-bottom 16px
+- `.pn-header-titulo h1`: Fraunces, var(--type-2xl), letter-spacing -0.03em
+- `.pn-delta-valor`: Switzer 700, var(--type-lg), color var(--info)
+- `.pn-kpis-grid`: grid 4 colunas, gap 16px
+- `.pn-kpi`: surface-secondary, border-radius 12px, padding 20px, hover translateY(-2px)
+- `.pn-kpi-valor`: Switzer 700, var(--type-xl) | `.pn-kpi-label`: uppercase, letter-spacing 0.06em, xs
+- `.pn-kpi-progress`: height 4px, background border-soft, border-radius 2px, overflow hidden
+- `.kpi-bar-fill`: height 100%, background var(--info) → accent-modo-hover gradient, transition width 600ms
+- `.pn-kpi--pendencias[data-urgente="true"] .pn-kpi-valor`: color var(--critical)
+- `.pn-cliente-item`: flex, gap 12px, border-bottom | `.pn-cliente-bar div`: background var(--info)
+- `.pn-venda-valor`: color var(--info), font-weight 600
+- `.pn-action-btn`: padding 10px 16px, border border-soft, hover border-color var(--info) + accent-modo-subtle + translateX(2px)
+- `.pn-action-btn--primary`: background var(--info), color #fff
+- `.pn-bottom-grid`: grid 1fr auto, gap 16px
+- `.pn-quick-actions`: flex-column, gap 10px, min-width 200px
+
+**RESPONSIVO (ambos):**
+- `< 1024px`: `.pn-kpis-grid` → 2 colunas
+- `< 768px`: padding 16px, `.pn-bottom-grid` → 1 coluna, `.pn-quick-actions` → row wrap
+- `< 480px`: `.dp-widgets-grid` e `.pn-kpis-grid` → 1×2
+
+**ARQUIVOS:** `css/dashboard-pessoal.css` (novo) | `css/painel-negocio.css` (novo) | `index.html` (links)
+**NÃO ALTERAR:** `css/negocio.css` (paleta do Alpha) | `css/tokens.css` | qualquer JS
+
+**CHECKLIST:**
+- [ ] dashboard-pessoal.css: bento grid warm, Fraunces italic, accent ouro
+- [ ] painel-negocio.css: grid executivo, KPI bars, accent safira herdado
+- [ ] Checkbox circular elegante com filled state ouro
+- [ ] Progress bars KPI com animação 600ms
+- [ ] Quick actions: primário safira, hover translateX(2px)
+- [ ] Responsivo em ambos (< 768px e < 480px)
+- [ ] Dark + light mode sem quebrar
+- [ ] Nenhum ouro no ambiente Negócio
+
+**HANDOFF — ÚLTIMA ETAPA:**
+```
+✅ [Beta-2/4 CONCLUÍDA — DOIS MUNDOS COMPLETOS]
+
+Sprint Alpha: fade + toast + paleta safira completa
+Sprint Beta: Dashboard Pessoal (hub de vida) + Painel Executivo (negócio)
+
+VALIDAÇÃO FINAL:
+[ ] Pessoal → fade → chega no Dashboard Pessoal (accent ouro)
+[ ] Negócio → fade → chega no Painel Executivo (accent safira em TUDO)
+[ ] Toast aparece/some com identidade correta por modo
+[ ] Dashboards com dados reais, fallback elegante
+[ ] Mobile < 768px: ambos responsivos
+[ ] Dark e light mode funcionando
+[ ] Nenhuma feature anterior regrediu
+
+Validação ok? Confirme para commit:
+
+  git add index.html js/modules/dashboard-pessoal.js js/modules/painel.js
+          css/dashboard-pessoal.css css/painel-negocio.css css/negocio.css js/core/app.js
+  git commit -m "feat(dual-mode): dois mundos completos — dashboards + paleta corporativa + routing — Forge v5.2 ENTERPRISE appetite-L"
+  git push origin main
+
+⚠️ AGUARDAR CONFIRMAÇÃO DO USUÁRIO ANTES DE EXECUTAR GIT.
+```
+
+---
+
+*Entrada #7 gerada por skill-pae v2.0 em 2026-05-16*

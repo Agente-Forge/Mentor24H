@@ -1,6 +1,6 @@
 # Índice — Aprendizado Dev
 **Projeto:** Mentor24h | **Modo Aprendiz:** PAE v2.0
-**Última atualização:** 2026-05-16
+**Última atualização:** 2026-05-16 (Lições #6 e #7 adicionadas)
 
 > Este índice é atualizado automaticamente pelo PAE a cada lição gerada.
 > Para consultar qualquer coisa, clique nos links abaixo.
@@ -9,8 +9,8 @@
 
 ## Glossário
 
-[glossario.md](glossario.md) — **26 termos cadastrados**
-Últimas adições: *dot indicator*, *drawer*, *frosted glass*, *rail mode*
+[glossario.md](glossario.md) — **35 termos cadastrados**
+Últimas adições: *causa raiz*, *debounce*, *fade/cross-fade*, *memória de posição*, *overflow: hidden*, *toast*, *widget*, *wrapper*
 
 ---
 
@@ -18,7 +18,7 @@
 
 | Arquivo | Mês | Lições | Termos aprendidos |
 |---------|-----|--------|-------------------|
-| [licoes-2026-05.md](licoes-2026-05.md) | Maio 2026 | 5 | 26 |
+| [licoes-2026-05.md](licoes-2026-05.md) | Maio 2026 | 7 | 35 |
 
 ---
 

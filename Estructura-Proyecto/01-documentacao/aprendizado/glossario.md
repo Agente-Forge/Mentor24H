@@ -117,6 +117,10 @@
 
 ## C
 
+**causa raiz**
+→ O problema real que gerou um bug — não o sintoma visível. Exemplo: o sintoma era "botão de sidebar sumindo"; a causa raiz era "botão dentro de container com overflow:hidden". Resolver o sintoma é band-aid. Resolver a causa raiz é o fix correto.
+*Apareceu em:* Lição #6 (2026-05-16)
+
 **commit**
 → Salvar permanentemente as mudanças no histórico do projeto usando git. É como tirar um "snapshot" do código naquele momento. Após o commit, você tem um registro de tudo que foi feito.
 → Comando: `git commit -m "descrição do que foi feito"`
@@ -125,6 +129,10 @@
 ---
 
 ## D
+
+**debounce**
+→ Técnica que atrasa a execução de uma ação até o usuário parar de agir por X milissegundos. Exemplo: nota rápida com debounce de 800ms — o app só salva no localStorage 800ms depois que você parar de digitar. Evita salvar a cada letra.
+*Apareceu em:* Lição #7 (2026-05-16)
 
 **deploy**
 → Publicar o app na internet para que funcione no link real. No Mentor24h, após `git push`, o GitHub Pages faz o deploy automaticamente em ~60 segundos.
@@ -150,6 +158,10 @@
 
 ## F
 
+**fade / cross-fade**
+→ Efeito de transição onde uma tela "apaga" suavemente (opacity 0) e outra "acende" (opacity 1). Cross-fade é quando os dois acontecem em sequência — como uma troca de cena no cinema. No Mentor24h: 160ms para apagar + 240ms para acender = 400ms total ao trocar de modo.
+*Apareceu em:* Lição #7 (2026-05-16)
+
 **frosted glass**
 → Efeito visual translúcido com desfoque de fundo — como vidro fosco. Em CSS: `backdrop-filter: blur(8px)`. Usado nos itens inativos da sidebar para dar profundidade sem poluir.
 *Apareceu em:* Lição #5 (2026-05-16)
@@ -172,7 +184,19 @@
 
 ---
 
+## M (continuação)
+
+**memória de posição**
+→ O app lembra em qual módulo você estava antes de trocar de modo. Ao voltar para o Modo Pessoal, ele te leva de volta onde você estava — não força ir para o dashboard toda vez. Salvo no localStorage: `mentor24h_pos_pessoal` e `mentor24h_pos_negocio`.
+*Apareceu em:* Lição #7 (2026-05-16)
+
+---
+
 ## O
+
+**overflow: hidden**
+→ Propriedade CSS que esconde tudo que ultrapassa a borda do container. Útil para efeitos de collapse — mas cuidado: elementos filhos posicionados (como botões com `position: absolute`) também ficam invisíveis se estiverem fora dos limites.
+*Apareceu em:* Lição #6 (2026-05-16)
 
 **override (CSS)**
 → Quando um estilo "ganha" sobre outro por ser mais específico. Ex: `.modo-negocio .navbar` sobrescreve o estilo padrão `.navbar` apenas quando o modo Negócio está ativo.
@@ -196,6 +220,14 @@
 
 ---
 
+## T (continuação)
+
+**toast**
+→ Notificação temporária que aparece sozinha na tela e some após alguns segundos — sem precisar clicar para fechar. No Mentor24h: exibe "Bem-vindo ao Modo Pessoal, Léo!" em ouro ou "Modo Negócio ativado" em safira ao trocar de ambiente. Dura 2.500ms.
+*Apareceu em:* Lição #7 (2026-05-16)
+
+---
+
 ## S (continuação)
 
 **schema**
@@ -204,4 +236,16 @@
 
 ---
 
-*Total: 26 termos | Última adição: 2026-05-16 | PAE v2.0*
+## W
+
+**widget**
+→ Componente visual independente que exibe um tipo de dado. No Dashboard Pessoal: widget de Agenda, widget de Saúde, widget de Finanças, widget de Contatos — cada um lê seus próprios dados e se atualiza sozinho.
+*Apareceu em:* Lição #7 (2026-05-16)
+
+**wrapper**
+→ Elemento HTML "pai" que envolve outros elementos só para organizar ou aplicar um estilo específico — sem significado semântico próprio. No fix da sidebar: `.sidebar-inner` é um wrapper que recebe o `overflow:hidden`, enquanto o botão de toggle fica fora dele.
+*Apareceu em:* Lição #6 (2026-05-16)
+
+---
+
+*Total: 35 termos | Última adição: 2026-05-16 | PAE v2.0*

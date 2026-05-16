@@ -68,10 +68,10 @@
    1. SIDEBAR CONTAINER + INNER
 ───────────────────────────────────────────────────────────  */
 
-/* Sidebar: overflow VISIBLE → toggle button pode sair da borda */
+/* Sidebar: overflow VISIBLE → toggle button pode sair da borda.
+   position:fixed (definido pelo layout.css) já cria contexto para filhos absolute. */
 #sidebar {
   overflow: visible;
-  position: relative; /* garante contexto para .sidebar-toggle absolute */
 }
 
 /* Inner: recebe o clipping */

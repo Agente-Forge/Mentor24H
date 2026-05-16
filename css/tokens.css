@@ -107,6 +107,9 @@
   --topbar-h:             64px;
   --content-pad:         var(--s-7);
   --mobile-breakpoint:   768px;
+
+  /* ─── Semantic border aliases ─── */
+  --border-soft: rgba(212, 165, 116, 0.10); /* mesmo valor que --line-2 */
 }
 
 /* ═══════════════════════════════════════════════════════════
