@@ -246,6 +246,11 @@
       <div id="dashboard-content"></div>
     </section>
 
+    <!-- ─── PAINEL NEGÓCIO ─── -->
+    <section class="page" data-page="painel">
+      <div id="painel-negocio-content"></div>
+    </section>
+
     <!-- ─── CHAT AI ─── -->
     <section class="page" data-page="chat-ai">
       <div id="chat-ai-content"></div>
@@ -576,6 +581,7 @@
 <script src="js/router.js"></script>
 <script src="js/charts.js?v=8"></script>
 <script src="js/modal.js?v=8"></script>
+<script src="js/modules/painel.js?v=10"></script>
 <script src="js/dashboard.js?v=8"></script>
 <script src="js/contas.js?v=8"></script>
 <script src="js/transacoes.js?v=8"></script>
@@ -597,6 +603,11 @@
 <script src="js/command-palette.js?v=8"></script>
 <script src="js/leo-data.js?v=8"></script>
 <script src="js/app.js?v=10"></script>
+
+<!-- Router registration para Painel -->
+<script>
+  Router.register('painel', () => Painel.render());
+</script>
 
 </body>
 </html>

@@ -56,6 +56,11 @@ const App = (() => {
     document.querySelectorAll('.nav-group').forEach(g => g.classList.remove('open'));
     const firstGroup = document.querySelector(`[data-context="${modo}"]`);
     if (firstGroup) firstGroup.classList.add('open');
+
+    /* Navegar para a página padrão do modo */
+    if (modo === 'negocio') {
+      Router.navigate('painel');
+    }
   }
 
   function initNavGroups() {
@@ -170,7 +175,7 @@ const App = (() => {
   }
 
   const BNAV_GROUP = {
-    'produtos': 'vendas', 'vendas': 'vendas', 'estoque': 'vendas', 'clientes': 'vendas',
+    'painel': 'vendas', 'produtos': 'vendas', 'vendas': 'vendas', 'estoque': 'vendas', 'clientes': 'vendas',
     'contas': 'contas', 'transacoes': 'contas', 'metas': 'contas',
     'kanban': 'contas', 'categorias': 'contas',
     'agenda': 'tarefas', 'medicamentos': 'tarefas', 'tarefas': 'tarefas', 'contatos': 'tarefas',
