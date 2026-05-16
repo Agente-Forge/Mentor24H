@@ -143,13 +143,25 @@ const App = (() => {
       sb.classList.add('collapsed');
       document.body.classList.add('sidebar-colapsada');
     }
+    /* Sincronizar aria-expanded no toggle externo */
+    const toggleBtnInit = document.getElementById('sidebar-toggle');
+    if (toggleBtnInit) {
+      toggleBtnInit.setAttribute('aria-expanded', String(!isCollapsed));
+    }
 
+    /* Botão collapse legado (dentro do footer) */
     const btn = document.getElementById('btn-collapse');
     if (btn) btn.addEventListener('click', toggleSidebar);
 
+    /* Novo sidebar-toggle externo (fora do sidebar-inner) */
+    const toggleBtn = document.getElementById('sidebar-toggle');
+    if (toggleBtn) toggleBtn.addEventListener('click', toggleSidebar);
+
+    /* Hamburger mobile */
     const mobileBtn = document.getElementById('btn-mobile-menu');
     if (mobileBtn) mobileBtn.addEventListener('click', toggleMobileSidebar);
 
+    /* Overlay — fecha drawer mobile */
     const overlay = document.getElementById('sidebar-overlay');
     if (overlay) overlay.addEventListener('click', closeMobileSidebar);
 
@@ -176,9 +188,17 @@ const App = (() => {
     const isCollapsed = sb.classList.toggle('collapsed');
     document.body.classList.toggle('sidebar-colapsada', isCollapsed);
     localStorage.setItem('mentor24h_sidebarColapsada', isCollapsed ? '1' : '0');
+
+    /* Atualizar ícone do botão legado */
     const btn = document.getElementById('btn-collapse');
     if (btn) {
       btn.innerHTML = Icons.html(isCollapsed ? 'panel-left-open' : 'panel-left-close', 16);
+    }
+
+    /* Atualizar aria-expanded no novo sidebar-toggle externo */
+    const toggleBtn = document.getElementById('sidebar-toggle');
+    if (toggleBtn) {
+      toggleBtn.setAttribute('aria-expanded', String(!isCollapsed));
     }
   }
 

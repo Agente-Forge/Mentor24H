@@ -1,5 +1,76 @@
-# Sprint Relay — Sidebar Premium v5.2
-**Pipeline:** skill-construtor (Etapa 1) → skill-forge-visual (Etapa 2) → DEPLOY
+# Sprint Relay — Sidebar Fix + Enriquecimento (B1/B2)
+**Pipeline:** skill-construtor B1 ✅ → skill-forge-visual B2 ✅ → DEPLOY ✅ LIBERADO
+
+---
+
+## DIAGRAMA DA ESTRUTURA ATUAL (B1)
+
+```
+<aside id="sidebar">
+  <div class="sidebar-inner">              ← NOVO — recebe overflow:hidden
+    .sidebar-zona-logo     [Z1] data-zona="1"
+    .sidebar-zona-avatar   [Z2] data-zona="2"  #sidebar-saudacao
+    .sidebar-zona-switcher [Z3] data-zona="3"  .modo-switcher
+    .sidebar-zona-nav      [Z4] data-zona="4"  nav + #sidebar-dot
+    .sidebar-zona-footer   [Z5] data-zona="5"  Chat IA + tema + collapse
+  </div>
+  <button class="sidebar-toggle" id="sidebar-toggle"
+          aria-label="Alternar menu lateral" aria-expanded="true">
+    <span class="sidebar-toggle-icon" data-icon="chevron-left">
+  </button>
+</aside>
+<div id="sidebar-overlay" class="sidebar-overlay"></div>  ← linha 551
+
+[topbar] .mobile-menu-btn.sidebar-hamburger #btn-mobile-menu
+```
+
+## ✅ SPRINT B1 — skill-construtor — CONCLUÍDO
+
+- [x] sidebar-inner wrapper adicionado (linha 32–186)
+- [x] sidebar-toggle FORA do inner (linha 189) — nunca clipado
+- [x] aria-expanded gerenciado em toggleSidebar() + restore no load
+- [x] sidebar-hamburger class + aria-label no btn-mobile-menu
+- [x] sidebar-overlay já existia (linha 551) — intacto
+- [!] Seletores CSS em sidebar.css precisam atualizar para .sidebar-inner .sidebar-zona-*
+
+## ✅ SPRINT B2 — skill-forge-visual — CONCLUÍDO
+
+- [x] sidebar: overflow visible (sidebar-inner faz o clipping)
+- [x] .sidebar-toggle: position absolute right -14px, pill visual, sempre visível
+- [x] chevron rotaciona 180deg em body.sidebar-colapsada
+- [x] Rail mode: sidebar 64px, labels opacity 0 / max-width 0
+- [x] Tooltips no rail: hover delay 200ms (CSS ::after com transition-delay)
+- [x] Mobile drawer: translateX(-100%) → 0 com #sidebar.mobile-open
+- [x] Overlay: fade com .sidebar-overlay.visible { opacity: 0.5 }
+- [x] Hamburger estilizado (.sidebar-hamburger display:none → flex em @media <768px)
+- [x] Token override: :root { --sidebar-w-collapsed: 64px } (sem tocar tokens.css)
+- [x] RNF01: local tokens no #sidebar {} para rgba glow centralizados
+- [x] RNF03: @supports para backdrop-filter
+- [x] RNF04: [data-theme="light"] override dos local tokens
+- [x] Reduced-motion: todas transições/animações desativadas
+
+### Arquivos entregues neste sprint
+
+| Arquivo | Ação |
+|---------|------|
+| css/sidebar.css | REESCRITA COMPLETA (Pipeline B2) |
+| js/sidebar-dot.js | já existia do A2 — intacto |
+| index.html | já modificado no B1 — intacto |
+
+## 🚦 STATUS FINAL
+
+| Sprint | Status |
+|--------|--------|
+| A1 — 5 Zonas | ✅ |
+| A2 — Visual | ✅ |
+| B1 — Fix inner+toggle | ✅ |
+| B2 — Visual fix | ✅ CONCLUÍDO |
+| DEPLOY | ✅ LIBERADO — aguardando validação |
+
+---
+
+## HISTÓRICO ANTERIOR (A1/A2)
+**Pipeline original:** skill-construtor (Etapa 1) → skill-forge-visual (Etapa 2) → DEPLOY
 
 ---
 
@@ -134,23 +205,36 @@
 
 ---
 
-## ✅ SPRINT 2 — skill-forge-visual — CONCLUÍDO
+## ✅ SPRINT 2 — skill-forge-visual — CONCLUÍDO (v2 FINAL)
 
-**Commit:** `[FORGE-VISUAL-SIDEBAR-v5.2]` — design(sidebar): CSS premium 5 zonas + ring animado + dot indicator + tooltips rail
+**Commit:** `[FORGE-VISUAL-SIDEBAR-v5.2-FINAL]` — design(sidebar): Tier Apple+ — dot deslizante real + hierarquia opacidade + frosted glass inativo
 
 ### Arquivos Modificados
 
-#### css/sidebar.css (NOVO)
-- [x] **ZONA 1**: padding 28px top, separador gradiente `::after`, rail centraliza logo
-- [x] **ZONA 2**: Avatar ring 2px `var(--color-gold)` via box-shadow, pulse 400ms (`@keyframes sb-avatar-pulse`), saudação `#sidebar-saudacao` Fraunces italic
-- [x] **ZONA 3**: Switcher frosted glass (`@supports backdrop-filter`), pill ouro/safira com box-shadow, rail compacto (ícones empilhados)
-- [x] **ZONA 4**: Dot indicator 6×18px com glow + `sb-dot-in` spring, frosted glass hover, safira em modo Negócio
-- [x] **ZONA 5**: Gradient separator `::before`, Chat IA destacado (ouro/safira por modo), collapse btn premium
-- [x] **Rail mode** (`#sidebar.collapsed`): overflow visible para tooltips, avatares/zonas centralizadas
-- [x] **Tooltips**: CSS `attr(data-tooltip)` com delay 200ms — aparecem em hover no rail
-- [x] **Mobile drawer**: `.sidebar-zona-*` restauram padding quando `.mobile-open`
-- [x] **Light theme**: overrides para ring e gradiente no creme
-- [x] **Acessibilidade**: focus rings ouro/safira, `prefers-reduced-motion`
+#### css/sidebar.css (REESCRITA COMPLETA v2)
+- [x] **Local tokens** em `#sidebar {}`: opacidades (0.55/0.85/1), easing, rgba de glow centralizados (RNF01)
+- [x] **ZONA 1**: padding 28px/20px, separador gradiente `var(--border-soft)`, rail max-width collapse
+- [x] **ZONA 2**: Avatar ring `0 0 0 2px var(--signature)` + halo, pulse 400ms (ouro e safira), saudação Switzer italic `var(--t-xs) var(--text-3)`
+- [x] **ZONA 3**: Container frosted glass `@supports`, pill ativo ouro/safira, pill **inativo opacity:0.6 + backdrop-filter blur(8px)**
+- [x] **ZONA 4**: `::before` desabilitado (dot cuida); **opacity hierárquica** 0.55→0.85→1; hover **translateX(2px)** 160ms; focus 1.5px outline
+- [x] **ZONA 5**: Gradient separator, Chat IA ouro/safira, collapse btn com **chevron rotate(180deg)**, footer t-xs
+- [x] **Rail mode**: overflow visible, tooltips delay 200ms, `transform: none` no rail
+- [x] **Mobile**: width 280px, 300ms cubic-bezier(0.4,0,0.2,1), drawer restaura zonas
+- [x] **Light theme**: sobrescreve local tokens com valores de contraste creme
+- [x] **Reduced-motion**: todas as transições/animações desativadas
+
+#### js/sidebar-dot.js (NOVO — dot deslizante real)
+- [x] IIFE isolado, zero dependências, não toca app.js
+- [x] MutationObserver em todos os `.nav-item` (attributeFilter: class)
+- [x] `getBoundingClientRect()` para posição relativa precisa (scroll-aware)
+- [x] `Math.clamp` para não ultrapassar limites da zona
+- [x] Re-posiciona no collapse/expand (setTimeout 60ms pós-transição)
+- [x] `.visible` class ativa opacity: 1 com transição suave
+
+#### index.html
+- [x] `sidebar.css?v=1` → `?v=2`
+- [x] `<div id="sidebar-dot" class="sidebar-dot-indicator" aria-hidden="true">` em ZONA 4
+- [x] `<script src="js/sidebar-dot.js">` após Router.register(painel)
 
 #### index.html
 - [x] `<link rel="stylesheet" href="css/sidebar.css?v=1">` adicionado

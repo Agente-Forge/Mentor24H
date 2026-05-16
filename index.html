@@ -21,7 +21,7 @@
   <link rel="stylesheet" href="css/pages.css?v=9">
   <link rel="stylesheet" href="css/motion.css?v=8">
   <link rel="stylesheet" href="css/negocio.css?v=2">
-  <link rel="stylesheet" href="css/sidebar.css?v=1">
+  <link rel="stylesheet" href="css/sidebar.css?v=2">
 </head>
 <body>
 
@@ -29,6 +29,7 @@
 
   <!-- ═══ SIDEBAR ═══ -->
   <aside id="sidebar">
+    <div class="sidebar-inner">
     <!-- ZONA 1: Logo & Branding -->
     <div class="sidebar-zona-logo" data-zona="1">
       <div class="brand-logo"><span>M</span></div>
@@ -63,6 +64,8 @@
 
     <!-- ZONA 4: Navegação -->
     <div class="sidebar-zona-nav" data-zona="4">
+    <!-- Dot indicator deslizante — posicionado por js/sidebar-dot.js -->
+    <div id="sidebar-dot" class="sidebar-dot-indicator" aria-hidden="true"></div>
     <nav class="sidebar-nav">
 
       <!-- Dashboard -->
@@ -180,13 +183,20 @@
       </button>
     </div>
     </div>
+    </div><!-- /.sidebar-inner -->
+
+    <!-- Toggle desktop — fora do inner, nunca clipado pelo overflow -->
+    <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Alternar menu lateral" aria-expanded="true">
+      <span class="sidebar-toggle-icon" data-icon="chevron-left" data-size="16"></span>
+    </button>
   </aside>
+
 
   <!-- ═══ MAIN ═══ -->
   <main id="main">
 
     <header id="topbar">
-      <button class="mobile-menu-btn" id="btn-mobile-menu" title="Menu">
+      <button class="mobile-menu-btn sidebar-hamburger" id="btn-mobile-menu" aria-label="Abrir menu" title="Menu">
         <span data-icon="menu" data-size="20"></span>
       </button>
 
@@ -626,6 +636,9 @@
 <script>
   Router.register('painel', () => Painel.render());
 </script>
+
+<!-- Sidebar dot indicator — carrega após app.js ter definido o item ativo -->
+<script src="js/sidebar-dot.js"></script>
 
 </body>
 </html>

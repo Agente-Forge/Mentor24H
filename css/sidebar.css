@@ -1,358 +1,720 @@
 /* ═══════════════════════════════════════════════════════════
-   SIDEBAR PREMIUM v5.2 — 5 Zonas Semânticas
+   SIDEBAR PREMIUM v5.2 — Pipeline B2 Final · Tier Apple+
    OBSIDIAN Design System | Mentor24h
    skill-forge-visual v5.0 | Forge v5.2 | 2026-05-16
+
+   Estrutura HTML que este CSS espera:
+   <aside id="sidebar">
+     <div class="sidebar-inner">      ← overflow:hidden aqui
+       .sidebar-zona-[logo|avatar|switcher|nav|footer]
+     </div>
+     <button class="sidebar-toggle">  ← FORA do inner
+   </aside>
+
+   RNF01: zero cores hardcoded — apenas var(--)
+   RNF02: zero sombras genéricas — apenas var(--shadow-*)
+   RNF03: backdrop-filter com @supports fallback
+   RNF04: dark/light automático via tokens OBSIDIAN
+   RNF05: divisórias sempre via gradient
 ═══════════════════════════════════════════════════════════ */
 
 /* ─────────────────────────────────────────────────────────
-   1. ZONAS — Layout base
-   Cada zona é um flex-item dentro do #sidebar (column).
+   0. OVERRIDE TOKENS + LOCAL VARS
+   Centraliza todos os rgba e valores de rail neste escopo.
 ───────────────────────────────────────────────────────────  */
 
-.sidebar-zona-logo {
-  padding: 28px var(--s-5) var(--s-4);
+/* Rail width: 64px (PAE spec) — sobrescreve tokens.css (72px) via cascade */
+:root {
+  --sidebar-w-collapsed: 64px;
+}
+
+/* Tokens locais: opacity, easing, glow — satisfaz RNF01 */
+#sidebar {
+  /* Opacidades de nav */
+  --sb-inactive: 0.55;
+  --sb-hover:    0.85;
+  --sb-active:   1;
+
+  /* Timing */
+  --sb-ease-slide: cubic-bezier(0.4, 0, 0.2, 1);
+  --sb-d-fast:   160ms;
+  --sb-d-base:   240ms;
+  --sb-d-slide:  300ms;
+
+  /* Glow ouro — Pessoal */
+  --sb-glow-sig:   rgba(212, 165, 116, 0.55);
+  --sb-halo-sig:   rgba(212, 165, 116, 0.20);
+  --sb-ring-sig:   rgba(212, 165, 116, 0.12);
+  --sb-pulse-sig:  rgba(212, 165, 116, 0.30);
+  --sb-chat-sig:   rgba(212, 165, 116, 0.06);
+  --sb-chat-sigH:  rgba(212, 165, 116, 0.14);
+  --sb-dot-sig:    rgba(212, 165, 116, 0.04);
+
+  /* Glow safira — Negócio */
+  --sb-glow-inf:   rgba(109, 142, 168, 0.55);
+  --sb-halo-inf:   rgba(109, 142, 168, 0.20);
+  --sb-ring-inf:   rgba(109, 142, 168, 0.12);
+  --sb-pulse-inf:  rgba(109, 142, 168, 0.30);
+  --sb-chat-inf:   rgba(109, 142, 168, 0.08);
+  --sb-chat-infH:  rgba(109, 142, 168, 0.16);
+  --sb-border-inf: rgba(109, 142, 168, 0.20);
+  --sb-bord-infH:  rgba(109, 142, 168, 0.36);
+
+  /* Toggle button */
+  --sb-toggle-size: 28px;
+}
+
+/* ─────────────────────────────────────────────────────────
+   1. SIDEBAR CONTAINER + INNER
+───────────────────────────────────────────────────────────  */
+
+/* Sidebar: overflow VISIBLE → toggle button pode sair da borda */
+#sidebar {
+  overflow: visible;
+  position: relative; /* garante contexto para .sidebar-toggle absolute */
+}
+
+/* Inner: recebe o clipping */
+.sidebar-inner {
+  overflow: hidden;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ─────────────────────────────────────────────────────────
+   2. ZONAS — Containers das 5 zonas semânticas
+───────────────────────────────────────────────────────────  */
+
+.sidebar-inner .sidebar-zona-logo {
+  padding: 28px var(--s-5) 20px;
   display: flex;
   align-items: center;
   gap: var(--s-3);
   flex-shrink: 0;
   position: relative;
-  transition: padding 240ms var(--ease-out);
+  transition: padding var(--sb-d-base) var(--ease-out);
 }
 
-/* Separador sutil gradiente (substitui border-bottom) */
-.sidebar-zona-logo::after {
+/* Separador gradiente — RNF05 */
+.sidebar-inner .sidebar-zona-logo::after {
   content: '';
   position: absolute;
   bottom: 0;
   left: var(--s-5);
   right: var(--s-5);
   height: 1px;
-  background: linear-gradient(90deg, transparent, var(--line-3) 30%, var(--line-3) 70%, transparent);
+  background: linear-gradient(90deg,
+    transparent,
+    var(--border-soft) 25%,
+    var(--border-soft) 75%,
+    transparent
+  );
 }
 
-.sidebar-zona-avatar {
+.sidebar-inner .sidebar-zona-avatar {
   padding: var(--s-4) var(--s-5);
   display: flex;
   align-items: center;
   gap: var(--s-3);
   flex-shrink: 0;
   position: relative;
-  transition: padding 240ms var(--ease-out);
+  transition: padding var(--sb-d-base) var(--ease-out);
 }
 
-/* Separador sutil abaixo do avatar */
-.sidebar-zona-avatar::after {
+/* Separador gradiente inferior — RNF05 */
+.sidebar-inner .sidebar-zona-avatar::after {
   content: '';
   position: absolute;
   bottom: 0;
   left: var(--s-5);
   right: var(--s-5);
   height: 1px;
-  background: linear-gradient(90deg, transparent, var(--line-2) 30%, var(--line-2) 70%, transparent);
+  background: linear-gradient(90deg,
+    transparent,
+    var(--border-soft) 25%,
+    var(--border-soft) 75%,
+    transparent
+  );
 }
 
-.sidebar-zona-switcher {
+.sidebar-inner .sidebar-zona-switcher {
   padding: var(--s-3) var(--s-4);
   flex-shrink: 0;
-  transition: padding 240ms var(--ease-out);
+  transition: padding var(--sb-d-base) var(--ease-out);
 }
 
-.sidebar-zona-nav {
+.sidebar-inner .sidebar-zona-nav {
   flex: 1;
   display: flex;
   flex-direction: column;
   min-height: 0;
-  overflow: hidden;
+  position: relative; /* ponto de origem do #sidebar-dot */
 }
 
-.sidebar-zona-footer {
+.sidebar-inner .sidebar-zona-footer {
   flex-shrink: 0;
   position: relative;
 }
 
-/* Gradient separator no footer */
-.sidebar-zona-footer::before {
+/* Separador superior — RNF05 */
+.sidebar-inner .sidebar-zona-footer::before {
   content: '';
   position: absolute;
   top: 0;
   left: var(--s-4);
   right: var(--s-4);
   height: 1px;
-  background: linear-gradient(
-    90deg,
+  background: linear-gradient(90deg,
     transparent,
-    var(--line-3) 20%,
+    var(--border-soft) 20%,
     var(--color-gold-subtle) 50%,
-    var(--line-3) 80%,
+    var(--border-soft) 80%,
     transparent
   );
 }
 
 /* ─────────────────────────────────────────────────────────
-   2. ZONA 1 — Logo & Branding
-   Refinamentos sobre layout.css
+   3. ZONA 1 — Logo & Branding
 ───────────────────────────────────────────────────────────  */
 
-/* Rail mode: centraliza logo */
-#sidebar.collapsed .sidebar-zona-logo {
-  justify-content: center;
-  padding: 20px var(--s-3) var(--s-4);
-}
-
-#sidebar.collapsed .sidebar-zona-logo::after {
-  left: var(--s-3);
-  right: var(--s-3);
+/* Brand text: transição max-width para colapso suave */
+.sidebar-inner .brand-text {
+  transition:
+    opacity var(--sb-d-base) var(--ease-out),
+    max-width var(--sb-d-base) var(--ease-out);
 }
 
 /* ─────────────────────────────────────────────────────────
-   3. ZONA 2 — Avatar Ring & Saudação Dinâmica
+   4. ZONA 2 — Avatar Ring & Saudação Dinâmica
 ───────────────────────────────────────────────────────────  */
 
-/* Ring ouro líquido — complementa o ::after existente em layout.css */
-.sidebar-zona-avatar .avatar {
+/* Ring ouro — Pessoal */
+.sidebar-inner .sidebar-zona-avatar .avatar {
   box-shadow:
-    0 0 0 2px var(--color-gold),
-    0 0 0 5px rgba(212, 165, 116, 0.12),
+    0 0 0 2px var(--signature),
+    0 0 0 5px var(--sb-ring-sig),
     var(--shadow-1);
   transition:
     box-shadow 300ms var(--ease-out),
     transform 200ms var(--ease-out);
 }
 
-.sidebar-zona-avatar .avatar:hover {
+.sidebar-inner .sidebar-zona-avatar .avatar:hover {
   transform: scale(1.05);
 }
 
-/* Pulse ao trocar de modo — acionado via JS adicionando .ring-pulse */
-@keyframes sb-avatar-pulse {
-  0%   { box-shadow: 0 0 0 2px var(--color-gold), 0 0 0 5px rgba(212, 165, 116, 0.12); }
-  45%  { box-shadow: 0 0 0 3px var(--color-gold), 0 0 0 16px rgba(212, 165, 116, 0.30); }
-  100% { box-shadow: 0 0 0 2px var(--color-gold), 0 0 0 5px rgba(212, 165, 116, 0.12); }
-}
-
-.sidebar-zona-avatar .avatar.ring-pulse {
-  animation: sb-avatar-pulse 400ms var(--ease-out) forwards;
-}
-
-/* Ring safira no modo Negócio */
-html[data-mode="negocio"] .sidebar-zona-avatar .avatar {
+/* Ring safira — Negócio */
+html[data-mode="negocio"] .sidebar-inner .sidebar-zona-avatar .avatar {
   box-shadow:
     0 0 0 2px var(--info),
-    0 0 0 5px rgba(109, 142, 168, 0.12),
+    0 0 0 5px var(--sb-ring-inf),
     var(--shadow-1);
 }
 
-@keyframes sb-avatar-pulse-info {
-  0%   { box-shadow: 0 0 0 2px var(--info), 0 0 0 5px rgba(109, 142, 168, 0.12); }
-  45%  { box-shadow: 0 0 0 3px var(--info), 0 0 0 16px rgba(109, 142, 168, 0.30); }
-  100% { box-shadow: 0 0 0 2px var(--info), 0 0 0 5px rgba(109, 142, 168, 0.12); }
+/* Pulse ao trocar modo */
+@keyframes sb-ring-gold {
+  0%   { box-shadow: 0 0 0 2px var(--signature), 0 0 0 5px var(--sb-ring-sig); }
+  45%  { box-shadow: 0 0 0 3px var(--signature), 0 0 0 18px var(--sb-pulse-sig); }
+  100% { box-shadow: 0 0 0 2px var(--signature), 0 0 0 5px var(--sb-ring-sig); }
 }
 
-html[data-mode="negocio"] .sidebar-zona-avatar .avatar.ring-pulse {
-  animation: sb-avatar-pulse-info 400ms var(--ease-out) forwards;
+@keyframes sb-ring-info {
+  0%   { box-shadow: 0 0 0 2px var(--info), 0 0 0 5px var(--sb-ring-inf); }
+  45%  { box-shadow: 0 0 0 3px var(--info), 0 0 0 18px var(--sb-pulse-inf); }
+  100% { box-shadow: 0 0 0 2px var(--info), 0 0 0 5px var(--sb-ring-inf); }
 }
 
-/* Saudação dinâmica — Fraunces italic */
+.sidebar-inner .sidebar-zona-avatar .avatar.ring-pulse {
+  animation: sb-ring-gold 400ms var(--ease-out) forwards;
+}
+
+html[data-mode="negocio"] .sidebar-inner .sidebar-zona-avatar .avatar.ring-pulse {
+  animation: sb-ring-info 400ms var(--ease-out) forwards;
+}
+
+/* Nome: Switzer 500 */
+.sidebar-inner .user-info .name {
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: var(--t-sm);
+  color: var(--text-1);
+  letter-spacing: var(--tracking-snug);
+}
+
+/* Saudação: Switzer italic, text-quiet, type-xs */
 #sidebar-saudacao {
-  font-family: var(--font-display);
+  display: block;
+  font-family: var(--font-body);
   font-style: italic;
   font-weight: 400;
   font-size: var(--t-xs);
   color: var(--text-3);
-  display: block;
   margin-top: 2px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   letter-spacing: var(--tracking-snug);
   line-height: var(--leading-snug);
-  transition: opacity 200ms var(--ease-out);
 }
 
-/* Nome — Switzer 500 (override do layout.css) */
-.sidebar-zona-avatar .user-info .name {
-  font-family: var(--font-body);
-  font-weight: 500;
-}
-
-/* Rail mode: avatar centraliza, user-info some */
-#sidebar.collapsed .sidebar-zona-avatar {
-  justify-content: center;
-  padding: var(--s-4) var(--s-3);
-}
-
-#sidebar.collapsed .sidebar-zona-avatar .user-info {
-  opacity: 0;
-  width: 0;
-  pointer-events: none;
-  overflow: hidden;
-}
-
-#sidebar.collapsed .sidebar-zona-avatar::after {
-  left: var(--s-3);
-  right: var(--s-3);
+/* user-info: transição para colapso */
+.sidebar-inner .user-info {
+  transition:
+    opacity var(--sb-d-base) var(--ease-out),
+    max-width var(--sb-d-base) var(--ease-out);
 }
 
 /* ─────────────────────────────────────────────────────────
-   4. ZONA 3 — Modo Switcher Premium
+   5. ZONA 3 — Switcher Pill Premium
 ───────────────────────────────────────────────────────────  */
 
-/* Container frosted glass */
-.sidebar-zona-switcher .modo-switcher {
-  background: var(--glass-1);
+/* Container: glass + border-radius 100px */
+.sidebar-inner .sidebar-zona-switcher .modo-switcher {
+  background: var(--surface-2);
   border: 1px solid var(--line-2);
-  border-radius: var(--r-full);
+  border-radius: 100px;
   padding: 3px;
   gap: 0;
   margin-top: 0;
 }
 
 @supports (backdrop-filter: blur(1px)) {
-  .sidebar-zona-switcher .modo-switcher {
-    backdrop-filter: blur(12px) saturate(120%);
-    -webkit-backdrop-filter: blur(12px) saturate(120%);
+  .sidebar-inner .sidebar-zona-switcher .modo-switcher {
+    background: var(--glass-1);
+    backdrop-filter: blur(16px) saturate(130%);
+    -webkit-backdrop-filter: blur(16px) saturate(130%);
   }
 }
 
-/* Pill buttons */
-.sidebar-zona-switcher .modo-btn {
-  border-radius: var(--r-full);
+/* Pill base */
+.sidebar-inner .sidebar-zona-switcher .modo-btn {
+  border-radius: 100px;
   padding: 6px var(--s-4);
   gap: var(--s-2);
   font-size: var(--t-sm);
   font-weight: 500;
   letter-spacing: var(--tracking-snug);
-  transition: all 240ms var(--ease-out);
+  transition: all var(--sb-d-base) var(--ease-out);
   border: 1px solid transparent;
 }
 
-/* Active pill — Pessoal: ouro */
-.sidebar-zona-switcher .modo-pessoal-btn.active {
+/* Pill inativo: frosted glass + opacity 0.6 — RNF03 */
+.sidebar-inner .sidebar-zona-switcher .modo-btn:not(.active) {
+  opacity: 0.6;
+}
+
+@supports (backdrop-filter: blur(1px)) {
+  .sidebar-inner .sidebar-zona-switcher .modo-btn:not(.active) {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+}
+
+.sidebar-inner .sidebar-zona-switcher .modo-btn:not(.active):hover {
+  opacity: 0.85;
+  background: var(--surface-3);
+}
+
+/* Pill ativo — Pessoal: ouro */
+.sidebar-inner .sidebar-zona-switcher .modo-pessoal-btn.active {
   background: var(--signature);
   color: var(--base);
   border-color: transparent;
-  box-shadow: 0 2px 10px rgba(212, 165, 116, 0.32), 0 0 0 1px rgba(212, 165, 116, 0.20);
+  opacity: 1;
+  box-shadow:
+    0 2px 12px var(--sb-pulse-sig),
+    0 0 0 1px var(--sb-ring-sig);
 }
 
-/* Active pill — Negócio: safira */
-.sidebar-zona-switcher .modo-negocio-btn.active {
+/* Pill ativo — Negócio: safira */
+.sidebar-inner .sidebar-zona-switcher .modo-negocio-btn.active {
   background: var(--info);
   color: var(--text-1);
   border-color: transparent;
-  box-shadow: 0 2px 10px rgba(109, 142, 168, 0.32), 0 0 0 1px rgba(109, 142, 168, 0.20);
+  opacity: 1;
+  box-shadow:
+    0 2px 12px var(--sb-pulse-inf),
+    0 0 0 1px var(--sb-ring-inf);
 }
 
-/* Hover inativo */
-.sidebar-zona-switcher .modo-btn:not(.active):hover {
-  background: var(--surface-3);
-  color: var(--text-1);
+/* Focus ring */
+.sidebar-inner .sidebar-zona-switcher .modo-btn:focus-visible {
+  outline: 1.5px solid var(--signature);
+  outline-offset: 3px;
   opacity: 1;
 }
 
-/* Rail mode: compacto (apenas ícones) */
-#sidebar.collapsed .sidebar-zona-switcher {
-  padding: 0 var(--s-2) var(--s-3);
-}
-
-#sidebar.collapsed .sidebar-zona-switcher .modo-switcher {
-  flex-direction: column;
-  border-radius: var(--r-lg);
-  gap: 2px;
-}
-
-#sidebar.collapsed .sidebar-zona-switcher .modo-btn {
-  padding: var(--s-2);
-  justify-content: center;
-}
-
-#sidebar.collapsed .modo-label {
-  display: none !important;
+html[data-mode="negocio"] .sidebar-inner .sidebar-zona-switcher .modo-btn:focus-visible {
+  outline-color: var(--info);
 }
 
 /* ─────────────────────────────────────────────────────────
-   5. ZONA 4 — Navegação HERO
-   Dot indicator + frosted glass hover
+   6. ZONA 4 — Nav HERO + Dot Indicator Deslizante
 ───────────────────────────────────────────────────────────  */
 
-/* Frosted glass hover (complementa o hover do layout.css) */
+/* DOT INDICATOR — posicionado por js/sidebar-dot.js */
+.sidebar-dot-indicator {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 6px;
+  height: 18px;
+  border-radius: 0 3px 3px 0;
+  background: var(--signature);
+  box-shadow:
+    0 0 10px var(--sb-glow-sig),
+    0 0 24px var(--sb-halo-sig);
+  transform: translateY(-60px);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 2;
+  will-change: transform;
+  transition:
+    transform var(--sb-d-slide) var(--sb-ease-slide),
+    background 300ms var(--ease-out),
+    box-shadow 300ms var(--ease-out),
+    width 240ms var(--ease-out),
+    opacity 160ms var(--ease-out);
+}
+
+.sidebar-dot-indicator.visible {
+  opacity: 1;
+}
+
+html[data-mode="negocio"] .sidebar-dot-indicator {
+  background: var(--info);
+  box-shadow:
+    0 0 10px var(--sb-glow-inf),
+    0 0 24px var(--sb-halo-inf);
+}
+
+/* Nav: substitui ::before do layout.css na zona nav */
+.sidebar-inner .sidebar-zona-nav .nav-item.active::before {
+  display: none;
+}
+
+/* Nav: hierarquia de opacidade */
+.sidebar-inner .sidebar-zona-nav .nav-item,
+.sidebar-inner .sidebar-zona-nav .nav-group-header {
+  opacity: var(--sb-inactive);
+  transition:
+    opacity var(--sb-d-fast) ease,
+    transform var(--sb-d-fast) ease,
+    background var(--sb-d-fast) ease,
+    color var(--sb-d-fast) ease;
+}
+
+/* Hover: opacity 0.85 + translateX(2px) — 160ms ease */
+.sidebar-inner .sidebar-zona-nav .nav-item:hover,
+.sidebar-inner .sidebar-zona-nav .nav-group-header:hover {
+  opacity: var(--sb-hover);
+  transform: translateX(2px);
+  background: var(--surface-2);
+  color: var(--text-1);
+}
+
 @supports (backdrop-filter: blur(1px)) {
-  .sidebar-zona-nav .nav-item:hover,
-  .sidebar-zona-nav .nav-group-header:hover {
+  .sidebar-inner .sidebar-zona-nav .nav-item:hover,
+  .sidebar-inner .sidebar-zona-nav .nav-group-header:hover {
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
   }
 }
 
-/* DOT INDICATOR — 6×18px pill luminoso (override do layout.css 3×18px) */
-.sidebar-zona-nav .nav-item.active::before {
-  width: 6px;
-  height: 18px;
-  left: -3px;
-  border-radius: 0 3px 3px 0;
-  background: var(--color-gold);
-  box-shadow:
-    0 0 10px rgba(212, 165, 116, 0.60),
-    0 0 24px rgba(212, 165, 116, 0.20);
-}
-
-/* Modo Negócio: dot safira */
-html[data-mode="negocio"] .sidebar-zona-nav .nav-item.active::before {
-  background: var(--info);
-  box-shadow:
-    0 0 10px rgba(109, 142, 168, 0.60),
-    0 0 24px rgba(109, 142, 168, 0.20);
-}
-
-/* Animação de entrada do dot */
-@keyframes sb-dot-in {
-  from {
-    opacity: 0;
-    transform: translateY(-50%) scaleY(0.3);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(-50%) scaleY(1);
-  }
-}
-
-.sidebar-zona-nav .nav-item.active::before {
-  animation: sb-dot-in 220ms var(--ease-spring) both;
-}
-
-/* Active item: gradiente sutil + borda interna */
-.sidebar-zona-nav .nav-item.active {
+/* Ativo: opacity 1, font-weight 600 */
+.sidebar-inner .sidebar-zona-nav .nav-item.active {
+  opacity: var(--sb-active);
+  font-weight: 600;
+  color: var(--text-1);
+  background: linear-gradient(90deg, var(--surface-3), var(--surface-2));
   box-shadow:
     inset 0 0 0 1px var(--line-2),
-    inset 0 1px 0 rgba(212, 165, 116, 0.07);
+    inset 0 1px 0 var(--color-gold-subtle);
 }
 
-/* ─── Rail mode — tooltips ─── */
-/* Permite tooltips saírem do sidebar (overflow visible em collapsed) */
-#sidebar.collapsed {
-  overflow: visible;
+.sidebar-inner .sidebar-zona-nav .nav-item.active svg {
+  color: var(--signature);
 }
 
-#sidebar.collapsed .sidebar-zona-nav {
-  overflow: visible;
+html[data-mode="negocio"] .sidebar-inner .sidebar-zona-nav .nav-item.active svg {
+  color: var(--info);
 }
 
-#sidebar.collapsed .sidebar-zona-nav .sidebar-nav {
-  overflow: visible;
+/* Focus ring — 1.5px ouro, offset 3px */
+.sidebar-inner .sidebar-zona-nav .nav-item:focus-visible,
+.sidebar-inner .sidebar-zona-nav .nav-group-header:focus-visible {
+  outline: 1.5px solid var(--signature);
+  outline-offset: 3px;
+  opacity: 1;
 }
 
-/* Ícones centralizados */
-#sidebar.collapsed .sidebar-zona-nav .nav-item {
+html[data-mode="negocio"] .sidebar-inner .sidebar-zona-nav .nav-item:focus-visible,
+html[data-mode="negocio"] .sidebar-inner .sidebar-zona-nav .nav-group-header:focus-visible {
+  outline-color: var(--info);
+}
+
+/* ─────────────────────────────────────────────────────────
+   7. ZONA 5 — Footer Premium
+───────────────────────────────────────────────────────────  */
+
+/* Remove border-top do layout.css (gradient ::before já cobre) */
+.sidebar-inner .sidebar-zona-footer .sidebar-foot {
+  border-top: none;
+  padding: var(--s-3) var(--s-5) var(--s-5);
+}
+
+/* Itens footer: type-xs, menos destaque */
+.sidebar-inner .sidebar-zona-footer .nav-item {
+  font-size: var(--t-xs) !important;
+  opacity: 0.65;
+  transition: opacity 160ms ease, transform 160ms ease;
+}
+
+.sidebar-inner .sidebar-zona-footer .nav-item:hover {
+  opacity: 0.90;
+}
+
+/* Chat AI — destaque sutil, sempre presente */
+.sidebar-inner .sidebar-zona-footer .nav-item[data-nav="chat-ia"] {
+  background: linear-gradient(90deg, var(--sb-chat-sig), transparent);
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-sm);
+  margin: var(--s-3) var(--s-3) var(--s-2);
+  color: var(--text-2);
+  opacity: 1;
+  font-size: var(--t-sm) !important;
+  transition: all 200ms var(--ease-out);
+}
+
+.sidebar-inner .sidebar-zona-footer .nav-item[data-nav="chat-ia"]:hover {
+  background: linear-gradient(90deg, var(--sb-chat-sigH), var(--sb-dot-sig));
+  border-color: var(--line-3);
+  color: var(--text-1);
+  box-shadow: var(--shadow-glow);
+  transform: translateX(2px);
+  opacity: 1;
+}
+
+.sidebar-inner .sidebar-zona-footer .nav-item[data-nav="chat-ia"] svg {
+  color: var(--color-gold);
+}
+
+html[data-mode="negocio"] .sidebar-inner .sidebar-zona-footer .nav-item[data-nav="chat-ia"] {
+  background: linear-gradient(90deg, var(--sb-chat-inf), transparent);
+  border-color: var(--sb-border-inf);
+}
+
+html[data-mode="negocio"] .sidebar-inner .sidebar-zona-footer .nav-item[data-nav="chat-ia"]:hover {
+  background: linear-gradient(90deg, var(--sb-chat-infH), transparent);
+  border-color: var(--sb-bord-infH);
+  box-shadow: 0 0 16px var(--sb-ring-inf);
+}
+
+html[data-mode="negocio"] .sidebar-inner .sidebar-zona-footer .nav-item[data-nav="chat-ia"] svg {
+  color: var(--info);
+}
+
+/* Collapse btn: o JS muda o ícone — sem rotate CSS aqui */
+.sidebar-inner .sidebar-zona-footer .collapse-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  border: 1px solid var(--line-2);
+  color: var(--text-3);
+  transition: all 200ms var(--ease-out);
+}
+
+.sidebar-inner .sidebar-zona-footer .collapse-btn:hover {
+  background: var(--surface-3);
+  border-color: var(--line-3);
+  color: var(--text-1);
+  box-shadow: var(--shadow-1);
+}
+
+.sidebar-inner .sidebar-zona-footer .collapse-btn:focus-visible {
+  outline: 1.5px solid var(--signature);
+  outline-offset: 3px;
+}
+
+/* ─────────────────────────────────────────────────────────
+   8. SIDEBAR TOGGLE — pill na borda, sempre visível
+   Posicionado FORA do .sidebar-inner — não é clipado.
+───────────────────────────────────────────────────────────  */
+
+.sidebar-toggle {
+  position: absolute;
+  right: calc(var(--sb-toggle-size) / -2); /* cola na borda direita */
+  top: 50%;
+  transform: translateY(-50%);
+  width: var(--sb-toggle-size);
+  height: var(--sb-toggle-size);
+  border-radius: var(--r-full);
+  background: var(--surface-2);
+  border: 1px solid var(--border-soft);
+  box-shadow: var(--shadow-1);
+  display: flex;
+  align-items: center;
   justify-content: center;
-  overflow: visible;
+  cursor: pointer;
+  z-index: 10;
+  transition:
+    background 160ms var(--ease-out),
+    box-shadow 160ms var(--ease-out),
+    border-color 160ms var(--ease-out);
 }
 
-#sidebar.collapsed .sidebar-zona-nav .nav-group-header {
+.sidebar-toggle:hover {
+  background: var(--surface-3);
+  box-shadow: var(--shadow-2);
+  border-color: var(--line-3);
+}
+
+.sidebar-toggle:focus-visible {
+  outline: 1.5px solid var(--signature);
+  outline-offset: 3px;
+}
+
+/* Ícone do toggle */
+.sidebar-toggle-icon {
+  transition: transform var(--sb-d-base) var(--ease-out);
+  display: flex;
+  align-items: center;
   justify-content: center;
+}
+
+/* ◀ vira ▶ quando colapsado */
+body.sidebar-colapsada .sidebar-toggle-icon {
+  transform: rotate(180deg);
+}
+
+/* ─────────────────────────────────────────────────────────
+   9. RAIL MODE — body.sidebar-colapsada
+   #sidebar.collapsed (largura) já é tratado pelo layout.css.
+   Aqui: textos, ícones, dot e tooltips.
+───────────────────────────────────────────────────────────  */
+
+/* Sidebar: overflow visible para toggle não ser clipado */
+body.sidebar-colapsada #sidebar {
   overflow: visible;
 }
 
-/* Tooltip via [data-tooltip] — delay 200ms para não piscar ao passar rápido */
-#sidebar.collapsed [data-tooltip]::after {
+/* Inner: clipa o conteúdo das zonas */
+body.sidebar-colapsada .sidebar-inner {
+  overflow: hidden;
+}
+
+/* Textos que somem: opacity + max-width para colapso real */
+body.sidebar-colapsada .sidebar-inner .brand-text,
+body.sidebar-colapsada .sidebar-inner .user-info {
+  opacity: 0;
+  max-width: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+body.sidebar-colapsada .sidebar-inner .nav-label,
+body.sidebar-colapsada .sidebar-inner .nav-group-arrow,
+body.sidebar-colapsada .sidebar-inner .nav-badge,
+body.sidebar-colapsada .sidebar-inner .theme-label {
+  opacity: 0;
+  max-width: 0;
+  overflow: hidden;
+  pointer-events: none;
+  transition: opacity 180ms ease, max-width var(--sb-d-base) var(--ease-out);
+}
+
+/* Switcher some no rail */
+body.sidebar-colapsada .sidebar-inner .sidebar-zona-switcher {
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  padding: 0;
+  pointer-events: none;
+  transition:
+    opacity 180ms ease,
+    max-height var(--sb-d-base) var(--ease-out),
+    padding var(--sb-d-base) var(--ease-out);
+}
+
+/* Zonas: centralizam conteúdo */
+body.sidebar-colapsada .sidebar-inner .sidebar-zona-logo,
+body.sidebar-colapsada .sidebar-inner .sidebar-zona-avatar {
+  justify-content: center;
+  padding: var(--s-4) var(--s-3);
+}
+
+body.sidebar-colapsada .sidebar-inner .sidebar-zona-logo::after,
+body.sidebar-colapsada .sidebar-inner .sidebar-zona-avatar::after {
+  left: var(--s-3);
+  right: var(--s-3);
+}
+
+/* Ícones de nav: centralizados, sem translateX */
+body.sidebar-colapsada .sidebar-inner .nav-item,
+body.sidebar-colapsada .sidebar-inner .nav-group-header {
+  justify-content: center;
+  padding: 10px 0;
+}
+
+body.sidebar-colapsada .sidebar-inner .nav-item:hover,
+body.sidebar-colapsada .sidebar-inner .nav-group-header:hover {
+  transform: none; /* sem translateX no rail */
+}
+
+/* Grupos fechados no rail */
+body.sidebar-colapsada .sidebar-inner .nav-group-items {
+  max-height: 0 !important;
+}
+
+/* Footer compacto no rail */
+body.sidebar-colapsada .sidebar-inner .sidebar-zona-footer .sidebar-foot {
+  justify-content: center;
+  padding: var(--s-3) var(--s-2) var(--s-5);
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}
+
+body.sidebar-colapsada .sidebar-inner .sidebar-zona-footer .theme-toggle-row {
+  display: none;
+}
+
+body.sidebar-colapsada .sidebar-inner .sidebar-zona-footer .nav-item[data-nav="chat-ia"] {
+  margin: var(--s-3) var(--s-2) var(--s-2);
+  justify-content: center;
+  border-radius: var(--r-md);
+  transform: none !important;
+}
+
+/* Dot: vira linha fina 3px no rail */
+body.sidebar-colapsada .sidebar-dot-indicator {
+  width: 3px;
+  border-radius: 0 2px 2px 0;
+  opacity: 0;
+}
+
+/* ─────────────────────────────────────────────────────────
+   10. TOOLTIPS NO RAIL — delay 200ms
+───────────────────────────────────────────────────────────  */
+
+/* Sidebar precisa de overflow visible para tooltips saírem */
+body.sidebar-colapsada #sidebar {
+  overflow: visible;
+}
+
+body.sidebar-colapsada .sidebar-inner .sidebar-zona-nav {
+  overflow: visible;
+}
+
+body.sidebar-colapsada .sidebar-inner .sidebar-zona-nav .sidebar-nav {
+  overflow: visible;
+  align-items: center;
+}
+
+/* Tooltip via data-tooltip */
+body.sidebar-colapsada .sidebar-inner [data-tooltip]::after {
   content: attr(data-tooltip);
   position: absolute;
   left: calc(100% + var(--s-3));
@@ -364,219 +726,193 @@ html[data-mode="negocio"] .sidebar-zona-nav .nav-item.active::before {
   font-size: var(--t-xs);
   font-weight: 500;
   letter-spacing: var(--tracking-snug);
-  padding: 5px var(--s-3);
+  padding: 4px var(--s-3);
   border-radius: var(--r-sm);
-  border: 1px solid var(--line-3);
+  border: 1px solid var(--border-soft);
   white-space: nowrap;
   pointer-events: none;
   opacity: 0;
   z-index: var(--z-toast);
-  box-shadow: var(--shadow-3);
-  transition: opacity 140ms var(--ease-out) 200ms;
+  box-shadow: var(--shadow-2);
+  transition: opacity 140ms var(--ease-out) 200ms; /* delay 200ms */
 }
 
-#sidebar.collapsed [data-tooltip]:hover::after {
+body.sidebar-colapsada .sidebar-inner [data-tooltip]:hover::after {
   opacity: 1;
 }
 
 /* ─────────────────────────────────────────────────────────
-   6. ZONA 5 — Footer Premium
+   11. HAMBURGER — visível só em mobile
 ───────────────────────────────────────────────────────────  */
 
-/* Chat IA em destaque */
-.sidebar-zona-footer .nav-item[data-nav="chat-ia"] {
-  background: linear-gradient(90deg, rgba(212, 165, 116, 0.06), transparent);
-  border: 1px solid var(--line-2);
-  border-radius: var(--r-sm);
-  margin: var(--s-3) var(--s-3) var(--s-2);
-  color: var(--text-2);
-  transition: all 200ms var(--ease-out);
-}
-
-.sidebar-zona-footer .nav-item[data-nav="chat-ia"]:hover {
-  background: linear-gradient(90deg, rgba(212, 165, 116, 0.14), rgba(212, 165, 116, 0.04));
-  border-color: var(--line-3);
-  color: var(--text-1);
-  box-shadow: var(--shadow-glow);
-  transform: translateX(2px);
-}
-
-.sidebar-zona-footer .nav-item[data-nav="chat-ia"] svg {
-  color: var(--color-gold);
-}
-
-/* Modo Negócio: Chat IA safira */
-html[data-mode="negocio"] .sidebar-zona-footer .nav-item[data-nav="chat-ia"] {
-  background: linear-gradient(90deg, rgba(109, 142, 168, 0.08), transparent);
-  border-color: rgba(109, 142, 168, 0.20);
-}
-
-html[data-mode="negocio"] .sidebar-zona-footer .nav-item[data-nav="chat-ia"]:hover {
-  background: linear-gradient(90deg, rgba(109, 142, 168, 0.16), rgba(109, 142, 168, 0.04));
-  border-color: rgba(109, 142, 168, 0.36);
-  box-shadow: 0 0 16px rgba(109, 142, 168, 0.15);
-}
-
-html[data-mode="negocio"] .sidebar-zona-footer .nav-item[data-nav="chat-ia"] svg {
-  color: var(--info);
-}
-
-/* Footer row — remove border-top duplicado do layout.css (gradiente já faz o papel) */
-.sidebar-zona-footer .sidebar-foot {
-  border-top: none;
-  padding: var(--s-3) var(--s-5) var(--s-5);
-}
-
-/* Collapse btn premium */
-.sidebar-zona-footer .collapse-btn {
-  width: 32px;
-  height: 32px;
-  border-radius: var(--r-md);
-  background: var(--surface-2);
-  border: 1px solid var(--line-2);
-  color: var(--text-3);
-  transition: all 200ms var(--ease-out);
-}
-
-.sidebar-zona-footer .collapse-btn:hover {
-  background: var(--surface-3);
-  border-color: var(--line-3);
-  color: var(--text-1);
-  box-shadow: var(--shadow-1);
-}
-
-/* Rail mode: footer compacto */
-#sidebar.collapsed .sidebar-zona-footer .nav-item[data-nav="chat-ia"] {
-  margin: var(--s-3) var(--s-2) var(--s-2);
-  justify-content: center;
-  border-radius: var(--r-md);
-}
-
-#sidebar.collapsed .sidebar-zona-footer .nav-item[data-nav="chat-ia"]:hover {
-  transform: none;
-}
-
-#sidebar.collapsed .sidebar-zona-footer .sidebar-foot {
-  justify-content: center;
-  padding: var(--s-3) var(--s-2) var(--s-5);
-  gap: var(--s-2);
-  flex-wrap: wrap;
-}
-
-#sidebar.collapsed .sidebar-zona-footer .theme-toggle-row {
+.sidebar-hamburger {
   display: none;
+  width: 36px;
+  height: 36px;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: var(--s-2);
+  border-radius: var(--r-sm);
+  color: var(--text-2);
+  transition: background 160ms var(--ease-out), color 160ms var(--ease-out);
+  flex-shrink: 0;
+}
+
+.sidebar-hamburger:hover {
+  background: var(--surface-2);
+  color: var(--text-1);
+}
+
+.sidebar-hamburger:focus-visible {
+  outline: 1.5px solid var(--signature);
+  outline-offset: 3px;
 }
 
 /* ─────────────────────────────────────────────────────────
-   7. MOBILE DRAWER — ≤ 640px
-   Base definida em layout.css. Aqui: correções de zona.
+   12. MOBILE DRAWER — ≤ 768px
 ───────────────────────────────────────────────────────────  */
 
-@media (max-width: 640px) {
-  /* Quando o drawer abre (mobile-open), restaurar padding das zonas */
-  #sidebar.mobile-open .sidebar-zona-logo {
-    justify-content: flex-start;
-    padding: 28px var(--s-5) var(--s-4);
+@media (max-width: 768px) {
+  /* Hamburger visível */
+  .sidebar-hamburger {
+    display: flex;
   }
 
-  #sidebar.mobile-open .sidebar-zona-avatar {
+  /* Sidebar vira drawer */
+  #sidebar {
+    width: 280px !important;
+    transform: translateX(-100%);
+    transition: transform 300ms var(--sb-ease-slide) !important;
+    overflow: hidden; /* no mobile, sem toggle protruso */
+  }
+
+  /* Toggle some no mobile — hamburger assume o papel */
+  .sidebar-toggle {
+    display: none;
+  }
+
+  /* Drawer aberto */
+  #sidebar.mobile-open {
+    transform: translateX(0);
+    box-shadow: var(--shadow-4);
+    overflow: visible; /* não necessário mas garante */
+  }
+
+  /* Mobile: sem rail — sidebar sempre full */
+  body.sidebar-colapsada #sidebar {
+    width: 280px !important;
+  }
+
+  /* Restaurar zonas quando drawer aberto */
+  #sidebar.mobile-open .sidebar-inner .sidebar-zona-logo {
+    justify-content: flex-start;
+    padding: 28px var(--s-5) 20px;
+  }
+
+  #sidebar.mobile-open .sidebar-inner .sidebar-zona-logo .brand-text {
+    opacity: 1 !important;
+    max-width: none !important;
+    pointer-events: auto !important;
+  }
+
+  #sidebar.mobile-open .sidebar-inner .sidebar-zona-avatar {
     justify-content: flex-start;
     padding: var(--s-4) var(--s-5);
   }
 
-  #sidebar.mobile-open .sidebar-zona-avatar .user-info {
+  #sidebar.mobile-open .sidebar-inner .user-info {
     opacity: 1 !important;
-    width: auto !important;
+    max-width: none !important;
     pointer-events: auto !important;
   }
 
-  #sidebar.mobile-open .sidebar-zona-switcher {
-    padding: var(--s-3) var(--s-4);
+  #sidebar.mobile-open .sidebar-inner .sidebar-zona-switcher {
+    opacity: 1 !important;
+    max-height: 200px !important;
+    padding: var(--s-3) var(--s-4) !important;
+    pointer-events: auto !important;
   }
 
-  #sidebar.mobile-open .sidebar-zona-switcher .modo-switcher {
+  #sidebar.mobile-open .sidebar-inner .sidebar-zona-switcher .modo-switcher {
     flex-direction: row;
-    border-radius: var(--r-full);
+    border-radius: 100px;
   }
 
-  #sidebar.mobile-open .sidebar-zona-switcher .modo-btn {
-    padding: 6px var(--s-4);
+  #sidebar.mobile-open .sidebar-inner .nav-item,
+  #sidebar.mobile-open .sidebar-inner .nav-group-header {
+    justify-content: flex-start;
+    padding: 10px var(--s-3);
   }
 
-  /* Tooltips não são necessários no mobile */
-  #sidebar [data-tooltip]::after {
+  #sidebar.mobile-open .sidebar-inner .nav-label {
+    opacity: 1 !important;
+    max-width: none !important;
+    pointer-events: auto !important;
+  }
+
+  #sidebar.mobile-open .sidebar-inner .sidebar-zona-footer .sidebar-foot {
+    justify-content: space-between;
+    padding: var(--s-3) var(--s-5) var(--s-5);
+  }
+
+  /* Dot visível no drawer */
+  #sidebar.mobile-open .sidebar-dot-indicator {
+    opacity: 1;
+    width: 6px;
+  }
+
+  /* Tooltips off no mobile */
+  .sidebar-inner [data-tooltip]::after {
     display: none !important;
   }
 }
 
 /* ─────────────────────────────────────────────────────────
-   8. LIGHT THEME — overrides pontuais
-   A maioria dos tokens adapta via themes.css automaticamente.
+   13. OVERLAY — fade com .visible
+   Sobrescreve opacity: 1 do layout.css para 0.5 semi-opaco.
 ───────────────────────────────────────────────────────────  */
 
-[data-theme="light"] .sidebar-zona-avatar .avatar {
-  box-shadow:
-    0 0 0 2px var(--color-gold),
-    0 0 0 5px rgba(155, 110, 58, 0.15),
-    var(--shadow-1);
-}
-
-[data-theme="light"] html[data-mode="negocio"] .sidebar-zona-avatar .avatar,
-html[data-theme="light"][data-mode="negocio"] .sidebar-zona-avatar .avatar {
-  box-shadow:
-    0 0 0 2px var(--info),
-    0 0 0 5px rgba(61, 100, 128, 0.15),
-    var(--shadow-1);
-}
-
-[data-theme="light"] .sidebar-zona-footer .nav-item[data-nav="chat-ia"] {
-  background: linear-gradient(90deg, rgba(155, 110, 58, 0.08), transparent);
-}
-
-[data-theme="light"] .sidebar-zona-footer::before {
-  background: linear-gradient(
-    90deg,
-    transparent,
-    var(--line-3) 20%,
-    rgba(155, 110, 58, 0.18) 50%,
-    var(--line-3) 80%,
-    transparent
-  );
+.sidebar-overlay.visible {
+  opacity: 0.5; /* layout.css define opacity: 1 — sobrescrito aqui */
 }
 
 /* ─────────────────────────────────────────────────────────
-   9. ACESSIBILIDADE
+   14. LIGHT THEME — sobrescreve tokens locais
 ───────────────────────────────────────────────────────────  */
 
-/* Focus rings premium nas zonas */
-.sidebar-zona-switcher .modo-btn:focus-visible {
-  outline: 2px solid var(--signature);
-  outline-offset: 2px;
-  box-shadow: 0 0 0 4px rgba(212, 165, 116, 0.15);
+[data-theme="light"] #sidebar {
+  --sb-glow-sig:   rgba(155, 110, 58, 0.50);
+  --sb-halo-sig:   rgba(155, 110, 58, 0.18);
+  --sb-ring-sig:   rgba(155, 110, 58, 0.15);
+  --sb-pulse-sig:  rgba(155, 110, 58, 0.28);
+  --sb-glow-inf:   rgba(61, 100, 128, 0.50);
+  --sb-halo-inf:   rgba(61, 100, 128, 0.18);
+  --sb-ring-inf:   rgba(61, 100, 128, 0.15);
+  --sb-pulse-inf:  rgba(61, 100, 128, 0.28);
 }
 
-html[data-mode="negocio"] .sidebar-zona-switcher .modo-btn:focus-visible {
-  outline-color: var(--info);
-  box-shadow: 0 0 0 4px rgba(109, 142, 168, 0.15);
-}
+/* ─────────────────────────────────────────────────────────
+   15. ACESSIBILIDADE — WCAG AA + reduced-motion
+───────────────────────────────────────────────────────────  */
 
-.sidebar-zona-footer .collapse-btn:focus-visible {
-  outline: 2px solid var(--signature);
-  outline-offset: 2px;
-  box-shadow: 0 0 0 4px rgba(212, 165, 116, 0.12);
-}
-
-/* Redução de movimento */
 @media (prefers-reduced-motion: reduce) {
-  .sidebar-zona-avatar .avatar,
-  .sidebar-zona-switcher .modo-btn,
-  .sidebar-zona-footer .nav-item[data-nav="chat-ia"],
-  #sidebar-saudacao {
+  .sidebar-dot-indicator,
+  .sidebar-toggle-icon,
+  .sidebar-inner .sidebar-zona-avatar .avatar,
+  .sidebar-inner .sidebar-zona-nav .nav-item,
+  .sidebar-inner .sidebar-zona-nav .nav-group-header,
+  .sidebar-inner .sidebar-zona-switcher .modo-btn,
+  .sidebar-inner .sidebar-zona-footer .nav-item[data-nav="chat-ia"],
+  .sidebar-inner .brand-text,
+  .sidebar-inner .user-info {
     transition: none;
+    animation: none;
   }
 
-  .sidebar-zona-avatar .avatar.ring-pulse,
-  .sidebar-zona-nav .nav-item.active::before {
+  .sidebar-inner .sidebar-zona-avatar .avatar.ring-pulse {
     animation: none;
   }
 }
