@@ -22,46 +22,98 @@ const App = (() => {
   function initModoSwitcher() {
     const modo = localStorage.getItem('mentor24h_modoAtivo') || 'pessoal';
     applyMode(modo);
+    /* Navegar para posição inicial sem fade (primeiro load) */
+    Router.navigate(restorePosition(modo));
 
     document.querySelectorAll('.modo-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        applyMode(btn.dataset.modo);
+        toggleModo(btn.dataset.modo);
       });
     });
   }
 
+  /* Sync puro — sem fade, sem toast, sem navegação. Usado em: init, toggleModo interno */
   function applyMode(modo) {
     if (!['pessoal', 'negocio'].includes(modo)) modo = 'pessoal';
     localStorage.setItem('mentor24h_modoAtivo', modo);
     document.documentElement.setAttribute('data-mode', modo);
 
-    /* Atualizar botões do switcher */
     document.querySelectorAll('.modo-btn').forEach(btn => {
       btn.classList.toggle('active', btn.dataset.modo === modo);
     });
 
-    /* Atualizar saudação no header */
     const modoLabel = modo === 'pessoal' ? 'Modo Pessoal' : 'Modo Negócio';
     const headerLabel = document.getElementById('modo-label-header');
-    if (headerLabel) {
-      headerLabel.textContent = `— ${modoLabel}`;
-    }
+    if (headerLabel) headerLabel.textContent = `— ${modoLabel}`;
 
-    /* Visibilidade dos grupos */
     document.querySelectorAll('[data-context]').forEach(group => {
-      const visible = group.dataset.context === modo;
-      group.style.display = visible ? '' : 'none';
+      group.style.display = group.dataset.context === modo ? '' : 'none';
     });
 
-    /* Fechar todos os grupos e abrir o primeiro do modo ativo */
     document.querySelectorAll('.nav-group').forEach(g => g.classList.remove('open'));
     const firstGroup = document.querySelector(`[data-context="${modo}"]`);
     if (firstGroup) firstGroup.classList.add('open');
+  }
 
-    /* Navegar para a página padrão do modo */
-    if (modo === 'negocio') {
-      Router.navigate('painel');
-    }
+  /* Troca de modo com fade 400ms + position memory + toast — chamado pelo usuário */
+  function toggleModo(modo) {
+    if (!['pessoal', 'negocio'].includes(modo)) modo = 'pessoal';
+    const modoAtual = localStorage.getItem('mentor24h_modoAtivo') || 'pessoal';
+    if (modo === modoAtual) return;
+
+    const main = document.getElementById('main');
+    if (!main) { applyMode(modo); Router.navigate(restorePosition(modo)); return; }
+
+    /* ① Fade-out 160ms */
+    main.classList.add('env-transitioning');
+
+    setTimeout(() => {
+      /* ② Trocar modo (sync) */
+      applyMode(modo);
+
+      /* ③ Navegar para posição memorizada ou home do modo */
+      Router.navigate(restorePosition(modo));
+
+      /* ④ Fade-in 240ms */
+      requestAnimationFrame(() => main.classList.remove('env-transitioning'));
+
+      /* ⑤ Toast de confirmação */
+      const label = modo === 'pessoal' ? 'Ambiente Pessoal ativado' : 'Ambiente Negócio ativado';
+      showToast(label, modo);
+    }, 160);
+  }
+
+  /* Salva a posição atual do usuário no modo ativo */
+  function savePosition(modulo) {
+    const modo = localStorage.getItem('mentor24h_modoAtivo') || 'pessoal';
+    localStorage.setItem(`mentor24h_pos_${modo}`, modulo);
+  }
+
+  /* Restaura a posição salva ou retorna o home do modo */
+  function restorePosition(modo) {
+    const saved = localStorage.getItem(`mentor24h_pos_${modo}`);
+    if (saved) return saved;
+    return modo === 'negocio' ? 'painel' : 'dashboard';
+  }
+
+  /* Toast de confirmação de troca de modo */
+  function showToast(msg, tipo) {
+    const container = document.querySelector('.app-toast-container');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = `app-toast app-toast--${tipo}`;
+    const icone = tipo === 'pessoal' ? 'user-circle' : 'briefcase';
+    toast.innerHTML =
+      `<span class="app-toast-icon" data-icon="${icone}" data-size="16"></span>` +
+      `<span class="app-toast-text">${msg}</span>`;
+    container.appendChild(toast);
+    Icons.render();
+
+    setTimeout(() => {
+      toast.classList.add('app-toast--saindo');
+      setTimeout(() => toast.remove(), 400);
+    }, 2500);
   }
 
   function initNavGroups() {
@@ -93,6 +145,7 @@ const App = (() => {
 
     const originalNavigate = Router.navigate;
     Router.navigate = function(page) {
+      savePosition(page);
       openGroupFor(page);
       return originalNavigate.call(Router, page);
     };

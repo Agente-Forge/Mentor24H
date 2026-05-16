@@ -178,9 +178,14 @@
 
 ---
 
+| 2026-05-16 | Alpha CSS — Dois Mundos | **skill-forge-visual v5.0 (PAE #7 · Alpha CSS):** CSS do sistema de transição de modo. **css/layout.css:** `#main { transition: opacity 260ms }` + `#main.env-transitioning { opacity:0; pointer-events:none }` + `.app-toast-container` (fixed top-right z-toast) + `.app-toast` (glass-2 bg, border-left 3px, toastSlideIn 240ms) + `.app-toast--pessoal/negocio` + `.app-toast--saindo { opacity:0; transform:translateX(20px) }` + `@keyframes toastSlideIn` + mobile override. **css/negocio.css expandido (seções 14–27):** `--accent-modo/hover/subtle` + `--surface-cold-tint` em `html[data-mode="negocio"]`; superfícies com cold-tint; .btn-primary safira; focus-rings globais; progress/kpi-bar-fill gradient safira; links/badges/scrollbar/topbar-borda/seleção texto → safira; h1/h2 letter-spacing -0.02em; `html[data-theme="light"][data-mode="negocio"]` overrides. |
+| 2026-05-16 | Beta CSS — Dashboards | **skill-forge-visual v5.0 (PAE #7 · Beta CSS):** Visual premium dos dois dashboards. **css/dashboard-pessoal.css (NOVO):** Local tokens (#dp-gold-*), saudação hero Fraunces italic var(--t-2xl), bento grid 2 colunas, widgets com reflexo topo + hover translateY(-2px), widget-financas font-mono ouro, checkbox circular .dp-tarefa-check:checked ouro, nota-input placeholder-mute, light mode overrides, responsivo 768px+480px, reduced-motion. **css/painel-negocio.css (NOVO):** Local tokens (#pn-info-subtle/hover/bar), header executivo com h1 Fraunces italic info-colored, pn-kpis-grid 4 cols, pn-kpi progress bar .kpi-bar-fill safira gradient, top clientes com pn-cliente-bar-fill, pn-bottom-grid 1fr+auto, quick-actions pn-action-btn hover translateX(2px), pn-action-btn--primary safira, light mode overrides pn-info-subtle/hover, responsivo, reduced-motion. **index.html:** links `dashboard-pessoal.css?v=1` + `painel-negocio.css?v=1` adicionados. |
+
+---
+
 ## PRÓXIMA AÇÃO
 
-> **DEPLOY LIBERADO** — Pipeline PAE #2 (Sprints 1/3) completo ✅  
-> **Testes manuais finais:** Desktop/Mobile, dark/light, Pessoal↔Negócio switch, Contatos CRM  
-> **8.1** — skill-health-monitor → Relatório semanal (opcional, Haiku 4.5)  
-> **Opcional:** skill-consultor para avaliar feedback Léo + próximas features backlog
+> **BETA-1 CONSTRUTOR** — criar `js/modules/dashboard-pessoal.js` com HTML `.dp-*` + reescrever `js/modules/painel.js` com HTML `.pn-*`
+> CSS já está pronto em `dashboard-pessoal.css` e `painel-negocio.css`
+> Após Beta-1: validar dashboards + commit + deploy
+> **8.1** — skill-health-monitor → Relatório semanal (opcional, Haiku 4.5)

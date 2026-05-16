@@ -1,0 +1,520 @@
+/* ═══════════════════════════════════════════════════════════
+   PAINEL EXECUTIVO — Negócio (Classes .pn-*)
+   Scope: #painel-negocio e classes .pn-*
+   Estilo: corporativo, precisão, ENTERPRISE — accent safira
+   NOTA: accent safira vem automaticamente via css/negocio.css
+         (html[data-mode="negocio"] + .modo-negocio).
+         Este arquivo define layout e componentes .pn-* apenas.
+   Mentor24h | OBSIDIAN Design System | Forge v5.2
+   skill-forge-visual v5.0 | 2026-05-16
+═══════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────────────────
+   LOCAL TOKENS
+   Centralizados para obedecer RNF01 (zero rgba inline).
+───────────────────────────────────────────────────────────  */
+#painel-negocio {
+  --pn-info-subtle:  rgba(109, 142, 168, 0.10);
+  --pn-info-hover:   rgba(109, 142, 168, 0.18);
+  --pn-info-bar:     rgba(109, 142, 168, 0.80);
+  --pn-ease:         var(--ease-out);
+  --pn-ease-smooth:  var(--ease-smooth);
+  --pn-d-fast:       var(--d-fast);
+  --pn-d-base:       var(--d-base);
+  --pn-d-bar:        600ms;
+}
+
+/* ─────────────────────────────────────────────────────────
+   1. LAYOUT GERAL
+───────────────────────────────────────────────────────────  */
+
+#painel-negocio {
+  padding: 28px var(--s-6);
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-6);
+}
+
+/* ─────────────────────────────────────────────────────────
+   2. HEADER EXECUTIVO
+   Título + período à esquerda, delta à direita.
+───────────────────────────────────────────────────────────  */
+
+.pn-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding-bottom: var(--s-4);
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.pn-header-titulo h1 {
+  font-family: var(--font-display);
+  font-size: var(--t-2xl);
+  font-weight: 400;
+  color: var(--text-1);
+  margin: 0;
+  letter-spacing: var(--tracking-tight);
+}
+
+/* Destaque italic Fraunces no h1 */
+.pn-header-titulo h1 em {
+  font-style: italic;
+  color: var(--info);
+}
+
+.pn-periodo {
+  font-family: var(--font-body);
+  font-size: var(--t-sm);
+  color: var(--text-quiet);
+  display: block;
+  margin-top: var(--s-1);
+  font-weight: 300;
+}
+
+.pn-delta {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.pn-delta-valor {
+  font-family: var(--font-mono);
+  font-size: var(--t-lg);
+  font-weight: 700;
+  color: var(--info);
+  display: block;
+  line-height: 1;
+}
+
+.pn-delta-label {
+  font-size: var(--t-xs);
+  color: var(--text-quiet);
+  display: block;
+  margin-top: var(--s-1);
+  text-align: right;
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+}
+
+/* ─────────────────────────────────────────────────────────
+   3. GRADE DE KPIs
+   4 colunas desktop, 2 em tablet, 2 em mobile.
+───────────────────────────────────────────────────────────  */
+
+.pn-kpis-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--s-4);
+}
+
+/* ─────────────────────────────────────────────────────────
+   4. KPI CARD
+   Surface com hover de elevação + progress bar.
+───────────────────────────────────────────────────────────  */
+
+.pn-kpi {
+  background: var(--surface-2);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-lg);
+  padding: var(--s-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  position: relative;
+  overflow: hidden;
+  transition:
+    transform var(--pn-d-fast) var(--pn-ease),
+    box-shadow var(--pn-d-fast) var(--pn-ease),
+    border-color var(--pn-d-fast) var(--pn-ease);
+}
+
+/* Reflexo topo — precisão corporativa */
+.pn-kpi::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.05) 50%,
+    transparent
+  );
+  pointer-events: none;
+}
+
+.pn-kpi:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-elevated);
+  border-color: var(--line-3);
+}
+
+.pn-kpi-valor {
+  font-family: var(--font-mono);
+  font-size: var(--t-xl);
+  font-weight: 700;
+  color: var(--text-1);
+  letter-spacing: var(--tracking-tight);
+  line-height: 1;
+}
+
+.pn-kpi-label {
+  font-size: var(--t-xs);
+  color: var(--text-quiet);
+  font-family: var(--font-body);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wider);
+  margin-top: var(--s-1);
+}
+
+/* Progress bar */
+.pn-kpi-progress {
+  height: 4px;
+  background: var(--border-soft);
+  border-radius: var(--r-full);
+  overflow: hidden;
+  margin-top: var(--s-1);
+}
+
+.kpi-bar-fill {
+  height: 100%;
+  border-radius: var(--r-full);
+  background: linear-gradient(
+    90deg,
+    var(--info),
+    var(--pn-info-bar)
+  );
+  transition: width var(--pn-d-bar) var(--pn-ease-smooth);
+}
+
+.pn-kpi-meta {
+  font-size: var(--t-xs);
+  color: var(--text-mute);
+  font-family: var(--font-body);
+}
+
+/* KPI Pendências: vermelho se urgente */
+.pn-kpi--pendencias[data-urgente="true"] .pn-kpi-valor {
+  color: var(--color-error);
+}
+
+/* ─────────────────────────────────────────────────────────
+   5. TOP CLIENTES
+───────────────────────────────────────────────────────────  */
+
+.pn-top-clientes {
+  background: var(--surface-2);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-lg);
+  padding: var(--s-5);
+}
+
+.pn-section-titulo {
+  font-family: var(--font-body);
+  font-size: var(--t-xs);
+  font-weight: 600;
+  color: var(--text-1);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wider);
+  margin: 0 0 var(--s-4);
+}
+
+.pn-clientes-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.pn-cliente-item {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-2) 0;
+  border-bottom: 1px solid var(--line-1);
+  transition: background var(--pn-d-fast) var(--pn-ease);
+}
+
+.pn-cliente-item:last-child { border-bottom: none; }
+
+.pn-cliente-rank {
+  font-family: var(--font-mono);
+  font-size: var(--t-xs);
+  color: var(--text-mute);
+  width: 16px;
+  flex-shrink: 0;
+  text-align: right;
+}
+
+.pn-cliente-nome {
+  font-family: var(--font-body);
+  font-size: var(--t-sm);
+  color: var(--text-1);
+  font-weight: 500;
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pn-cliente-valor {
+  font-family: var(--font-mono);
+  font-size: var(--t-xs);
+  font-weight: 600;
+  color: var(--info);
+  flex-shrink: 0;
+}
+
+.pn-cliente-bar {
+  width: 80px;
+  height: 3px;
+  background: var(--border-soft);
+  border-radius: var(--r-full);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.pn-cliente-bar-fill {
+  height: 100%;
+  background: var(--info);
+  border-radius: var(--r-full);
+  transition: width var(--pn-d-bar) var(--pn-ease-smooth);
+}
+
+/* ─────────────────────────────────────────────────────────
+   6. BOTTOM GRID: VENDAS + QUICK ACTIONS
+───────────────────────────────────────────────────────────  */
+
+.pn-bottom-grid {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--s-4);
+  align-items: start;
+}
+
+/* ─────────────────────────────────────────────────────────
+   7. VENDAS RECENTES
+───────────────────────────────────────────────────────────  */
+
+.pn-vendas-recentes {
+  background: var(--surface-2);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-lg);
+  padding: var(--s-5);
+}
+
+.pn-vendas-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.pn-venda-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-2) 0;
+  border-bottom: 1px solid var(--line-1);
+  font-family: var(--font-body);
+  font-size: var(--t-sm);
+  transition: background var(--pn-d-fast) var(--pn-ease);
+}
+
+.pn-venda-item:last-child { border-bottom: none; }
+
+.pn-venda-info { flex: 1; min-width: 0; }
+
+.pn-venda-desc {
+  font-weight: 500;
+  color: var(--text-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pn-venda-data {
+  color: var(--text-mute);
+  font-size: var(--t-xs);
+  margin-top: 2px;
+}
+
+.pn-venda-valor {
+  font-family: var(--font-mono);
+  font-size: var(--t-sm);
+  font-weight: 600;
+  color: var(--info);
+  flex-shrink: 0;
+}
+
+/* ─────────────────────────────────────────────────────────
+   8. QUICK ACTIONS
+───────────────────────────────────────────────────────────  */
+
+.pn-quick-actions {
+  background: var(--surface-2);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-lg);
+  padding: var(--s-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  min-width: 200px;
+}
+
+.pn-action-btn {
+  width: 100%;
+  padding: var(--s-3) var(--s-4);
+  border-radius: var(--r-md);
+  font-family: var(--font-body);
+  font-size: var(--t-sm);
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  border: 1px solid var(--border-soft);
+  background: var(--surface-1);
+  color: var(--text-1);
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  transition:
+    background var(--pn-d-fast) var(--pn-ease),
+    border-color var(--pn-d-fast) var(--pn-ease),
+    transform 120ms var(--pn-ease);
+}
+
+.pn-action-btn:hover {
+  border-color: var(--info);
+  background: var(--pn-info-subtle);
+  transform: translateX(2px);
+}
+
+.pn-action-btn:focus-visible {
+  outline: 1.5px solid var(--info);
+  outline-offset: 2px;
+}
+
+.pn-action-btn svg {
+  width: 16px;
+  height: 16px;
+  color: var(--info);
+  flex-shrink: 0;
+}
+
+/* Botão primário — safira sólido */
+.pn-action-btn--primary {
+  background: var(--info);
+  color: #fff;
+  border-color: var(--info);
+}
+
+.pn-action-btn--primary svg { color: rgba(255, 255, 255, 0.85); }
+
+.pn-action-btn--primary:hover {
+  background: var(--pn-info-hover);
+  border-color: var(--info);
+  color: var(--text-1);
+  transform: translateX(2px);
+}
+
+.pn-action-btn--primary:hover svg { color: var(--info); }
+
+/* ─────────────────────────────────────────────────────────
+   9. ESTADO VAZIO
+───────────────────────────────────────────────────────────  */
+
+.pn-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--s-9) var(--s-6);
+  color: var(--text-3);
+  gap: var(--s-2);
+}
+
+.pn-empty p {
+  font-size: var(--t-md);
+  color: var(--text-2);
+  margin: 0;
+}
+
+.pn-empty-hint {
+  font-size: var(--t-xs);
+  color: var(--text-4);
+  font-style: italic;
+}
+
+/* ─────────────────────────────────────────────────────────
+   10. LIGHT MODE
+───────────────────────────────────────────────────────────  */
+
+[data-theme="light"] #painel-negocio {
+  --pn-info-subtle: rgba(61, 100, 128, 0.08);
+  --pn-info-hover:  rgba(61, 100, 128, 0.15);
+  --pn-info-bar:    rgba(61, 100, 128, 0.75);
+}
+
+[data-theme="light"] .pn-kpi::before {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(0, 0, 0, 0.03) 50%,
+    transparent
+  );
+}
+
+/* ─────────────────────────────────────────────────────────
+   11. RESPONSIVO
+───────────────────────────────────────────────────────────  */
+
+@media (max-width: 1024px) {
+  .pn-kpis-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 768px) {
+  #painel-negocio {
+    padding: var(--s-4);
+    gap: var(--s-4);
+  }
+
+  .pn-header { flex-direction: column; align-items: flex-start; gap: var(--s-3); }
+  .pn-delta { text-align: left; }
+  .pn-delta-label { text-align: left; }
+
+  .pn-kpis-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--s-3);
+  }
+
+  .pn-bottom-grid { grid-template-columns: 1fr; }
+
+  .pn-quick-actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+    min-width: unset;
+  }
+
+  .pn-action-btn {
+    width: auto;
+    flex: 1;
+    min-width: 140px;
+  }
+}
+
+@media (max-width: 480px) {
+  .pn-kpis-grid { grid-template-columns: 1fr 1fr; }
+}
+
+/* ─────────────────────────────────────────────────────────
+   12. REDUCED MOTION
+───────────────────────────────────────────────────────────  */
+
+@media (prefers-reduced-motion: reduce) {
+  .pn-kpi,
+  .pn-action-btn,
+  .kpi-bar-fill,
+  .pn-cliente-bar-fill { transition: none; }
+}

@@ -1,0 +1,414 @@
+/* ═══════════════════════════════════════════════════════════
+   DASHBOARD PESSOAL — Hub de Vida
+   Scope: #dashboard-pessoal e classes .dp-*
+   Estilo: warm, humano, OBSIDIAN ouro — Tier Apple+
+   Mentor24h | OBSIDIAN Design System | Forge v5.2
+   skill-forge-visual v5.0 | 2026-05-16
+═══════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────────────────
+   LOCAL TOKENS
+   Centralizados para obedecer RNF01 (zero rgba inline).
+───────────────────────────────────────────────────────────  */
+#dashboard-pessoal {
+  --dp-gold-subtle:  rgba(212, 165, 116, 0.10);
+  --dp-gold-glow:    rgba(212, 165, 116, 0.18);
+  --dp-check-bg:     rgba(212, 165, 116, 0.90);
+  --dp-ease:         var(--ease-out);
+  --dp-d-fast:       var(--d-fast);
+  --dp-d-base:       var(--d-base);
+}
+
+/* ─────────────────────────────────────────────────────────
+   1. LAYOUT GERAL
+───────────────────────────────────────────────────────────  */
+
+#dashboard-pessoal {
+  padding: 28px var(--s-6);
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-6);
+}
+
+/* ─────────────────────────────────────────────────────────
+   2. SAUDAÇÃO HERO
+   Fraunces italic — editorial, caloroso.
+───────────────────────────────────────────────────────────  */
+
+.dp-greeting {
+  padding: 0 0 var(--s-2) 0;
+}
+
+.dp-greeting-texto {
+  font-family: var(--font-display);
+  font-size: var(--t-2xl);
+  font-style: italic;
+  font-weight: 400;
+  color: var(--text-1);
+  line-height: var(--leading-tight);
+  margin: 0;
+  letter-spacing: var(--tracking-tight);
+}
+
+/* Destaque "nome" em ouro na saudação */
+.dp-greeting-texto .dp-name {
+  color: var(--signature);
+  font-weight: 300;
+}
+
+.dp-greeting-data {
+  font-family: var(--font-body);
+  font-size: var(--t-sm);
+  color: var(--text-3);
+  margin: var(--s-1) 0 0;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+
+/* ─────────────────────────────────────────────────────────
+   3. GRADE DE WIDGETS (bento grid)
+   2 colunas desktop, responsivo para mobile.
+───────────────────────────────────────────────────────────  */
+
+.dp-widgets-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--s-4);
+}
+
+.dp-widget {
+  background: var(--surface-2);
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-lg);
+  padding: var(--s-5);
+  position: relative;
+  overflow: hidden;
+  transition:
+    transform var(--dp-d-fast) var(--dp-ease),
+    box-shadow var(--dp-d-fast) var(--dp-ease),
+    border-color var(--dp-d-fast) var(--dp-ease);
+}
+
+/* Reflexo no topo — Tier Apple+ */
+.dp-widget::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.05) 50%,
+    transparent
+  );
+  pointer-events: none;
+}
+
+.dp-widget:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-elevated);
+  border-color: var(--line-3);
+}
+
+.dp-widget-icon {
+  font-size: 1.4rem;
+  margin-bottom: var(--s-2);
+  display: block;
+  line-height: 1;
+}
+
+.dp-widget-valor {
+  font-family: var(--font-body);
+  font-size: var(--t-lg);
+  font-weight: 600;
+  color: var(--text-1);
+  display: block;
+  line-height: 1.1;
+}
+
+.dp-widget-label {
+  font-size: var(--t-xs);
+  color: var(--text-quiet);
+  font-family: var(--font-body);
+  display: block;
+  margin-top: var(--s-1);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+}
+
+.dp-widget-sub {
+  font-size: var(--t-xs);
+  color: var(--signature);
+  margin-top: var(--s-2);
+  display: block;
+  font-weight: 500;
+}
+
+/* Widget Finanças: valor em ouro — destaque pessoal */
+.dp-widget--financas .dp-widget-valor {
+  font-family: var(--font-mono);
+  color: var(--signature);
+}
+
+/* Widget Saúde/Bem-estar */
+.dp-widget--saude .dp-widget-valor {
+  color: var(--color-success);
+}
+
+/* ─────────────────────────────────────────────────────────
+   4. TAREFAS PRIORITÁRIAS
+───────────────────────────────────────────────────────────  */
+
+.dp-tarefas {
+  background: var(--surface-2);
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-lg);
+  padding: var(--s-5);
+}
+
+.dp-tarefas-titulo {
+  font-family: var(--font-body);
+  font-size: var(--t-xs);
+  font-weight: 600;
+  color: var(--text-1);
+  margin: 0 0 var(--s-4);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wider);
+}
+
+.dp-tarefas-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.dp-tarefa-item {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-2) 0;
+  border-bottom: 1px solid var(--line-1);
+  transition: opacity var(--dp-d-fast) var(--dp-ease);
+}
+
+.dp-tarefa-item:last-child { border-bottom: none; }
+
+/* Checkbox circular elegante — ouro ao marcar */
+.dp-tarefa-check {
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid var(--line-3);
+  border-radius: var(--r-full);
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  flex-shrink: 0;
+  background: transparent;
+  position: relative;
+  transition:
+    background var(--dp-d-fast) var(--dp-ease),
+    border-color var(--dp-d-fast) var(--dp-ease);
+}
+
+.dp-tarefa-check:hover {
+  border-color: var(--signature);
+}
+
+.dp-tarefa-check:checked {
+  background: var(--signature);
+  border-color: var(--signature);
+}
+
+/* Checkmark via pseudo-element */
+.dp-tarefa-check:checked::after {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border-radius: var(--r-full);
+  background: var(--base);
+  opacity: 0.6;
+}
+
+.dp-tarefa-check:focus-visible {
+  outline: 1.5px solid var(--signature);
+  outline-offset: 2px;
+}
+
+.dp-tarefa-texto {
+  font-size: var(--t-sm);
+  color: var(--text-1);
+  font-family: var(--font-body);
+  line-height: var(--leading-snug);
+  flex: 1;
+  transition: color var(--dp-d-fast) var(--dp-ease);
+}
+
+.dp-tarefa-check:checked ~ .dp-tarefa-texto {
+  text-decoration: line-through;
+  color: var(--text-mute);
+}
+
+/* Estado vazio das tarefas */
+.dp-tarefas-vazio {
+  text-align: center;
+  padding: var(--s-6) var(--s-4);
+  color: var(--text-mute);
+  font-size: var(--t-sm);
+  font-style: italic;
+}
+
+/* ─────────────────────────────────────────────────────────
+   5. NOTA RÁPIDA
+───────────────────────────────────────────────────────────  */
+
+.dp-nota {
+  background: var(--surface-2);
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-lg);
+  padding: var(--s-5);
+  transition: border-color var(--dp-d-fast) var(--dp-ease);
+}
+
+.dp-nota:focus-within {
+  border-color: var(--line-4);
+}
+
+.dp-nota-titulo {
+  font-family: var(--font-body);
+  font-size: var(--t-xs);
+  font-weight: 600;
+  color: var(--text-3);
+  margin: 0 0 var(--s-3);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wider);
+}
+
+.dp-nota-input {
+  width: 100%;
+  min-height: 80px;
+  background: none;
+  border: none;
+  outline: none;
+  font-family: var(--font-body);
+  font-size: var(--t-sm);
+  color: var(--text-1);
+  resize: none;
+  line-height: var(--leading-base);
+}
+
+.dp-nota-input::placeholder { color: var(--text-mute); }
+
+/* ─────────────────────────────────────────────────────────
+   6. EVENTOS DO DIA (widget extra)
+───────────────────────────────────────────────────────────  */
+
+.dp-eventos {
+  background: var(--surface-2);
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-lg);
+  padding: var(--s-5);
+}
+
+.dp-evento-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-3);
+  padding: var(--s-2) 0;
+  border-bottom: 1px solid var(--line-1);
+}
+
+.dp-evento-item:last-child { border-bottom: none; }
+
+.dp-evento-hora {
+  font-family: var(--font-mono);
+  font-size: var(--t-xs);
+  color: var(--signature);
+  font-weight: 500;
+  min-width: 40px;
+  flex-shrink: 0;
+  padding-top: 2px;
+}
+
+.dp-evento-nome {
+  font-size: var(--t-sm);
+  color: var(--text-1);
+  line-height: var(--leading-snug);
+}
+
+/* ─────────────────────────────────────────────────────────
+   7. ESTADO VAZIO GERAL
+───────────────────────────────────────────────────────────  */
+
+.dp-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--s-9) var(--s-6);
+  color: var(--text-3);
+  gap: var(--s-2);
+}
+
+.dp-empty p {
+  font-size: var(--t-md);
+  color: var(--text-2);
+  margin: 0;
+}
+
+.dp-empty-hint {
+  font-size: var(--t-xs);
+  color: var(--text-4);
+  font-style: italic;
+}
+
+/* ─────────────────────────────────────────────────────────
+   8. LIGHT MODE
+───────────────────────────────────────────────────────────  */
+
+[data-theme="light"] #dashboard-pessoal {
+  --dp-gold-subtle: rgba(155, 110, 58, 0.10);
+  --dp-gold-glow:   rgba(155, 110, 58, 0.15);
+}
+
+[data-theme="light"] .dp-widget::before {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(0, 0, 0, 0.03) 50%,
+    transparent
+  );
+}
+
+/* ─────────────────────────────────────────────────────────
+   9. RESPONSIVO
+───────────────────────────────────────────────────────────  */
+
+@media (max-width: 768px) {
+  #dashboard-pessoal {
+    padding: var(--s-4);
+    gap: var(--s-4);
+  }
+
+  .dp-widgets-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--s-3);
+  }
+
+  .dp-greeting-texto { font-size: var(--t-xl); }
+}
+
+@media (max-width: 480px) {
+  .dp-widgets-grid { grid-template-columns: 1fr; }
+}
+
+/* ─────────────────────────────────────────────────────────
+   10. REDUCED MOTION
+───────────────────────────────────────────────────────────  */
+
+@media (prefers-reduced-motion: reduce) {
+  .dp-widget,
+  .dp-tarefa-check,
+  .dp-nota { transition: none; }
+}

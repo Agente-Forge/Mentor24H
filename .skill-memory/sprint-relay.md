@@ -1,5 +1,119 @@
-# Sprint Relay — Sidebar Fix + Enriquecimento (B1/B2)
-**Pipeline:** skill-construtor B1 ✅ → skill-forge-visual B2 ✅ → DEPLOY ✅ LIBERADO
+# Sprint Relay — Dois Mundos (Alpha + Beta)
+**Pipeline:** skill-construtor Alpha ✅ → skill-forge-visual Alpha ✅ → Beta CSS ✅ → DEPLOY ✅ LIBERADO
+
+---
+
+## DIAGRAMA — Sprint Alpha
+
+```
+js/app.js
+├── toggleModo(modo)        → fade 160ms-out + applyMode + restorePosition + fadeIn + toast
+├── applyMode(modo)         → sync puro (localStorage, data-mode, grupos, switcher)
+├── savePosition(modulo)    → localStorage mentor24h_pos_[modo]
+├── restorePosition(modo)   → lê mentor24h_pos_[modo] || home do modo
+└── showToast(msg, tipo)    → .app-toast--pessoal (ouro) / .app-toast--negocio (safira)
+
+index.html
+└── .app-toast-container    → posicionado antes do </body>, aria-live="polite"
+```
+
+### Classes CSS criadas pela lógica (forge-visual implementa o visual):
+- `#main.env-transitioning` → opacity 0 + pointer-events none + transition 160ms
+- `.app-toast-container` → fixed, top-right, z-index alto
+- `.app-toast--pessoal` → borda --signature
+- `.app-toast--negocio` → borda --info
+- `.app-toast--saindo` → opacity 0 + fade-out 400ms
+
+## ✅ SPRINT ALPHA — skill-construtor — CONCLUÍDO
+
+- [x] toggleModo() com fade 400ms (160ms out + 240ms in via RAF)
+- [x] pointer-events: none via CSS .env-transitioning (forge-visual implementa)
+- [x] savePosition() hookado em Router.navigate wrapper
+- [x] restorePosition() retorna posição salva ou home do modo
+- [x] Dashboard pessoal = home de pessoal (chave vazia → 'dashboard')
+- [x] Painel negócio = home de negócio (chave vazia → 'painel')
+- [x] showToast() com ícone + tipo + fade-out 2500ms
+- [x] .app-toast-container com aria-live="polite" no index.html
+- [x] applyMode() preservado como sync puro (zero regressões)
+- [!] CSS do fade e toast → forge-visual Alpha resolve
+
+## 📋 MISSÃO SKILL-FORGE-VISUAL ALPHA
+
+```css
+/* Fade do conteúdo principal */
+#main { transition: opacity 240ms var(--ease-out); }
+#main.env-transitioning { opacity: 0; pointer-events: none; transition: opacity 160ms var(--ease-out); }
+
+/* Toast container */
+.app-toast-container { position: fixed; top: var(--s-4); right: var(--s-4); z-index: 9999; display: flex; flex-direction: column; gap: var(--s-2); }
+
+/* Toast base */
+.app-toast { display: flex; align-items: center; gap: var(--s-2); padding: var(--s-3) var(--s-4); border-radius: var(--r-2); background: var(--surface-2); backdrop-filter: blur(12px); box-shadow: var(--shadow-2); border-left: 3px solid; opacity: 1; transition: opacity 400ms var(--ease-out); animation: toastSlideIn 240ms var(--ease-out); }
+.app-toast--pessoal { border-color: var(--signature); }
+.app-toast--negocio { border-color: var(--info); }
+.app-toast--saindo  { opacity: 0; }
+
+@keyframes toastSlideIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+
+/* Paleta corporativa modo Negócio */
+html[data-mode="negocio"] { /* accents ouro → safira, surfaces mais frias */ }
+```
+
+## ✅ SKILL-FORGE-VISUAL ALPHA — CONCLUÍDO (v2 — paleta corporativa completa)
+
+- [x] css/layout.css: #main transition + #main.env-transitioning
+- [x] css/layout.css: .app-toast-container, .app-toast, .app-toast--pessoal/negocio/saindo (translateX)
+- [x] css/layout.css: @keyframes toastSlideIn, mobile override
+- [x] css/negocio.css seção 14: --accent-modo + --accent-modo-hover + --accent-modo-subtle + --surface-cold-tint em html[data-mode="negocio"]
+- [x] css/negocio.css seção 15: superfícies com cold-tint (.card, .painel-kpi-card, .pn-kpi)
+- [x] css/negocio.css seção 16: .btn-primary safira + hover safira-escura
+- [x] css/negocio.css seção 17: *:focus-visible outline-color var(--info)
+- [x] css/negocio.css seção 18: .text-accent, [aria-current="page"] → safira
+- [x] css/negocio.css seção 19: .kpi-bar-fill gradient safira + .pn-cliente-bar-fill
+- [x] css/negocio.css seção 20: links a:not(.btn) → safira
+- [x] css/negocio.css seção 21: .badge--primary, .badge-gold → safira
+- [x] css/negocio.css seção 22: scrollbar safira
+- [x] css/negocio.css seção 23: .gradient-accent → safira
+- [x] css/negocio.css seção 24: #topbar borda-bottom safira sutil
+- [x] css/negocio.css seção 25: h1/h2 letter-spacing -0.02em
+- [x] css/negocio.css seção 26: ::selection fundo accent-modo-subtle
+- [x] css/negocio.css seção 27: html[data-theme="light"][data-mode="negocio"] overrides
+
+## ✅ SKILL-FORGE-VISUAL BETA — CONCLUÍDO
+
+- [x] css/dashboard-pessoal.css: bento grid warm, ouro, Fraunces italic
+- [x] css/painel-negocio.css: grid executivo, safira herdado, progress bars
+- [x] index.html: links adicionados para os dois novos CSS
+- [x] Local tokens em cada arquivo (RNF01)
+- [x] Light mode: override dos local tokens em cada arquivo
+- [x] Reduced-motion: todas transições desativadas
+- [x] Responsivo: mobile 768px + 480px ambos os dashboards
+
+### Arquivos entregues
+
+| Arquivo | Ação |
+|---------|------|
+| css/layout.css | Alpha CSS adicionado (fade + toast) |
+| css/dashboard-pessoal.css | NOVO — bento grid warm |
+| css/painel-negocio.css | NOVO — grid executivo safira |
+| index.html | links css?v=1 adicionados |
+
+## 🚦 STATUS FINAL
+
+| Sprint | Status |
+|--------|--------|
+| A1+A2 — Sidebar Premium | ✅ |
+| B1+B2 — Sidebar Fix Visual | ✅ |
+| **Alpha — Dois Mundos JS** | ✅ CONCLUÍDO |
+| **Alpha — Dois Mundos CSS** | ✅ CONCLUÍDO |
+| **Beta CSS — Dashboards** | ✅ CONCLUÍDO |
+| Beta-1 Construtor (HTML .dp-/.pn-) | ⏳ PRÓXIMO |
+| DEPLOY | ✅ LIBERADO — aguardando Beta-1 |
+
+---
+
+## HISTÓRICO — SIDEBAR PREMIUM (A+B)
+**Pipeline original:** skill-construtor B1 ✅ → skill-forge-visual B2 ✅ → DEPLOY ✅ LIBERADO
 
 ---
 

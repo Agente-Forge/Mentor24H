@@ -681,3 +681,187 @@ html[data-mode="negocio"] #group-negocio .nav-item svg {
   border-color: var(--info);
   color: white;
 }
+
+/* ═══════════════════════════════════════════════════════════
+   PALETA CORPORATIVA COMPLETA — Alpha forge-visual
+   Scope: html[data-mode="negocio"]
+   REGRA: ouro (--signature) → safira (--info) em TODOS os
+   elementos interativos e de destaque do modo Negócio.
+   O design system OBSIDIAN permanece — só o accent muda.
+   skill-forge-visual v5.0 | 2026-05-16
+═══════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────────────────
+   14. TOKENS DO MODO NEGÓCIO
+   Referência central do accent safira neste modo.
+───────────────────────────────────────────────────────────  */
+
+html[data-mode="negocio"] {
+  --accent-modo:        var(--info);
+  --accent-modo-hover:  #5A7A96;
+  --accent-modo-subtle: rgba(109, 142, 168, 0.15);
+  --surface-cold-tint:  rgba(109, 142, 168, 0.04);
+}
+
+/* ─────────────────────────────────────────────────────────
+   15. SUPERFÍCIES COM TOQUE CORPORATIVO
+   Tint frio sutil nos cards — diferencia do ambiente pessoal
+   sem quebrar o dark OBSIDIAN.
+───────────────────────────────────────────────────────────  */
+
+html[data-mode="negocio"] .card,
+html[data-mode="negocio"] .painel-kpi-card,
+html[data-mode="negocio"] .pn-kpi {
+  background-image: linear-gradient(
+    135deg,
+    var(--surface-cold-tint),
+    transparent 60%
+  );
+}
+
+/* ─────────────────────────────────────────────────────────
+   16. BOTÕES PRIMÁRIOS
+───────────────────────────────────────────────────────────  */
+
+html[data-mode="negocio"] .btn-primary,
+html[data-mode="negocio"] [class*="btn--primary"] {
+  background: var(--info);
+  border-color: var(--info);
+  color: #fff;
+}
+
+html[data-mode="negocio"] .btn-primary:hover,
+html[data-mode="negocio"] [class*="btn--primary"]:hover {
+  background: var(--accent-modo-hover);
+  border-color: var(--accent-modo-hover);
+}
+
+html[data-mode="negocio"] .btn-primary:focus-visible,
+html[data-mode="negocio"] [class*="btn--primary"]:focus-visible {
+  outline-color: var(--info);
+}
+
+/* ─────────────────────────────────────────────────────────
+   17. FOCUS RINGS GLOBAIS
+   Todos os elementos interativos usam safira em modo Negócio.
+───────────────────────────────────────────────────────────  */
+
+html[data-mode="negocio"] *:focus-visible {
+  outline-color: var(--info);
+}
+
+/* ─────────────────────────────────────────────────────────
+   18. ESTADOS ATIVOS E SELECIONADOS
+───────────────────────────────────────────────────────────  */
+
+html[data-mode="negocio"] .text-accent,
+html[data-mode="negocio"] [aria-current="page"]:not(.nav-item) {
+  color: var(--info);
+}
+
+/* ─────────────────────────────────────────────────────────
+   19. KPI PROGRESS BARS
+   Gradient safira nos indicadores de progresso.
+───────────────────────────────────────────────────────────  */
+
+html[data-mode="negocio"] .kpi-bar-fill,
+html[data-mode="negocio"] .pn-kpi-progress .kpi-bar-fill,
+html[data-mode="negocio"] .progress-fill,
+html[data-mode="negocio"] [class*="progress--fill"] {
+  background: linear-gradient(
+    90deg,
+    var(--info),
+    var(--accent-modo-hover)
+  );
+}
+
+html[data-mode="negocio"] .pn-cliente-bar-fill {
+  background: var(--info);
+}
+
+/* ─────────────────────────────────────────────────────────
+   20. LINKS E DESTAQUES DE TEXTO
+───────────────────────────────────────────────────────────  */
+
+html[data-mode="negocio"] a:not(.btn):not(.nav-item):not(.modo-btn) {
+  color: var(--info);
+}
+
+html[data-mode="negocio"] a:not(.btn):not(.nav-item):not(.modo-btn):hover {
+  color: var(--accent-modo-hover);
+}
+
+/* ─────────────────────────────────────────────────────────
+   21. BADGES CORPORATIVOS
+───────────────────────────────────────────────────────────  */
+
+html[data-mode="negocio"] .badge--primary,
+html[data-mode="negocio"] .badge-gold {
+  background: var(--accent-modo-subtle);
+  color: var(--info);
+  border: 1px solid rgba(109, 142, 168, 0.30);
+}
+
+/* ─────────────────────────────────────────────────────────
+   22. SCROLLBAR CORPORATIVA
+───────────────────────────────────────────────────────────  */
+
+html[data-mode="negocio"] ::-webkit-scrollbar-thumb {
+  background: rgba(109, 142, 168, 0.35);
+}
+
+html[data-mode="negocio"] ::-webkit-scrollbar-thumb:hover {
+  background: var(--info);
+}
+
+/* ─────────────────────────────────────────────────────────
+   23. GRADIENTES CORPORATIVOS
+───────────────────────────────────────────────────────────  */
+
+html[data-mode="negocio"] .gradient-accent {
+  background: linear-gradient(135deg, var(--info), #3D6480);
+}
+
+/* ─────────────────────────────────────────────────────────
+   24. TOPBAR — BORDA SAFIRA SUTIL
+───────────────────────────────────────────────────────────  */
+
+html[data-mode="negocio"] #topbar,
+html[data-mode="negocio"] .app-header {
+  border-bottom-color: rgba(109, 142, 168, 0.20);
+}
+
+/* ─────────────────────────────────────────────────────────
+   25. TIPOGRAFIA CORPORATIVA
+   Letter-spacing mais compacto — sensação de precisão.
+───────────────────────────────────────────────────────────  */
+
+html[data-mode="negocio"] h1,
+html[data-mode="negocio"] h2 {
+  letter-spacing: -0.02em;
+}
+
+/* ─────────────────────────────────────────────────────────
+   26. SELEÇÃO DE TEXTO
+───────────────────────────────────────────────────────────  */
+
+html[data-mode="negocio"] ::selection {
+  background: var(--accent-modo-subtle);
+  color: var(--text-1);
+}
+
+/* ─────────────────────────────────────────────────────────
+   27. LIGHT MODE — overrides da paleta corporativa
+   Dark e light mode funcionam automaticamente via OBSIDIAN.
+   Apenas ajuste fino dos rgba (--info muda em [data-theme=light]).
+───────────────────────────────────────────────────────────  */
+
+/* data-theme e data-mode vivem ambos no <html> — seletor combinado */
+html[data-theme="light"][data-mode="negocio"] {
+  --accent-modo-subtle: rgba(61, 100, 128, 0.12);
+  --surface-cold-tint:  rgba(61, 100, 128, 0.03);
+}
+
+html[data-theme="light"][data-mode="negocio"] ::-webkit-scrollbar-thumb {
+  background: rgba(61, 100, 128, 0.30);
+}
