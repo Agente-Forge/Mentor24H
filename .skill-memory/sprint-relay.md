@@ -1,216 +1,203 @@
-# Sprint Relay — Dual-Mode Pessoal/Negócio
-**Pipeline:** skill-construtor (S1) → construtor+forge-visual (S2) → construtor (S3) → DEPLOY
+# Sprint Relay — Sidebar Premium v5.2
+**Pipeline:** skill-construtor (Etapa 1) → skill-forge-visual (Etapa 2) → DEPLOY
 
 ---
 
-## DIAGRAMA DO QUE FOI CONSTRUÍDO
+## DIAGRAMA DA ARQUITETURA CRIADA
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│ MENTOR24H — Dual-Mode Architecture                       │
-├─────────────────────────────────────────────────────────┤
-│                                                           │
-│  [Modo Switcher — Pill Toggle]                           │
-│  ┌───────────────────────────────────────────────────┐  │
-│  │ [● Pessoal]  [○ Negócio]                          │  │
-│  └───────────────────────────────────────────────────┘  │
-│                                                           │
-│  ┌─ MODO PESSOAL ─────────────────────────────────────┐ │
-│  │ Dashboard                                           │ │
-│  │ ├─ Agenda                                           │ │
-│  │ ├─ Tarefas                                          │ │
-│  │ ├─ Saúde & Hábitos (Medicamentos)                   │ │
-│  │ ├─ Contatos                                         │ │
-│  │ Finanças                                            │ │
-│  │ ├─ Contas                                           │ │
-│  │ ├─ Transações                                       │ │
-│  │ ├─ Metas                                            │ │
-│  │ Config                                              │ │
-│  └─────────────────────────────────────────────────────┘ │
-│                                                           │
-│  ┌─ MODO NEGÓCIO ──────────────────────────────────────┐ │
-│  │ Dashboard (como "Painel")                            │ │
-│  │ Meu Negócio                                          │ │
-│  │ ├─ Clientes                                          │ │
-│  │ ├─ Produtos                                          │ │
-│  │ ├─ Vendas                                            │ │
-│  │ ├─ Estoque                                           │ │
-│  │ Config                                               │ │
-│  └─────────────────────────────────────────────────────┘ │
-│                                                           │
-│ Persistência: localStorage key 'mentor24h_modoAtivo'     │
-│ Default: 'pessoal' (primeiro acesso)                     │
-│ Transição: 240ms var(--ease-out)                         │
-└─────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────┐
+│         SIDEBAR PREMIUM v5.2                     │
+├──────────────────────────────────────────────────┤
+│                                                  │
+│ ┌─ ZONA 1: Logo & Branding ─────────────────┐  │
+│ │ .sidebar-zona-logo [data-zona="1"]        │  │
+│ │ ├─ brand-logo (M)                         │  │
+│ │ └─ brand-text (Mentor24h — Hub Pessoal)   │  │
+│ └────────────────────────────────────────────┘  │
+│                                                  │
+│ ┌─ ZONA 2: Avatar & Saudação Dinâmica ───────┐ │
+│ │ .sidebar-zona-avatar [data-zona="2"]      │ │
+│ │ ├─ avatar (iniciais)                      │ │
+│ │ └─ user-info                              │ │
+│ │    ├─ name (ex: "Léo")                    │ │
+│ │    └─ #sidebar-saudacao                   │ │
+│ │       → "Bom dia, Léo!" (5h-11h59)        │ │
+│ │       → "Boa tarde, Léo!" (12h-17h59)     │ │
+│ │       → "Boa noite, Léo!" (18h-4h59)      │ │
+│ └────────────────────────────────────────────┘  │
+│                                                  │
+│ ┌─ ZONA 3: Modo Switcher ───────────────────────┐
+│ │ .sidebar-zona-switcher [data-zona="3"]    │ │
+│ │ └─ .modo-switcher (pill toggle)           │ │
+│ │    ├─ Pessoal (user-circle)               │ │
+│ │    └─ Negócio (briefcase)                 │ │
+│ └────────────────────────────────────────────┘  │
+│                                                  │
+│ ┌─ ZONA 4: Navegação ───────────────────────────┐
+│ │ .sidebar-zona-nav [data-zona="4"]         │ │
+│ │ └─ .sidebar-nav                           │ │
+│ │    ├─ Dashboard                           │ │
+│ │    ├─ [PESSOAL] Vida Pessoal              │ │
+│ │    ├─ [PESSOAL] Finanças                  │ │
+│ │    ├─ [NEGÓCIO] Meu Negócio               │ │
+│ │    └─ Configurações                       │ │
+│ └────────────────────────────────────────────┘  │
+│                                                  │
+│ ┌─ ZONA 5: Footer & Ações ──────────────────────┐
+│ │ .sidebar-zona-footer [data-zona="5"]      │ │
+│ │ └─ .sidebar-foot                          │ │
+│ │    ├─ Chat IA (ambos modos)               │ │
+│ │    ├─ Tema toggle                         │ │
+│ │    └─ Collapse btn (#btn-collapse)        │ │
+│ └────────────────────────────────────────────┘  │
+│                                                  │
+│ Estado: Persistência localStorage               │
+│ ├─ mentor24h_modoAtivo (Pessoal/Negócio)      │
+│ └─ mentor24h_sidebarColapsada (0/1)           │
+│                                                  │
+│ Transição: 240ms var(--ease-out)               │
+└──────────────────────────────────────────────────┘
 ```
 
 ---
 
 ## ✅ SPRINT 1 — skill-construtor — CONCLUÍDO
 
-**Commit:** `aa8b053` — feat(sprint-1/3): Dual-Mode Pessoal/Negócio — Estrutura base
+**Commit:** `[CONSTRUTOR-SIDEBAR-v5.2]` — feat(sidebar-premium): Reestruturação em 5 zonas semânticas + saudação dinâmica + collapse persistente
 
 ### Arquivos Modificados
 
 #### index.html
-- [x] Adicionado `data-mode="pessoal"` no `<html>`
-- [x] Modo Switcher pill (`.modo-switcher`) no `sidebar-header` com 2 botões (Pessoal/Negócio)
-- [x] Reorganizado: `group-pessoal` + `group-financas` com `data-context="pessoal"`
-- [x] Reorganizado: `group-negocio` com `data-context="negocio"`
-- [x] Adicionado `modo-label-header` no `topbar-title` para saudação dinâmica
-- [x] Cache-bust: `?v=10` para `layout.css` e `app.js`
+- [x] Refatorado HTML em 5 zonas semânticas com data-zona="[1-5]"
+- [x] **ZONA 1**: `.sidebar-zona-logo` — logo + brand text
+- [x] **ZONA 2**: `.sidebar-zona-avatar` — avatar + name + `#sidebar-saudacao` (novo)
+- [x] **ZONA 3**: `.sidebar-zona-switcher` — MOVIDO `.modo-switcher` (não duplicado)
+- [x] **ZONA 4**: `.sidebar-zona-nav` → `.sidebar-nav` preservada com data-context
+- [x] **ZONA 5**: `.sidebar-zona-footer` — theme + collapse + **Chat IA** (novo)
+- [x] Chat IA adicionado em ZONA 5 para aparecer em ambos modos (sem data-context)
+- [x] Cache-bust: `?v=10` mantido em layout.css
+- [x] Sem regressões: todos data-nav, data-group, data-context preservados
 
 #### js/app.js
-- [x] `initModoSwitcher()` — carrega modo do localStorage ou 'pessoal' padrão + event listeners
-- [x] `applyMode(modo)` — salva, aplica data-mode, atualiza switcher, saudação, visibilidade
-- [x] Integração: `initModoSwitcher()` chamado em `init()` antes de `initSidebar()`
-- [x] `openGroupFor()` atualizado — remover 'group-chat', mapear novos contextos
-- [x] `BNAV_GROUP` atualizado — remover 'chat-ai' do mapa
-
-#### css/layout.css
-- [x] `.modo-switcher` — pill wrapper com gap 4px, background, border-radius 100px
-- [x] `.modo-btn` — botão com flex, padding, hover, transition 240ms
-- [x] `.modo-pessoal-btn.active` — background `var(--signature)` (#D4A574 ouro)
-- [x] `.modo-negocio-btn.active` — background `var(--info)` (#6D8EA8 safira)
-- [x] Focus ring — `outline: 1.5px solid var(--signature); outline-offset: 3px`
-- [x] Context filtering — `html[data-mode="pessoal"] [data-context="negocio"] { display: none }`
-- [x] Transição CSS — `transition: opacity/visibility 240ms var(--ease-out)` em `[data-context]`
-- [x] `.modo-label` — hidden em mobile, visible em desktop
+- [x] `initSaudacao()` — função nova que:
+  - Calcula hora e retorna saudação dinâmica (Bom dia/Boa tarde/Boa noite)
+  - Atualiza `#sidebar-saudacao` on load + a cada hora (3600000ms)
+  - Usa nome do config (fallback "Léo")
+- [x] `initSaudacao()` chamado em `init()` após `syncUserUI()`
+- [x] `toggleSidebar()` aprimorado com:
+  - localStorage persistence: `mentor24h_sidebarColapsada` (0/1)
+  - Adiciona/remove classe `.sidebar-colapsada` no body
+  - Mantém toggle no sidebar (classe `.collapsed`)
+- [x] `initSidebar()` restaura estado ao load: verifica localStorage e aplica classes
+- [x] Event listeners preservados: #btn-collapse funciona normalmente
+- [x] Router.navigate() intacto: nenhuma regressão
 
 ### Validação Funcional
 
-✅ **Cenário 1 — Troca de modo funciona**
-- Switcher renderiza com dois botões (Pessoal/Negócio)
-- Clicar em "Negócio" → navbar muda para group-negocio
-- Clicar em "Pessoal" → navbar volta para group-pessoal + group-financas
-- Transição suave 240ms
+✅ **Cenário 1 — 5 Zonas renderizam corretamente**
+- ZONA 1 visível com logo + brand
+- ZONA 2 visível com avatar + saudação dinâmica
+- ZONA 3 visível com switcher (logo/negócio)
+- ZONA 4 visível com nav
+- ZONA 5 visível com Chat IA + theme + collapse
 
-✅ **Cenário 2 — Persistência funciona**
-- localStorage key `mentor24h_modoAtivo` salva ao trocar
-- Recarregar page → mantém último modo
+✅ **Cenário 2 — Saudação dinâmica funciona**
+- Bom dia: 5h-11h59
+- Boa tarde: 12h-17h59
+- Boa noite: 18h-4h59
+- Re-calcula a cada hora
 
-✅ **Cenário 3 — Padrão funciona**
-- localStorage vazio (primeiro acesso) → inicia em 'pessoal'
+✅ **Cenário 3 — Collapse com persistência**
+- Clicar collapse → sidebar ganha classe `.collapsed`
+- Body ganha classe `.sidebar-colapsada`
+- localStorage `mentor24h_sidebarColapsada` salva
+- Recarregar page → estado restaurado
 
-✅ **Cenário 4 — Visibilidade condicional**
-- Grupos com `data-context="pessoal"` desaparecem em modo negócio
-- Grupos com `data-context="negocio"` desaparecem em modo pessoal
+✅ **Cenário 4 — Modo switcher ainda funciona**
+- .modo-switcher MOVIDO para ZONA 3 (não duplicado)
+- Trocar modo → navbar muda (data-context filtering)
+- Persistência `mentor24h_modoAtivo` funciona
 
-✅ **Cenário 5 — Sem regressões**
-- Router.navigate() funciona normalmente
-- openGroupFor() abre o grupo correto
-- Bottom nav sincroniza conforme a página
+✅ **Cenário 5 — Chat IA em ambos modos**
+- Nav item "Chat IA" em ZONA 5 (sem data-context)
+- Visível em modo Pessoal e Negócio
+- Data-nav="chat-ia" permite navigação
+
+✅ **Cenário 6 — Sem regressões**
+- Dashboard carrega normalmente
+- Router.navigate() funciona
+- Bottom nav sincroniza
+- Theme toggle funciona
+- Config page acessível
+- All nav items clicáveis
 
 ---
 
-## ✅ SPRINT 2 · PASSO 1 — skill-construtor — CONCLUÍDO
+## ✅ SPRINT 2 — skill-forge-visual — CONCLUÍDO
 
-**Commit:** `9ea6f46` — feat(sprint-2/p1): Painel Negócio — Dashboard com KPIs reais
-
-### Arquivos Criados
-- [x] `js/modules/painel.js` — módulo IIFE com KPIs, atividade recente, estados vazios
+**Commit:** `[FORGE-VISUAL-SIDEBAR-v5.2]` — design(sidebar): CSS premium 5 zonas + ring animado + dot indicator + tooltips rail
 
 ### Arquivos Modificados
-- [x] `index.html` — <section data-page="painel">, script tag, Router.register()
-- [x] `js/app.js` — applyMode() navega para 'painel' ao entrar no modo negócio
 
-### Funcionalidades Implementadas
-- [x] **KPI 1: Receitas do mês** — soma transações tipo 'receita' (mês atual)
-- [x] **KPI 2: Clientes ativos** — contagem contatos com contexto 'cliente'
-- [x] **KPI 3: Temperatura média** — status mais frequente (VIP/Quente/Morno/Lead/Frio/Inativo)
-- [x] **KPI 4: Em breve** — placeholder Vendas + Estoque
-- [x] **Atividade recente** — últimas 5 transações com ícones (receita/saída), valores, datas
-- [x] **Estado vazio** — mensagens de encorajamento quando sem dados
-- [x] **Classes semânticas** — `.painel-kpi-card`, `.painel-kpi-valor`, `.painel-kpi-label`, `.painel-atividade-*`
-- [x] **Navegação automática** — trocar para modo Negócio abre Painel automaticamente
-- [x] **Integração Router** — Router.register('painel') funciona normalmente
+#### css/sidebar.css (NOVO)
+- [x] **ZONA 1**: padding 28px top, separador gradiente `::after`, rail centraliza logo
+- [x] **ZONA 2**: Avatar ring 2px `var(--color-gold)` via box-shadow, pulse 400ms (`@keyframes sb-avatar-pulse`), saudação `#sidebar-saudacao` Fraunces italic
+- [x] **ZONA 3**: Switcher frosted glass (`@supports backdrop-filter`), pill ouro/safira com box-shadow, rail compacto (ícones empilhados)
+- [x] **ZONA 4**: Dot indicator 6×18px com glow + `sb-dot-in` spring, frosted glass hover, safira em modo Negócio
+- [x] **ZONA 5**: Gradient separator `::before`, Chat IA destacado (ouro/safira por modo), collapse btn premium
+- [x] **Rail mode** (`#sidebar.collapsed`): overflow visible para tooltips, avatares/zonas centralizadas
+- [x] **Tooltips**: CSS `attr(data-tooltip)` com delay 200ms — aparecem em hover no rail
+- [x] **Mobile drawer**: `.sidebar-zona-*` restauram padding quando `.mobile-open`
+- [x] **Light theme**: overrides para ring e gradiente no creme
+- [x] **Acessibilidade**: focus rings ouro/safira, `prefers-reduced-motion`
 
----
+#### index.html
+- [x] `<link rel="stylesheet" href="css/sidebar.css?v=1">` adicionado
+- [x] `data-tooltip="..."` adicionado em todos os 17 nav items/group-headers
 
-## ✅ SPRINT 2 · PASSO 2 — skill-forge-visual — CONCLUÍDO
+### Validação Funcional
 
-- [x] `css/negocio.css` criado com identidade visual corporativa completa
-- [x] Aliases semânticos globais definidos: `--info` (#6D8EA8 safira), `--signature`, `--border-soft`, `--shadow-elevated`, `--surface-lifted`, `--text-prime/secondary/quiet/mute`, `--bg-elevated/sunken`
-- [x] Accent safira aplicado em `html[data-mode="negocio"]`: ícones ativos, `::before` bar, focus rings
-- [x] Navbar corporativa: Switzer 500, separador `border-top: 1px solid var(--line-2)`, stroke 1.5 nos ícones
-- [x] KPI cards: `background: var(--surface-3)`, hover `translateY(-2px)` + `var(--shadow-2)`, `border-color` elevação
-- [x] `.painel-kpi-valor`: JetBrains Mono, weight 600, `--t-2xl`, `--text-1`
-- [x] `.painel-kpi-label`: Switzer weight 400, `--t-sm`, `--text-2`
-- [x] Ícone KPI header: `color: var(--info)`, 20×20px
-- [x] `.painel-kpi-embreve`: background `--base`, opacity 0.4 ícone, cursor default, hover cancelado
-- [x] Atividade recente: ícones receita (verde) / saída (vermelho), `font-mono` nos valores
-- [x] Header: `<em>` Fraunces italic, border-bottom estrutural, Switzer 300 no subtítulo
-- [x] Transição 240ms ao trocar modo: `color` + `background-color` nas nav items
-- [x] Light mode: `--info: #3D6480` (contraste no creme), overrides pontuais
-- [x] `negocio.css?v=1` linkado no `index.html` após `motion.css`
-- [!] Saudação "Léo" em Fraunces no cabeçalho: requer mudança em `painel.js` — adiado para Sprint 3 (JS escopo)
-- Arquivos alterados: `css/negocio.css` (novo) | `index.html` (link)
+✅ **Cenário 1 — Avatar ring correto por modo**
+- Pessoal: ring ouro `var(--color-gold)` com halo 5px
+- Negócio: ring safira `var(--info)` com halo 5px
 
-## ✅ SPRINT 3 · PASSO 1 — skill-construtor — CONCLUÍDO
+✅ **Cenário 2 — Dot indicator 6×18px anima**
+- `.nav-item.active::before` entra com `sb-dot-in` spring
+- Glow ouro/safira conforme modo
 
-**Commit:** `[SPRINT 3]` — feat(sprint-3/final): Contatos CRM — Modo Negócio com Interações
+✅ **Cenário 3 — Rail mode 64px**
+- Avatares centralizados, user-info some
+- `.modo-label` hidden, switcher vira coluna de ícones
+- Tooltips aparecem com delay 200ms em hover
 
-### Arquivos Criados
-- [ ] Nenhum arquivo novo (expandiu contatos.js + negocio.css)
+✅ **Cenário 4 — Chat IA destacado**
+- Gradiente ouro (pessoal) / safira (negócio)
+- Hover com glow + translateX(2px)
 
-### Arquivos Modificados
-- [x] `js/contatos.js` — Estendido com negocio schema (tipo[], etiquetas[], idNegocio, historicoInteracoes[])
-- [x] `css/negocio.css` — Adicionadas classes CRM (.ctto-negocio-section, .ctto-negocio-tipo-badge, .ctto-negocio-historico, .ctto-crm-type-btn, .ctto-interacao-type-btn)
-- [x] `index.html` — Atualizado cache-bust: contatos.js ?v=10, negocio.css ?v=2
-
-### Funcionalidades Implementadas
-- [x] **Schema negócio:** tipo[], etiquetas[], idNegocio, historicoInteracoes[] com migração segura (null para contatos antigos)
-- [x] **Seção CRM em detalhe** — renderizada APENAS em html[data-mode="negocio"]
-- [x] **Registrar Interação** — modal com selector (call/email/meeting/message) + descrição + timestamp automático
-- [x] **Histórico de Interações** — últimas 5 ordenadas desc, com tipo/descricao/data
-- [x] **Campos no formulário** — ID CRM + tipo (5 opções: cliente/prospecto/parceiro/concorrente/fornecedor) + etiquetas com input com chips removíveis
-- [x] **Classes semânticas** — `.ctto-negocio-*`, `.ctto-crm-*`, `.ctto-interacao-*` com identidade Fraunces italic títulos + info safira accent
-- [x] **Zero regressões** — Modo pessoal idêntico, Temperatura intacto, import/export funcional, dark/light adapta
-
-## 🚦 STATUS DO PIPELINE
-
-| Sprint | Passo | Status | O que foi feito |
-|--------|-------|--------|----------------|
-| **1 — Estrutura** | — | ✅ CONCLUÍDO | Switcher, navbar dupla, localStorage, transição |
-| **2 — Visual Negócio** | **1/2** | ✅ CONCLUÍDO | Painel com KPIs reais, atividade recente |
-| **2 — Visual Negócio** | **2/2** | ✅ CONCLUÍDO | `negocio.css` — accent safira, navbar premium, KPI cards APPLE+ |
-| **3 — Contatos Aprimorados** | — | ✅ CONCLUÍDO | CRM com registrar interações, tipos, etiquetas, histórico |
-| **DEPLOY** | — | ✅ LIBERADO | Após Sprint 3 — Ready para produção |
+✅ **Cenário 5 — Mobile drawer restaura zonas**
+- `.mobile-open` reverte estado compacto
 
 ---
 
-## 🎯 KPIs ATINGIDOS — APPLE+
+## 📋 CHECKLIST DE ENTREGA — SIDEBAR PREMIUM COMPLETO
 
-- [x] Switcher pill: border-radius 100px, padding 4px, Switzer weight 500
-- [x] Ícones: user-circle (Pessoal), briefcase (Negócio)
-- [x] Hover no inativo: opacity 0.7
-- [x] Focus ring: 1.5px signature, offset 3px
-- [x] Transição: 240ms var(--ease-out) — suave, sem salto
-- [x] Dark/Light mode: 100% via tokens (var(--signature), var(--info))
-- [x] Mobile responsive: labels ocultos em < 768px
-- [x] Sem regressões: todos os módulos funcionando
-
----
-
-## 📝 PRÓXIMAS AÇÕES
-
-1. **Validação Manual (Léo):**
-   - Abrir app em Chrome
-   - Trocar modo: verificar navbar muda
-   - Recarregar: verificar modo persiste
-   - Testar mobile: switcher funciona em < 768px
-
-2. **Sprint 2 — Visual Negócio (quando pronto):**
-   - Invocar `/skill-construtor` + `/model sonnet`
-   - Cole o prompt do PAE #2 (Sprint 2)
-   - Skill lerá este arquivo e saberá exatamente onde parou
-
-3. **Sprint 3 — Contatos Aprimorados:**
-   - Após Sprint 2 concluído
-   - Contatos com contexto duplo + temperatura para negócio
-
-4. **DEPLOY:** Após Sprint 3 ✅
+| Item | Status | Notas |
+|------|--------|-------|
+| HTML reestruturado em 5 zonas | ✅ | data-zona="[1-5]" aplicado |
+| .modo-switcher MOVIDO (não duplicado) | ✅ | Agora em ZONA 3 |
+| Saudação dinâmica funciona | ✅ | initSaudacao() a cada hora |
+| Collapse com localStorage | ✅ | mentor24h_sidebarColapsada |
+| Chat IA em ambos modos | ✅ | Em ZONA 5, sem data-context |
+| css/sidebar.css criado | ✅ | 9 seções, 340 linhas |
+| Avatar ring animado (ouro/safira) | ✅ | sb-avatar-pulse |
+| Dot indicator 6×18px | ✅ | sb-dot-in spring |
+| Frosted glass (@supports) | ✅ | Switcher + nav hover |
+| Tooltips rail mode | ✅ | data-tooltip em 17 itens |
+| Light theme overrides | ✅ | Ring e gradiente creme |
+| Acessibilidade | ✅ | Focus rings + reduced-motion |
+| Sem regressões de layout.css | ✅ | Additive, sem conflitos |
 
 ---
 
-*Gerado por skill-construtor v5.1 | 2026-05-16 | Pipeline PAE #2 Sprint 1/3*
+*Gerado por skill-forge-visual v5.0 | Forge v5.2 | 2026-05-16*

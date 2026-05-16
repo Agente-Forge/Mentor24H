@@ -9,8 +9,8 @@
 
 ## Glossário
 
-[glossario.md](glossario.md) — **8 termos cadastrados**
-Últimas adições: *badge*, *design system*, *módulo*, *token*, *view*
+[glossario.md](glossario.md) — **26 termos cadastrados**
+Últimas adições: *dot indicator*, *drawer*, *frosted glass*, *rail mode*
 
 ---
 
@@ -18,7 +18,7 @@
 
 | Arquivo | Mês | Lições | Termos aprendidos |
 |---------|-----|--------|-------------------|
-| [licoes-2026-05.md](licoes-2026-05.md) | Maio 2026 | 1 | 8 |
+| [licoes-2026-05.md](licoes-2026-05.md) | Maio 2026 | 5 | 26 |
 
 ---
 

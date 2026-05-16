@@ -97,6 +97,10 @@
 
 ## R
 
+**rail mode**
+→ Modo colapsado da sidebar — mostra só ícones sem texto, largura reduzida (~64px). Parece um "trilho" compacto. Ao passar o mouse sobre um ícone, aparece um tooltip com o nome.
+*Apareceu em:* Lição #5 (2026-05-16)
+
 **routing**
 → O sistema que decide qual tela, navbar ou módulo mostrar dependendo de onde o usuário está ou qual modo está ativo. Como um "diretor de trânsito" do app.
 *Apareceu em:* Lição #2 (2026-05-16)
@@ -126,6 +130,14 @@
 → Publicar o app na internet para que funcione no link real. No Mentor24h, após `git push`, o GitHub Pages faz o deploy automaticamente em ~60 segundos.
 *Apareceu em:* Lição #4 (2026-05-16)
 
+**dot indicator**
+→ Bolinha ou marcador que desliza suavemente para indicar qual item está ativo na navegação. No Mentor24h a bolinha fica à esquerda dos itens e se move com animação de 300ms.
+*Apareceu em:* Lição #5 (2026-05-16)
+
+**drawer**
+→ Painel lateral que desliza da borda da tela — aparece quando o usuário precisa, some quando não precisa. No mobile, a sidebar do Mentor24h vira um drawer com overlay escuro atrás.
+*Apareceu em:* Lição #5 (2026-05-16)
+
 ---
 
 ## E
@@ -133,6 +145,14 @@
 **etiqueta (tag)**
 → Label personalizado que você adiciona a um item para categorizá-lo. No módulo Contatos do modo Negócio: "alto valor", "recorrente", "vip" são etiquetas. Aparecem como badges menores.
 *Apareceu em:* Lição #4 (2026-05-16)
+
+---
+
+## F
+
+**frosted glass**
+→ Efeito visual translúcido com desfoque de fundo — como vidro fosco. Em CSS: `backdrop-filter: blur(8px)`. Usado nos itens inativos da sidebar para dar profundidade sem poluir.
+*Apareceu em:* Lição #5 (2026-05-16)
 
 ---
 
@@ -184,4 +204,4 @@
 
 ---
 
-*Total: 22 termos | Última adição: 2026-05-16 | PAE v2.0*
+*Total: 26 termos | Última adição: 2026-05-16 | PAE v2.0*

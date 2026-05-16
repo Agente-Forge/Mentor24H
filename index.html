@@ -21,6 +21,7 @@
   <link rel="stylesheet" href="css/pages.css?v=9">
   <link rel="stylesheet" href="css/motion.css?v=8">
   <link rel="stylesheet" href="css/negocio.css?v=2">
+  <link rel="stylesheet" href="css/sidebar.css?v=1">
 </head>
 <body>
 
@@ -28,14 +29,26 @@
 
   <!-- ═══ SIDEBAR ═══ -->
   <aside id="sidebar">
-    <div class="sidebar-header">
+    <!-- ZONA 1: Logo & Branding -->
+    <div class="sidebar-zona-logo" data-zona="1">
       <div class="brand-logo"><span>M</span></div>
       <div class="brand-text">
         <span class="name">Mentor<em>24h</em></span>
         <span class="tag">Seu Hub Pessoal</span>
       </div>
+    </div>
 
-      <!-- Modo Switcher -->
+    <!-- ZONA 2: Avatar & Saudação Dinâmica -->
+    <div class="sidebar-zona-avatar" data-zona="2">
+      <div class="avatar" id="side-avatar" style="background:#D4A574">V</div>
+      <div class="user-info">
+        <span class="name" id="side-nome">Você</span>
+        <span class="sidebar-saudacao" id="sidebar-saudacao">bem-vindo de volta</span>
+      </div>
+    </div>
+
+    <!-- ZONA 3: Modo Switcher -->
+    <div class="sidebar-zona-switcher" data-zona="3">
       <div class="modo-switcher">
         <button class="modo-btn modo-pessoal-btn" data-modo="pessoal" title="Modo Pessoal">
           <span data-icon="user-circle" data-size="14"></span>
@@ -48,43 +61,37 @@
       </div>
     </div>
 
-    <div class="sidebar-user">
-      <div class="avatar" id="side-avatar" style="background:#D4A574">V</div>
-      <div class="user-info">
-        <span class="name" id="side-nome">Você</span>
-        <span class="greet">bem-vindo de volta</span>
-      </div>
-    </div>
-
+    <!-- ZONA 4: Navegação -->
+    <div class="sidebar-zona-nav" data-zona="4">
     <nav class="sidebar-nav">
 
       <!-- Dashboard -->
-      <div class="nav-item active" data-nav="dashboard">
+      <div class="nav-item active" data-nav="dashboard" data-tooltip="Dashboard">
         <span data-icon="layout-dashboard"></span>
         <span class="nav-label">Dashboard</span>
       </div>
 
       <!-- Grupo: Pessoal (Agenda, Tarefas, Medicamentos, Contatos, Finanças) -->
       <div class="nav-group" id="group-pessoal" data-context="pessoal">
-        <div class="nav-group-header" data-group="pessoal">
+        <div class="nav-group-header" data-group="pessoal" data-tooltip="Vida Pessoal">
           <span data-icon="user-circle"></span>
           <span class="nav-label">Vida Pessoal</span>
           <span class="nav-group-arrow" data-icon="chevron-right" data-size="14"></span>
         </div>
         <div class="nav-group-items">
-          <div class="nav-item nav-sub" data-nav="agenda">
+          <div class="nav-item nav-sub" data-nav="agenda" data-tooltip="Agenda">
             <span data-icon="calendar" data-size="14"></span>
             <span class="nav-label">Agenda</span>
           </div>
-          <div class="nav-item nav-sub" data-nav="tarefas">
+          <div class="nav-item nav-sub" data-nav="tarefas" data-tooltip="Tarefas">
             <span data-icon="check-square" data-size="14"></span>
             <span class="nav-label">Tarefas</span>
           </div>
-          <div class="nav-item nav-sub" data-nav="medicamentos">
+          <div class="nav-item nav-sub" data-nav="medicamentos" data-tooltip="Saúde & Hábitos">
             <span data-icon="pill" data-size="14"></span>
             <span class="nav-label">Saúde & Hábitos</span>
           </div>
-          <div class="nav-item nav-sub" data-nav="contatos">
+          <div class="nav-item nav-sub" data-nav="contatos" data-tooltip="Contatos">
             <span data-icon="address-book" data-size="14"></span>
             <span class="nav-label">Contatos</span>
           </div>
@@ -93,22 +100,22 @@
 
       <!-- Grupo: Finanças (Contas, Transações, Metas) -->
       <div class="nav-group" id="group-financas" data-context="pessoal">
-        <div class="nav-group-header" data-group="financas">
+        <div class="nav-group-header" data-group="financas" data-tooltip="Finanças">
           <span data-icon="wallet"></span>
           <span class="nav-label">Finanças</span>
           <span class="nav-group-arrow" data-icon="chevron-right" data-size="14"></span>
         </div>
         <div class="nav-group-items">
-          <div class="nav-item nav-sub" data-nav="contas">
+          <div class="nav-item nav-sub" data-nav="contas" data-tooltip="Contas">
             <span data-icon="receipt" data-size="14"></span>
             <span class="nav-label">Contas</span>
             <span class="nav-badge" id="nav-badge-contas"></span>
           </div>
-          <div class="nav-item nav-sub" data-nav="transacoes">
+          <div class="nav-item nav-sub" data-nav="transacoes" data-tooltip="Transações">
             <span data-icon="arrow-left-right" data-size="14"></span>
             <span class="nav-label">Transações</span>
           </div>
-          <div class="nav-item nav-sub" data-nav="metas">
+          <div class="nav-item nav-sub" data-nav="metas" data-tooltip="Metas">
             <span data-icon="target" data-size="14"></span>
             <span class="nav-label">Metas</span>
           </div>
@@ -117,25 +124,25 @@
 
       <!-- Grupo: Negócio (Clientes, Produtos, Vendas, Estoque) -->
       <div class="nav-group" id="group-negocio" data-context="negocio">
-        <div class="nav-group-header" data-group="negocio">
+        <div class="nav-group-header" data-group="negocio" data-tooltip="Meu Negócio">
           <span data-icon="briefcase"></span>
           <span class="nav-label">Meu Negócio</span>
           <span class="nav-group-arrow" data-icon="chevron-right" data-size="14"></span>
         </div>
         <div class="nav-group-items">
-          <div class="nav-item nav-sub" data-nav="clientes">
+          <div class="nav-item nav-sub" data-nav="clientes" data-tooltip="Clientes">
             <span data-icon="users" data-size="14"></span>
             <span class="nav-label">Clientes</span>
           </div>
-          <div class="nav-item nav-sub" data-nav="produtos">
+          <div class="nav-item nav-sub" data-nav="produtos" data-tooltip="Produtos">
             <span data-icon="package" data-size="14"></span>
             <span class="nav-label">Produtos</span>
           </div>
-          <div class="nav-item nav-sub" data-nav="vendas">
+          <div class="nav-item nav-sub" data-nav="vendas" data-tooltip="Vendas">
             <span data-icon="shopping-cart" data-size="14"></span>
             <span class="nav-label">Vendas</span>
           </div>
-          <div class="nav-item nav-sub" data-nav="estoque">
+          <div class="nav-item nav-sub" data-nav="estoque" data-tooltip="Estoque">
             <span data-icon="archive" data-size="14"></span>
             <span class="nav-label">Estoque</span>
           </div>
@@ -143,14 +150,23 @@
       </div>
 
       <!-- Configurações -->
-      <div class="nav-item" data-nav="config">
+      <div class="nav-item" data-nav="config" data-tooltip="Configurações">
         <span data-icon="settings-2"></span>
         <span class="nav-label">Configurações</span>
       </div>
 
     </nav>
+    </div>
 
+    <!-- ZONA 5: Footer com Chat AI integrado -->
+    <div class="sidebar-zona-footer" data-zona="5">
     <div class="sidebar-foot">
+      <!-- Chat AI — Disponível em ambos os modos -->
+      <div class="nav-item" data-nav="chat-ia" data-tooltip="Chat IA">
+        <span data-icon="message-circle"></span>
+        <span class="nav-label">Chat IA</span>
+      </div>
+
       <div class="theme-toggle-row">
         <span data-icon="moon" data-size="14"></span>
         <span class="theme-label">Tema</span>
@@ -162,6 +178,7 @@
       <button class="collapse-btn" id="btn-collapse" title="Recolher menu">
         <span data-icon="panel-left-close"></span>
       </button>
+    </div>
     </div>
   </aside>
 

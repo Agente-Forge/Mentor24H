@@ -12,6 +12,7 @@ const App = (() => {
     initNavGroups();   /* precisa ser antes de initRouter para o navigate wrapper estar pronto */
     initRouter();
     syncUserUI();
+    initSaudacao();
     startClock();
     Alarm.init();
     CommandPalette.init();
@@ -114,7 +115,35 @@ const App = (() => {
     Config.syncSidebarAvatar(initials, cfg.avatarCor || '#D4A574', cfg.nomeUsuario || 'Você');
   }
 
+  function initSaudacao() {
+    const updateGreeting = () => {
+      const h = new Date().getHours();
+      const cfg = DB.getConfig();
+      const nome = cfg.nomeUsuario ? cfg.nomeUsuario.split(' ')[0] : 'Léo';
+      let saudacao;
+      if (h >= 5 && h < 12) {
+        saudacao = `Bom dia, ${nome}!`;
+      } else if (h >= 12 && h < 18) {
+        saudacao = `Boa tarde, ${nome}!`;
+      } else {
+        saudacao = `Boa noite, ${nome}!`;
+      }
+      const span = document.getElementById('sidebar-saudacao');
+      if (span) span.textContent = saudacao;
+    };
+    updateGreeting();
+    setInterval(updateGreeting, 3600000);
+  }
+
   function initSidebar() {
+    /* Restaurar estado de collapse do localStorage */
+    const isCollapsed = localStorage.getItem('mentor24h_sidebarColapsada') === '1';
+    const sb = document.getElementById('sidebar');
+    if (isCollapsed && sb) {
+      sb.classList.add('collapsed');
+      document.body.classList.add('sidebar-colapsada');
+    }
+
     const btn = document.getElementById('btn-collapse');
     if (btn) btn.addEventListener('click', toggleSidebar);
 
@@ -144,10 +173,12 @@ const App = (() => {
   function toggleSidebar() {
     const sb = document.getElementById('sidebar');
     if (!sb) return;
-    sb.classList.toggle('collapsed');
+    const isCollapsed = sb.classList.toggle('collapsed');
+    document.body.classList.toggle('sidebar-colapsada', isCollapsed);
+    localStorage.setItem('mentor24h_sidebarColapsada', isCollapsed ? '1' : '0');
     const btn = document.getElementById('btn-collapse');
     if (btn) {
-      btn.innerHTML = Icons.html(sb.classList.contains('collapsed') ? 'panel-left-open' : 'panel-left-close', 16);
+      btn.innerHTML = Icons.html(isCollapsed ? 'panel-left-open' : 'panel-left-close', 16);
     }
   }
 
