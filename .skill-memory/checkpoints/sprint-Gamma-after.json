@@ -1,0 +1,19 @@
+{
+  "task": "sprint-Gamma",
+  "sprint": "Bug Fix — Roteamento Dual-Mode",
+  "timestamp": "2026-05-16T17:05:00Z",
+  "tipo": "after",
+  "status": "✅ CONCLUÍDO",
+  "arquivos_alterados": [
+    {
+      "caminho": "js/router.js",
+      "linhas_antes": 74,
+      "linhas_depois": 75,
+      "delta": "+1 linha",
+      "mudanca": "Adicionada entrada 'painel' em PAGES: { title: 'Painel', em: 'Executivo', icon: 'bar-chart-2' }"
+    }
+  ],
+  "bug_corrigido": "navigate('painel') não caía mais no fallback 'dashboard' — modo negócio agora roteia para o Painel Executivo corretamente",
+  "security_pre_check": "SEC-05 verificado (zero secrets)",
+  "leis_aplicadas": ["SEC-05"]
+}

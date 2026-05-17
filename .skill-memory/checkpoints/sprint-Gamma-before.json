@@ -1,0 +1,14 @@
+{
+  "task": "sprint-Gamma",
+  "sprint": "Bug Fix — Roteamento Dual-Mode",
+  "timestamp": "2026-05-16T17:00:00Z",
+  "tipo": "before",
+  "root_cause": "PAGES em router.js não contém entrada 'painel', causando fallback para 'dashboard' em modo negócio",
+  "arquivos_que_serao_alterados": [
+    {
+      "caminho": "js/router.js",
+      "linhas_antes": 74,
+      "descricao": "Adicionar entrada 'painel' em PAGES (linha ~24, antes de 'config')"
+    }
+  ]
+}

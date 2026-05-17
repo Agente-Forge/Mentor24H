@@ -20,6 +20,7 @@ const Router = (() => {
     contatos:       { title: 'Meus',            em: 'contatos',       icon: 'users' },
     kanban:         { title: 'Quadro',          em: 'kanban',         icon: 'columns-3' },
     categorias:     { title: 'Suas',            em: 'categorias',     icon: 'folder-open' },
+    painel:         { title: 'Painel',           em: 'Executivo',      icon: 'bar-chart-2' },
     config:         { title: 'Ajustar',         em: 'preferências',   icon: 'settings-2' },
   };
 
