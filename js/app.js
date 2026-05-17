@@ -62,7 +62,7 @@ const App = (() => {
     if (modo === modoAtual) return;
 
     const main = document.getElementById('main');
-    if (!main) { applyMode(modo); Router.navigate(restorePosition(modo)); return; }
+    if (!main) { applyMode(modo); Router.navigate(getHomePage(modo)); return; }
 
     /* ① Fade-out 160ms */
     main.classList.add('env-transitioning');
@@ -71,8 +71,8 @@ const App = (() => {
       /* ② Trocar modo (sync) */
       applyMode(modo);
 
-      /* ③ Navegar para posição memorizada ou home do modo */
-      Router.navigate(restorePosition(modo));
+      /* ③ Botão de modo SEMPRE vai pra home (UX previsível) */
+      Router.navigate(getHomePage(modo));
 
       /* ④ Fade-in 240ms */
       requestAnimationFrame(() => main.classList.remove('env-transitioning'));
@@ -83,17 +83,30 @@ const App = (() => {
     }, 160);
   }
 
-  /* Salva a posição atual do usuário no modo ativo */
+  /* Páginas válidas para cada modo (config/chat-ai/kanban/categorias são compartilhadas) */
+  const PAGES_BY_MODE = {
+    pessoal: ['dashboard', 'agenda', 'medicamentos', 'tarefas', 'contatos', 'contas', 'transacoes', 'metas'],
+    negocio: ['painel', 'clientes', 'produtos', 'vendas', 'estoque'],
+  };
+
+  /* Salva a posição atual — só se a página pertencer ao modo ativo */
   function savePosition(modulo) {
     const modo = localStorage.getItem('mentor24h_modoAtivo') || 'pessoal';
+    if (!PAGES_BY_MODE[modo]?.includes(modulo)) return;
     localStorage.setItem(`mentor24h_pos_${modo}`, modulo);
   }
 
-  /* Restaura a posição salva ou retorna o home do modo */
+  /* Home page de cada modo — usada no clique do botão de modo (UX previsível) */
+  function getHomePage(modo) {
+    return modo === 'negocio' ? 'painel' : 'dashboard';
+  }
+
+  /* Restaura a posição salva — valida que ainda pertence ao modo. Usada APENAS no init/refresh. */
   function restorePosition(modo) {
     const saved = localStorage.getItem(`mentor24h_pos_${modo}`);
-    if (saved) return saved;
-    return modo === 'negocio' ? 'painel' : 'dashboard';
+    if (saved && PAGES_BY_MODE[modo]?.includes(saved)) return saved;
+    localStorage.removeItem(`mentor24h_pos_${modo}`);
+    return getHomePage(modo);
   }
 
   /* Toast de confirmação de troca de modo */
@@ -293,7 +306,8 @@ const App = (() => {
   }
 
   function initRouter() {
-    Router.register('dashboard',  () => Dashboard.render());
+    Router.register('dashboard',  () => DashboardPessoal.render());
+    Router.register('painel',     () => Painel.render());
     Router.register('contas',     () => Contas.render());
     Router.register('transacoes', () => Transacoes.render());
     Router.register('metas',      () => Metas.render());
@@ -389,9 +403,18 @@ const Alarm = (() => {
 
     if (!toggleBtn) return;
 
-    /* Abrir/fechar painel */
+    /* Abrir/fechar painel — posiciona via fixed para funcionar dentro da sidebar */
     toggleBtn.addEventListener('click', (e) => {
       e.stopPropagation();
+      const isOpen = panel.classList.contains('open');
+      if (!isOpen) {
+        const rect = toggleBtn.getBoundingClientRect();
+        const panelW = 240;
+        let left = rect.right + 8;
+        if (left + panelW > window.innerWidth) left = rect.left - panelW - 8;
+        panel.style.top  = `${rect.top}px`;
+        panel.style.left = `${Math.max(8, left)}px`;
+      }
       panel.classList.toggle('open');
     });
 

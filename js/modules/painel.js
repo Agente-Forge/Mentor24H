@@ -138,6 +138,167 @@ const Painel = (() => {
       </div>`;
   }
 
+  /* ─── Pipeline de Temperatura ─── */
+  function buildPipelineTemperatura(contatos) {
+    contatos = contatos ?? [];
+    const cols = { frio: 0, morno: 0, quente: 0, vip: 0 };
+    contatos.forEach(c => {
+      const temp = c.temperatura || 'frio';
+      if (temp in cols) cols[temp]++;
+    });
+    const total = Object.values(cols).reduce((a, b) => a + b, 0);
+    const labels = { frio: '❄️ Frio', morno: '🌤️ Morno', quente: '🔥 Quente', vip: '⭐ VIP' };
+    const maxVal = Math.max(...Object.values(cols)) || 1;
+    return `
+      <div class="painel-pipeline-wrap">
+        <h2 class="pn-section-title"><span data-icon="layers" data-size="16"></span> Pipeline de Temperatura</h2>
+        <div class="painel-pipeline-cols">
+          ${Object.entries(cols).map(([col, count]) => {
+            const perc = total > 0 ? (count / total) * 100 : 0;
+            const barH = (count / maxVal) * 100;
+            return `
+              <div class="painel-pipeline-col">
+                <div class="painel-pipeline-label">${labels[col]}</div>
+                <div class="painel-pipeline-count">${count}</div>
+                <div class="painel-pipeline-bar"><div class="painel-pipeline-bar-fill" style="height:0%" data-h="${barH}"></div></div>
+              </div>`;
+          }).join('')}
+        </div>
+      </div>`;
+  }
+
+  /* ─── Alertas ─── */
+  function buildAlertas(contatos) {
+    contatos = contatos ?? [];
+    const txs = (DB.getTransacoes ? DB.getTransacoes() : []) ?? [];
+    const tarefas = (DB.getTarefas ? DB.getTarefas() : []) ?? [];
+    const hoje = new Date().toISOString().slice(0, 10);
+    const alertas = [];
+
+    tarefas.forEach(t => {
+      if (t.status === 'concluida') return;
+      if (t.prazo && t.prazo < hoje) {
+        alertas.push({ tipo: 'tarefa_vencida', texto: `Tarefa vencida: ${esc(t.titulo || 'sem título')}`, icon: 'alert-triangle' });
+      }
+    });
+
+    const meta30dias = 30000;
+    const receita6m = txs
+      .filter(t => (t.tipo === 'receita' || t.tipo === 'entrada') && t.data)
+      .reduce((sum, t) => sum + (t.valor || 0), 0);
+    if (receita6m < meta30dias * 0.3) {
+      alertas.push({ tipo: 'meta_baixa', texto: `Receita baixa: ${fmt(receita6m)} (meta: ${fmt(meta30dias)})`, icon: 'trending-down' });
+    }
+
+    contatos.forEach(c => {
+      if (!c.ultima_interacao) return;
+      const dias = Math.floor((new Date() - new Date(c.ultima_interacao)) / 86400000);
+      if (dias > 30) {
+        alertas.push({ tipo: 'sem_contato', texto: `${esc(c.nome)}: sem contato há ${dias} dias`, icon: 'user-x' });
+      }
+    });
+
+    if (alertas.length === 0) {
+      return `
+        <div class="painel-alertas-wrap">
+          <h2 class="pn-section-title"><span data-icon="bell" data-size="16"></span> Alertas</h2>
+          <div class="painel-alerta-vazio">✅ Tudo em ordem!</div>
+        </div>`;
+    }
+
+    return `
+      <div class="painel-alertas-wrap">
+        <h2 class="pn-section-title"><span data-icon="bell" data-size="16"></span> Alertas</h2>
+        <div class="painel-alertas-list">
+          ${alertas.slice(0, 5).map((a, i) => `
+            <div class="painel-alerta-item">
+              <span class="painel-alerta-icon" data-icon="${a.icon}" data-size="16"></span>
+              <span class="painel-alerta-text">${a.texto}</span>
+              <span class="painel-alerta-badge">${i + 1}</span>
+            </div>`).join('')}
+        </div>
+      </div>`;
+  }
+
+  /* ─── Gráfico de Vendas (últimos 6 meses) ─── */
+  function buildGraficoVendas(txs) {
+    txs = txs ?? [];
+    const meses = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date();
+      d.setMonth(d.getMonth() - i);
+      meses.push({ year: d.getFullYear(), month: d.getMonth() + 1 });
+    }
+    const dados = meses.map(m => {
+      const val = receitaDoMes(txs, m.year, m.month);
+      return { mes: new Date(m.year, m.month - 1).toLocaleDateString('pt-BR', { month: 'short' }), valor: val };
+    });
+    const maxVal = Math.max(...dados.map(d => d.valor)) || 1;
+    return `
+      <div class="painel-chart-wrap">
+        <h2 class="pn-section-title"><span data-icon="bar-chart" data-size="16"></span> Vendas — últimos 6 meses</h2>
+        <div class="painel-chart-bars">
+          ${dados.map(d => {
+            const h = (d.valor / maxVal) * 100;
+            return `
+              <div class="painel-chart-col">
+                <div class="painel-chart-bar"><div class="painel-chart-bar-fill" style="height:0%" data-h="${h}"></div></div>
+                <div class="painel-chart-label">${d.mes}</div>
+                <div class="painel-chart-value">${d.valor > 0 ? fmt(d.valor) : 'R$ 0'}</div>
+              </div>`;
+          }).join('')}
+        </div>
+      </div>`;
+  }
+
+  /* ─── Top Produtos ─── */
+  function buildTopProdutos(txs) {
+    txs = txs ?? [];
+    const produtos = {};
+    txs
+      .filter(t => (t.tipo === 'receita' || t.tipo === 'entrada') && t.descricao)
+      .forEach(t => {
+        const desc = esc(t.descricao);
+        if (!produtos[desc]) {
+          produtos[desc] = { qtd: 0, total: 0 };
+        }
+        produtos[desc].qtd += 1;
+        produtos[desc].total += (t.valor || 0);
+      });
+    const top5 = Object.entries(produtos)
+      .sort((a, b) => b[1].qtd - a[1].qtd)
+      .slice(0, 5);
+
+    if (top5.length === 0) {
+      return `
+        <div class="painel-top-produtos-wrap">
+          <h2 class="pn-section-title"><span data-icon="package" data-size="16"></span> Top Produtos</h2>
+          <div class="pn-estado-vazio"><p>Nenhuma venda registrada</p></div>
+        </div>`;
+    }
+
+    const maxQtd = Math.max(...top5.map(p => p[1].qtd)) || 1;
+    return `
+      <div class="painel-top-produtos-wrap">
+        <h2 class="pn-section-title"><span data-icon="package" data-size="16"></span> Top Produtos</h2>
+        <div class="painel-top-produtos-list">
+          ${top5.map((p, i) => {
+            const perc = (p[1].qtd / maxQtd) * 100;
+            return `
+              <div class="painel-top-produto-item">
+                <span class="pn-rank">${i + 1}.</span>
+                <span class="painel-top-produto-name">${p[0]}</span>
+                <div class="painel-top-produto-meta">
+                  <span class="painel-top-produto-qtd">${p[1].qtd}x</span>
+                  <span class="painel-top-produto-total">${fmt(p[1].total)}</span>
+                </div>
+                <div class="painel-top-produto-bar"><div class="painel-top-produto-bar-fill" style="width:0%" data-w="${perc}"></div></div>
+              </div>`;
+          }).join('')}
+        </div>
+      </div>`;
+  }
+
   /* ─── Top Clientes ─── */
   function buildTopClientes(contatos) {
     const clientes = contatos
@@ -203,6 +364,30 @@ const Painel = (() => {
       </div>`;
   }
 
+  /* ─── Animação de barras ao entrar no viewport ─── */
+  function initBarAnimations(root) {
+    const targets = root.querySelectorAll(
+      '.painel-pipeline-wrap, .painel-chart-wrap, .painel-top-produtos-wrap'
+    );
+    function animateTarget(el) {
+      el.querySelectorAll('[data-h]').forEach(b => { b.style.height = b.dataset.h + '%'; });
+      el.querySelectorAll('[data-w]').forEach(b => { b.style.width  = b.dataset.w + '%'; });
+    }
+    if (!targets.length) return;
+    if (!('IntersectionObserver' in window)) {
+      targets.forEach(animateTarget);
+      return;
+    }
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        animateTarget(entry.target);
+        observer.unobserve(entry.target);
+      });
+    }, { threshold: 0.15 });
+    targets.forEach(el => observer.observe(el));
+  }
+
   /* ─── Render principal ─── */
   function render() {
     const container = document.getElementById('painel-negocio-content');
@@ -223,15 +408,20 @@ const Painel = (() => {
           ${buildKpiPendencias()}
         </div>
 
-        <div class="pn-secoes-grid">
-          <div class="pn-top-clientes">
-            <h2 class="pn-section-title"><span data-icon="star" data-size="16"></span> Top Clientes</h2>
-            ${buildTopClientes(contatos)}
-          </div>
+        ${buildPipelineTemperatura(contatos)}
 
-          <div class="pn-vendas-recentes">
-            <h2 class="pn-section-title"><span data-icon="zap" data-size="16"></span> Vendas Recentes</h2>
-            ${buildVendasRecentes(txs)}
+        ${buildAlertas(contatos)}
+
+        <div class="pn-two-col">
+          <div class="pn-left-col">
+            ${buildGraficoVendas(txs)}
+          </div>
+          <div class="pn-right-col">
+            <div class="pn-top-clientes">
+              <h2 class="pn-section-title"><span data-icon="star" data-size="16"></span> Top Clientes</h2>
+              ${buildTopClientes(contatos)}
+            </div>
+            ${buildTopProdutos(txs)}
           </div>
         </div>
 
@@ -240,6 +430,7 @@ const Painel = (() => {
       </div>`;
 
     Icons.render();
+    initBarAnimations(container);
   }
 
   return { render };

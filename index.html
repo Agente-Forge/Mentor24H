@@ -23,7 +23,7 @@
   <link rel="stylesheet" href="css/negocio.css?v=2">
   <link rel="stylesheet" href="css/sidebar.css?v=3">
   <link rel="stylesheet" href="css/dashboard-pessoal.css?v=1">
-  <link rel="stylesheet" href="css/painel-negocio.css?v=1">
+  <link rel="stylesheet" href="css/painel-negocio.css?v=2">
 </head>
 <body>
 
@@ -151,6 +151,42 @@
             <span data-icon="archive" data-size="14"></span>
             <span class="nav-label">Estoque</span>
           </div>
+
+          <!-- Timer Rápido -->
+          <div class="alarm-nav-item" id="alarm-widget">
+            <button class="alarm-nav-btn" id="alarm-toggle" title="Timer Rápido">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;flex-shrink:0">
+                <circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2"/><path d="M5 3 2 6m20 0-3-3"/><path d="M6.38 18.7 4 21m16-2.3L17.64 21"/>
+              </svg>
+              <span class="nav-label">Timer Rápido</span>
+              <span class="alarm-countdown" id="alarm-countdown"></span>
+            </button>
+            <div class="alarm-panel" id="alarm-panel">
+              <div class="alarm-panel-title">Timer rápido</div>
+              <div class="alarm-presets">
+                <button class="alarm-preset" data-min="1">1m</button>
+                <button class="alarm-preset" data-min="2">2m</button>
+                <button class="alarm-preset" data-min="3">3m</button>
+                <button class="alarm-preset" data-min="5">5m</button>
+                <button class="alarm-preset" data-min="10">10m</button>
+                <button class="alarm-preset" data-min="15">15m</button>
+                <button class="alarm-preset" data-min="30">30m</button>
+              </div>
+              <div class="alarm-custom-row">
+                <input type="number" class="alarm-custom-input" id="alarm-custom-min" min="1" max="999" placeholder="min" value="">
+                <button class="alarm-custom-go" id="alarm-custom-go">Iniciar</button>
+              </div>
+              <div class="alarm-running" id="alarm-running" style="display:none">
+                <div class="alarm-running-bar"><div class="alarm-running-fill" id="alarm-fill"></div></div>
+                <div class="alarm-running-info">
+                  <span class="alarm-running-label">Restam</span>
+                  <span class="alarm-running-time" id="alarm-remain">—</span>
+                </div>
+                <button class="alarm-cancel-btn" id="alarm-cancel">Cancelar</button>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
 
@@ -167,7 +203,7 @@
     <div class="sidebar-zona-footer" data-zona="5">
     <div class="sidebar-foot">
       <!-- Chat AI — Disponível em ambos os modos -->
-      <div class="nav-item" data-nav="chat-ia" data-tooltip="Chat IA">
+      <div class="nav-item" data-nav="chat-ai" data-tooltip="Chat IA">
         <span data-icon="message-circle"></span>
         <span class="nav-label">Chat IA</span>
       </div>
@@ -222,40 +258,6 @@
         <!-- Data -->
         <div class="tb-widget tb-date-widget">
           <div class="tb-date" id="topbar-date">domingo, 10 mai. 2026</div>
-        </div>
-
-        <!-- Alarme -->
-        <div class="tb-widget tb-alarm-widget" id="alarm-widget">
-          <button class="tb-alarm-btn" id="alarm-toggle" title="Alarme/Timer">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2"/><path d="M5 3 2 6m20 0-3-3"/><path d="M6.38 18.7 4 21m16-2.3L17.64 21"/>
-            </svg>
-            <span class="alarm-countdown" id="alarm-countdown"></span>
-          </button>
-          <div class="alarm-panel" id="alarm-panel">
-            <div class="alarm-panel-title">Timer rápido</div>
-            <div class="alarm-presets">
-              <button class="alarm-preset" data-min="1">1m</button>
-              <button class="alarm-preset" data-min="2">2m</button>
-              <button class="alarm-preset" data-min="3">3m</button>
-              <button class="alarm-preset" data-min="5">5m</button>
-              <button class="alarm-preset" data-min="10">10m</button>
-              <button class="alarm-preset" data-min="15">15m</button>
-              <button class="alarm-preset" data-min="30">30m</button>
-            </div>
-            <div class="alarm-custom-row">
-              <input type="number" class="alarm-custom-input" id="alarm-custom-min" min="1" max="999" placeholder="min" value="">
-              <button class="alarm-custom-go" id="alarm-custom-go">Iniciar</button>
-            </div>
-            <div class="alarm-running" id="alarm-running" style="display:none">
-              <div class="alarm-running-bar"><div class="alarm-running-fill" id="alarm-fill"></div></div>
-              <div class="alarm-running-info">
-                <span class="alarm-running-label">Restam</span>
-                <span class="alarm-running-time" id="alarm-remain">—</span>
-              </div>
-              <button class="alarm-cancel-btn" id="alarm-cancel">Cancelar</button>
-            </div>
-          </div>
         </div>
 
         <!-- Ctrl+K hint -->
@@ -611,7 +613,7 @@
 <script src="js/router.js"></script>
 <script src="js/charts.js?v=8"></script>
 <script src="js/modal.js?v=8"></script>
-<script src="js/modules/painel.js?v=11"></script>
+<script src="js/modules/painel.js?v=13"></script>
 <script src="js/modules/dashboard-pessoal.js?v=1"></script>
 <script src="js/dashboard.js?v=8"></script>
 <script src="js/contas.js?v=8"></script>
@@ -633,13 +635,7 @@
 <script src="js/clientes.js?v=8"></script>
 <script src="js/command-palette.js?v=8"></script>
 <script src="js/leo-data.js?v=8"></script>
-<script src="js/app.js?v=10"></script>
-
-<!-- Router registration — Dashboards + Painel -->
-<script>
-  Router.register('dashboard', () => DashboardPessoal.render());
-  Router.register('painel',    () => Painel.render());
-</script>
+<script src="js/app.js?v=12"></script>
 
 <!-- Sidebar dot indicator — carrega após app.js ter definido o item ativo -->
 <script src="js/sidebar-dot.js"></script>

@@ -1345,3 +1345,205 @@ Validação ok? Confirme para commit:
 ---
 
 *Entrada #7 gerada por skill-pae v2.0 em 2026-05-16*
+
+---
+
+## Entrada #8 — 2026-05-16
+
+**Solicitação original do Léo:**
+> "temos os dois botões no sibebar pessoal e Negócio / botão pessoal Ag está ativando o dashboard pessoal / e o botão negócio tbm ativa o dashboard pessoal / parece q ainda não temos o dashboard corporativo / confere isso / caso já tenhamos o dashboard ele não está sendo ativado pelo o botão negócio / confira e traga o prompt para isso"
+
+**Decisão do Board PAE:**
+- Bug confirmado: 'painel' ausente do PAGES object do router.js → fallback para 'dashboard'
+- Dashboard Negócio (Painel Executivo) existe completo: painel.js, painel-negocio.css, negocio.css (paleta safira seções 14-27)
+- Fix cirúrgico: 1 linha no router.js + 2 nav items context-aware no index.html
+- Skill única: skill-construtor (JS + HTML, sem CSS)
+
+---
+
+```markdown
+🤖 SKILL:       skill-construtor
+🧠 LLM:         Sonnet 4.6
+⚙️ INTENSIDADE:  Low
+🎨 TIER:        APPLE
+📍 ETAPA:       1 de 1 (skill única — deploy direto ao fim)
+
+cd "c:\Users\Usuário\Desktop\Curso Claude Code-Jhonatan de Souza\controle-financeiro v2"
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Você é o Engenheiro Principal no Forge v5.2.
+
+PROJETO: Mentor24h — Hub pessoal + negócio
+STACK: HTML/CSS/JS vanilla, sem frameworks, sem bundler
+DESIGN SYSTEM: OBSIDIAN EDITORIAL — tokens em css/tokens.css
+PROMPT COMPLETO EM: Estructura-Proyecto/01-documentacao/pae-prompts/prompts-2026-05.md — entrada #8
+
+## CONTEXTO DO BUG
+
+O app tem dual-mode (Pessoal / Negócio). Ao clicar em "Negócio",
+a função toggleModo() chama Router.navigate('painel'). Porém
+o objeto PAGES do router.js (linha 6-24) é o mapa de rotas válidas.
+Se uma rota não estiver nesse mapa, a linha 32 faz fallback:
+  `if (!PAGES[page]) page = 'dashboard';`
+
+'painel' não está no PAGES → navigate('painel') vira navigate('dashboard')
+→ o modo Negócio sempre mostra o Dashboard Pessoal.
+
+O Dashboard Negócio (Painel Executivo) EXISTE e está 100% funcional:
+  • js/modules/painel.js — Painel.render() completo (KPIs, top clientes, vendas)
+  • data-page="painel" no HTML — container existe
+  • Router.register('painel', () => Painel.render()) — inline script em index.html
+  • css/negocio.css + css/painel-negocio.css — CSS completo
+
+O bug é SOMENTE a ausência de 'painel' no PAGES object.
+
+## SUA MISSÃO ESPECÍFICA
+
+Fazer 3 alterações cirúrgicas:
+
+### ALTERAÇÃO 1 — js/router.js
+
+No objeto PAGES, adicionar a entrada 'painel' ANTES do fechamento `}`:
+
+ANTES (final do PAGES object):
+    config:         { title: 'Ajustar',         em: 'preferências',   icon: 'settings-2' },
+  };
+
+DEPOIS:
+    config:         { title: 'Ajustar',         em: 'preferências',   icon: 'settings-2' },
+    painel:         { title: 'Painel',           em: 'Executivo',      icon: 'briefcase'  },
+  };
+
+### ALTERAÇÃO 2 — index.html (sidebar nav)
+
+Localizar o bloco do nav item Dashboard dentro da .sidebar-zona-nav:
+
+ANTES:
+  <!-- Dashboard -->
+  <div class="nav-item active" data-nav="dashboard" data-tooltip="Dashboard">
+    <span data-icon="layout-dashboard"></span>
+    <span class="nav-label">Dashboard</span>
+  </div>
+
+DEPOIS:
+  <!-- Dashboard Pessoal — home do modo Pessoal -->
+  <div class="nav-item active" data-nav="dashboard" data-context="pessoal" data-tooltip="Dashboard">
+    <span data-icon="layout-dashboard"></span>
+    <span class="nav-label">Dashboard</span>
+  </div>
+
+  <!-- Painel Executivo — home do modo Negócio -->
+  <div class="nav-item" data-nav="painel" data-context="negocio" data-tooltip="Painel Executivo">
+    <span data-icon="layout-dashboard"></span>
+    <span class="nav-label">Painel Executivo</span>
+  </div>
+
+### ALTERAÇÃO 3 — index.html (cache bust)
+
+ANTES:
+  <script src="js/router.js"></script>
+
+DEPOIS:
+  <script src="js/router.js?v=2"></script>
+
+## REQUISITOS FUNCIONAIS:
+• RF01: 'painel' deve ser rota válida — navigate('painel') não faz fallback
+• RF02: sidebar exibe "Dashboard" só em modo Pessoal
+• RF03: sidebar exibe "Painel Executivo" só em modo Negócio
+• RF04: ao clicar Negócio → Painel Executivo abre com paleta safira
+
+## REQUISITOS NÃO-FUNCIONAIS:
+• RNF01: zero regressão — modo Pessoal e todos os outros módulos intactos
+• RNF02: cache bust no router.js para forçar reload da versão corrigida
+• RNF03: nenhum outro arquivo alterado além dos listados acima
+
+## ARQUIVOS A ALTERAR:
+• js/router.js       → +1 linha no PAGES object
+• index.html         → trocar 1 nav item por 2 context-aware + cache bust
+
+## NÃO ALTERAR:
+• js/app.js          → toggleModo() e restorePosition() estão corretos
+• js/modules/painel.js → Painel.render() está correto e completo
+• css/negocio.css    → paleta corporativa safira já implementada
+• css/painel-negocio.css → classes .pn-* já implementadas
+
+## ATENÇÃO — RISCO MAPEADO (⚠️ Risk Auditor):
+
+applyMode() em app.js faz:
+  const firstGroup = document.querySelector(`[data-context="${modo}"]`);
+  if (firstGroup) firstGroup.classList.add('open');
+
+Com data-context="negocio" no nav-item Painel Executivo,
+esse item será o firstGroup. addClass('open') em .nav-item
+não causa efeito visual indesejado — .open só age em
+.nav-group .nav-group-items. Risco: nulo.
+
+## VALIDAÇÃO APÓS IMPLEMENTAÇÃO:
+1. Hard refresh (Ctrl+Shift+R)
+2. Clicar "Negócio" → deve abrir Painel Executivo com paleta safira
+3. Sidebar mostra "Painel Executivo" ativo, "Dashboard" oculto
+4. Clicar "Pessoal" → Dashboard pessoal, "Dashboard" ativo, "Painel Executivo" oculto
+5. Memória de posição: navegar para Contas → trocar modo → voltar → deve ir para Contas
+
+## CRITÉRIOS DE ACEITAÇÃO:
+
+Cenário 1 (bug principal):
+  GIVEN app em modo Pessoal
+  WHEN clica "Negócio"
+  THEN abre Painel Executivo com KPIs + paleta safira
+
+Cenário 2 (feedback visual):
+  GIVEN usuário no Painel Executivo (modo Negócio)
+  WHEN olha a sidebar
+  THEN "Painel Executivo" está ativo, "Dashboard" oculto
+
+Cenário 3 (sem regressão):
+  GIVEN usuário em modo Pessoal
+  WHEN olha a sidebar
+  THEN "Dashboard" está visível e ativo
+
+## CHECKLIST FINAL:
+[ ] PAGES object tem 'painel' com title/em/icon
+[ ] nav-item dashboard tem data-context="pessoal"
+[ ] nav-item painel tem data-context="negocio"
+[ ] router.js tem ?v=2 no index.html
+[ ] Painel Executivo abre ao clicar Negócio
+[ ] Paleta safira ativa no Painel Executivo
+[ ] Nenhuma regressão no modo Pessoal
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+## HANDOFF — O QUE FAZER AO TERMINAR (OBRIGATÓRIO)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Ao concluir, exibir ao usuário:
+
+─────────────────────────────────────────
+✅ ETAPA 1/1 CONCLUÍDA — O QUE FAZER AGORA
+
+O que foi feito:
+• js/router.js → 'painel' adicionado ao PAGES object
+• index.html → nav items Dashboard e Painel Executivo context-aware
+• index.html → cache bust router.js?v=2
+
+VALIDAÇÃO FINAL:
+[ ] Cliquei em Negócio → abriu Painel Executivo (KPIs + safira)
+[ ] Cliquei em Pessoal → voltou ao Dashboard pessoal (ouro)
+[ ] Sidebar destaca item correto em cada modo
+[ ] Nenhum outro módulo regrediu
+
+Validação ok? Confirme para commit e deploy:
+
+  git add js/router.js index.html
+  git commit -m "fix(routing): registrar rota painel no PAGES do router — Forge v5.2 APPLE appetite-S"
+  git push origin main
+
+  ⏳ GitHub Pages: deploy automático em ~60 segundos
+
+⚠️ AGUARDAR CONFIRMAÇÃO DO USUÁRIO ANTES DE EXECUTAR GIT.
+─────────────────────────────────────────
+```
+
+---
+
+*Entrada #8 gerada por skill-pae v2.0 em 2026-05-16*
