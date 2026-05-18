@@ -853,6 +853,10 @@ body.sidebar-colapsada .sidebar-inner [data-tooltip]:hover::after {
     pointer-events: auto !important;
   }
 
+  #sidebar.mobile-open .sidebar-inner .sidebar-zona-footer {
+    padding-top: var(--s-7);
+  }
+
   #sidebar.mobile-open .sidebar-inner .sidebar-zona-footer .sidebar-foot {
     justify-content: space-between;
     padding: var(--s-3) var(--s-5) var(--s-5);

@@ -1103,6 +1103,7 @@ html[data-mode="negocio"] [data-context="pessoal"] { display: none !important; }
   #sidebar.mobile-open {
     transform: translateX(0);
     box-shadow: var(--shadow-4);
+    z-index: var(--z-modal);
   }
 
   /* Esconder textos no sidebar mobile (mostrar completo quando aberto) */
