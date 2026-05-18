@@ -855,6 +855,7 @@ body.sidebar-colapsada .sidebar-inner [data-tooltip]:hover::after {
 
   #sidebar.mobile-open .sidebar-inner .sidebar-zona-footer {
     padding-top: var(--s-7);
+    padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
   }
 
   #sidebar.mobile-open .sidebar-inner .sidebar-zona-footer .sidebar-foot {
