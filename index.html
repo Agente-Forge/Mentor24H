@@ -18,11 +18,11 @@
   <link rel="stylesheet" href="css/layout.css?v=10">
   <link rel="stylesheet" href="css/bento.css?v=8">
   <link rel="stylesheet" href="css/components.css?v=8">
-  <link rel="stylesheet" href="css/pages.css?v=9">
+  <link rel="stylesheet" href="css/pages.css?v=10">
   <link rel="stylesheet" href="css/motion.css?v=8">
   <link rel="stylesheet" href="css/negocio.css?v=2">
   <link rel="stylesheet" href="css/themes.css">
-  <link rel="stylesheet" href="css/sidebar.css?v=3">
+  <link rel="stylesheet" href="css/sidebar.css?v=4">
   <link rel="stylesheet" href="css/dashboard-pessoal.css?v=1">
   <link rel="stylesheet" href="css/painel-negocio.css?v=2">
 </head>
@@ -44,7 +44,7 @@
 
     <!-- ZONA 2: Avatar & Saudação Dinâmica -->
     <div class="sidebar-zona-avatar" data-zona="2">
-      <div class="avatar" id="side-avatar" style="background:#D4A574">V</div>
+      <div class="avatar" id="side-avatar"></div>
       <div class="user-info">
         <span class="name" id="side-nome">Você</span>
         <span class="sidebar-saudacao" id="sidebar-saudacao">bem-vindo de volta</span>
@@ -100,6 +100,10 @@
           <div class="nav-item nav-sub" data-nav="contatos" data-tooltip="Contatos">
             <span data-icon="address-book" data-size="14"></span>
             <span class="nav-label">Contatos</span>
+          </div>
+          <div class="nav-item nav-sub" data-nav="chat-ai" data-tooltip="Chat IA">
+            <span data-icon="message-circle" data-size="14"></span>
+            <span class="nav-label">Chat IA</span>
           </div>
         </div>
       </div>
@@ -191,32 +195,18 @@
         </div>
       </div>
 
-      <!-- Configurações -->
-      <div class="nav-item" data-nav="config" data-tooltip="Configurações">
-        <span data-icon="settings-2"></span>
-        <span class="nav-label">Configurações</span>
-      </div>
-
     </nav>
     </div>
 
-    <!-- ZONA 5: Footer com Chat AI integrado -->
+    <!-- ZONA 5: Footer fixo — Separador + Configurações + Collapse -->
     <div class="sidebar-zona-footer" data-zona="5">
     <div class="sidebar-foot">
-      <!-- Chat AI — Disponível em ambos os modos -->
-      <div class="nav-item" data-nav="chat-ai" data-tooltip="Chat IA">
-        <span data-icon="message-circle"></span>
-        <span class="nav-label">Chat IA</span>
+      <div class="sidebar-foot-separator"></div>
+      <div class="nav-item sidebar-config-btn" data-nav="config" data-tooltip="Configurações">
+        <span data-icon="settings-2"></span>
+        <span class="nav-label">Configurações</span>
+        <span class="config-btn-arrow" data-icon="chevron-right" data-size="12"></span>
       </div>
-
-      <div class="theme-toggle-row">
-        <span data-icon="moon" data-size="14"></span>
-        <span class="theme-label">Tema</span>
-      </div>
-      <label class="theme-switch">
-        <input type="checkbox" id="theme-input">
-        <span class="theme-track"></span>
-      </label>
       <button class="collapse-btn" id="btn-collapse" title="Recolher menu">
         <span data-icon="panel-left-close"></span>
       </button>
@@ -467,86 +457,158 @@
 
     <!-- ─── CONFIG ─── -->
     <section class="page" data-page="config">
-      <div class="page-head">
-        <div>
-          <h2 class="page-title">Ajustar <em>preferências</em></h2>
-          <div class="page-sub">Personalize sua experiência</div>
+
+      <!-- HERO: Avatar + Nome + Plano -->
+      <div class="cfg-hero">
+        <div class="cfg-hero-bg"></div>
+        <div class="cfg-hero-content">
+          <div class="cfg-avatar-wrap">
+            <div class="cfg-avatar-ring">
+              <div class="cfg-avatar-display" id="cfg-avatar-display">
+                <!-- SVG do avatar selecionado renderizado aqui via JS -->
+              </div>
+            </div>
+            <button class="cfg-avatar-edit-btn" id="cfg-avatar-edit-btn" title="Mudar avatar" aria-label="Mudar avatar">
+              <span data-icon="pencil" data-size="12"></span>
+            </button>
+          </div>
+          <div class="cfg-hero-info">
+            <h2 class="cfg-hero-name" id="cfg-hero-name">Você</h2>
+            <span class="cfg-hero-badge">Hub Pessoal · Premium</span>
+          </div>
         </div>
       </div>
-      <div class="config-stack">
 
-        <div class="config-section">
-          <div class="config-section-head">
-            <div class="card-pill violet"><span data-icon="user" data-size="16"></span></div>
-            <h3>Perfil</h3>
+      <!-- AVATAR SELECTOR (oculto por padrão, abre ao clicar editar) -->
+      <div class="cfg-avatar-picker" id="cfg-avatar-picker" style="display:none">
+        <div class="cfg-picker-label">Escolha seu avatar</div>
+        <div class="cfg-picker-section-label">Feminino</div>
+        <div class="cfg-avatar-grid" id="cfg-avatar-grid-fem">
+          <!-- 6 SVGs femininos — renderizados pelo JS -->
+        </div>
+        <div class="cfg-picker-section-label" style="margin-top:var(--s-4)">Masculino</div>
+        <div class="cfg-avatar-grid" id="cfg-avatar-grid-masc">
+          <!-- 6 SVGs masculinos — renderizados pelo JS -->
+        </div>
+        <button class="btn btn-secondary cfg-picker-close" id="cfg-picker-close">Fechar</button>
+      </div>
+
+      <div class="cfg-stack">
+
+        <!-- SEÇÃO: Perfil -->
+        <div class="cfg-card">
+          <div class="cfg-card-head">
+            <span class="cfg-card-icon cfg-icon-violet" data-icon="user" data-size="16"></span>
+            <h3 class="cfg-card-title">Perfil</h3>
           </div>
-          <div class="avatar-edit-row">
-            <div class="avatar-preview" id="avatar-prev" style="background:#D4A574">V</div>
-            <div class="flex-1">
-              <div class="field" style="margin-bottom:var(--s-3)">
-                <label class="field-label">Seu nome</label>
-                <input type="text" id="cfg-nome" placeholder="Como quer ser chamado?" oninput="Config.updatePreview()">
+          <div class="cfg-card-body">
+            <div class="cfg-field">
+              <label class="cfg-field-label">Seu nome</label>
+              <input type="text" id="cfg-nome" class="cfg-input"
+                placeholder="Como quer ser chamado?"
+                oninput="Config.updatePreview()">
+            </div>
+            <button class="btn btn-primary cfg-save-btn" onclick="Config.salvar()">
+              <span data-icon="check" data-size="14"></span>
+              Salvar perfil
+            </button>
+          </div>
+        </div>
+
+        <!-- SEÇÃO: Aparência (theme toggle AQUI) -->
+        <div class="cfg-card">
+          <div class="cfg-card-head">
+            <span class="cfg-card-icon cfg-icon-amber" data-icon="sun" data-size="16"></span>
+            <h3 class="cfg-card-title">Aparência</h3>
+          </div>
+          <div class="cfg-card-body">
+            <div class="cfg-row">
+              <div class="cfg-row-info">
+                <span class="cfg-row-label">Tema</span>
+                <span class="cfg-row-sub">Claro ou escuro</span>
               </div>
-              <div class="field" style="margin-bottom:0">
-                <label class="field-label">Cor do avatar</label>
-                <input type="color" id="cfg-cor" oninput="Config.updatePreview()" style="height:38px;cursor:pointer">
+              <div class="cfg-theme-control">
+                <span class="cfg-theme-icon" aria-hidden="true">☀️</span>
+                <label class="theme-switch">
+                  <input type="checkbox" id="theme-input" aria-label="Alternar tema">
+                  <span class="theme-track"></span>
+                </label>
+                <span class="cfg-theme-icon" aria-hidden="true">🌙</span>
               </div>
             </div>
           </div>
         </div>
 
-        <div class="config-section">
-          <div class="config-section-head">
-            <div class="card-pill amber"><span data-icon="sliders-horizontal" data-size="16"></span></div>
-            <h3>Preferências</h3>
+        <!-- SEÇÃO: Moeda & Finanças -->
+        <div class="cfg-card">
+          <div class="cfg-card-head">
+            <span class="cfg-card-icon cfg-icon-green" data-icon="wallet" data-size="16"></span>
+            <h3 class="cfg-card-title">Moeda & Finanças</h3>
           </div>
-          <div class="field-row">
-            <div class="field">
-              <label class="field-label">Moeda</label>
-              <select id="cfg-moeda">
-                <option value="BRL">R$ — Real Brasileiro</option>
-                <option value="USD">$ — Dólar Americano</option>
-                <option value="EUR">€ — Euro</option>
-              </select>
+          <div class="cfg-card-body">
+            <div class="cfg-field-row">
+              <div class="cfg-field">
+                <label class="cfg-field-label">Moeda</label>
+                <select id="cfg-moeda" class="cfg-select">
+                  <option value="BRL">R$ — Real Brasileiro</option>
+                  <option value="USD">$ — Dólar Americano</option>
+                  <option value="EUR">€ — Euro</option>
+                </select>
+              </div>
+              <div class="cfg-field">
+                <label class="cfg-field-label">Saldo Inicial (R$)</label>
+                <input type="number" id="cfg-saldo" class="cfg-input"
+                  min="0" step="0.01" placeholder="0,00">
+                <div class="cfg-field-hint">Base para calcular saldo disponível</div>
+              </div>
             </div>
-            <div class="field">
-              <label class="field-label">Saldo Inicial (R$)</label>
-              <input type="number" id="cfg-saldo" min="0" step="0.01" placeholder="0,00">
-              <div class="field-hint">Base para calcular saldo disponível</div>
-            </div>
+            <button class="btn btn-primary cfg-save-btn" onclick="Config.salvar()">
+              <span data-icon="save" data-size="14"></span>
+              Salvar preferências
+            </button>
           </div>
-          <button class="btn btn-primary" onclick="Config.salvar()" style="margin-top:var(--s-3)">
-            <span data-icon="save" data-size="14"></span>
-            Salvar preferências
-          </button>
         </div>
 
-        <!-- Seção LLM (renderizada por LLM.renderConfig) -->
+        <!-- SEÇÃO: Inteligência Artificial (renderizada por LLM.renderConfig) -->
         <div id="config-llm-section"></div>
 
-        <div class="config-section">
-          <div class="config-section-head">
-            <div class="card-pill blue"><span data-icon="database" data-size="16"></span></div>
-            <h3>Dados</h3>
+        <!-- SEÇÃO: Dados & Privacidade -->
+        <div class="cfg-card">
+          <div class="cfg-card-head">
+            <span class="cfg-card-icon cfg-icon-blue" data-icon="database" data-size="16"></span>
+            <h3 class="cfg-card-title">Dados & Privacidade</h3>
           </div>
-          <div style="display:flex;flex-direction:column;gap:var(--s-2)">
-            <button class="btn btn-secondary" onclick="Config.exportar()">
-              <span data-icon="download" data-size="14"></span>
-              Exportar backup (JSON)
+          <div class="cfg-card-body cfg-data-actions">
+            <button class="cfg-action-row" onclick="Config.exportar()">
+              <span class="cfg-action-icon cfg-icon-green" data-icon="download" data-size="16"></span>
+              <div class="cfg-action-info">
+                <span class="cfg-action-label">Exportar backup</span>
+                <span class="cfg-action-sub">Baixar arquivo JSON com seus dados</span>
+              </div>
+              <span data-icon="chevron-right" data-size="14" class="cfg-action-arrow"></span>
             </button>
-            <label class="btn btn-secondary" style="cursor:pointer">
-              <span data-icon="upload" data-size="14"></span>
-              Importar backup
-              <input type="file" accept=".json" style="display:none" onchange="Config.importar(this.files[0])">
+            <label class="cfg-action-row" style="cursor:pointer">
+              <span class="cfg-action-icon cfg-icon-amber" data-icon="upload" data-size="16"></span>
+              <div class="cfg-action-info">
+                <span class="cfg-action-label">Importar backup</span>
+                <span class="cfg-action-sub">Restaurar dados de um arquivo JSON</span>
+              </div>
+              <span data-icon="chevron-right" data-size="14" class="cfg-action-arrow"></span>
+              <input type="file" accept=".json" style="display:none"
+                onchange="Config.importar(this.files[0])">
             </label>
-            <button class="btn btn-danger" onclick="Config.limparTudo()">
-              <span data-icon="trash-2" data-size="14"></span>
-              Apagar todos os dados
+            <button class="cfg-action-row cfg-action-danger" onclick="Config.limparTudo()">
+              <span class="cfg-action-icon cfg-icon-red" data-icon="trash-2" data-size="16"></span>
+              <div class="cfg-action-info">
+                <span class="cfg-action-label">Apagar todos os dados</span>
+                <span class="cfg-action-sub">Ação irreversível — reinicia o app</span>
+              </div>
+              <span data-icon="chevron-right" data-size="14" class="cfg-action-arrow"></span>
             </button>
           </div>
         </div>
 
-      </div>
+      </div><!-- /.cfg-stack -->
     </section>
 
   </main>
@@ -608,6 +670,7 @@
 <!-- ═══ SCRIPTS (ordem importa) ═══ -->
 <script src="js/icons.js"></script>
 <script src="js/utils.js"></script>
+<script src="js/avatars.js"></script>
 <script src="js/db.js"></script>
 <script src="js/toast.js"></script>
 <script src="js/theme.js"></script>
@@ -622,7 +685,7 @@
 <script src="js/metas.js?v=8"></script>
 <script src="js/kanban.js?v=8"></script>
 <script src="js/categorias.js?v=8"></script>
-<script src="js/config.js?v=8"></script>
+<script src="js/config.js?v=9"></script>
 <script src="js/llm-tools.js?v=8"></script>
 <script src="js/llm.js?v=8"></script>
 <script src="js/chat-wa.js?v=8"></script>
@@ -636,7 +699,7 @@
 <script src="js/clientes.js?v=8"></script>
 <script src="js/command-palette.js?v=8"></script>
 <script src="js/leo-data.js?v=8"></script>
-<script src="js/app.js?v=12"></script>
+<script src="js/app.js?v=13"></script>
 
 <!-- Sidebar dot indicator — carrega após app.js ter definido o item ativo -->
 <script src="js/sidebar-dot.js"></script>

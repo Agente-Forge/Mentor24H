@@ -192,6 +192,7 @@
 
 /* Ring ouro — Pessoal */
 .sidebar-inner .sidebar-zona-avatar .avatar {
+  overflow: hidden;
   box-shadow:
     0 0 0 2px var(--signature),
     0 0 0 5px var(--sb-ring-sig),
@@ -199,6 +200,12 @@
   transition:
     box-shadow 300ms var(--ease-out),
     transform 200ms var(--ease-out);
+}
+
+.sidebar-inner .sidebar-zona-avatar .avatar svg {
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 
 .sidebar-inner .sidebar-zona-avatar .avatar:hover {
@@ -456,64 +463,87 @@ html[data-mode="negocio"] .sidebar-inner .sidebar-zona-nav .nav-group-header:foc
 }
 
 /* ─────────────────────────────────────────────────────────
-   7. ZONA 5 — Footer Premium
+   7. ZONA 5 — Footer Premium (Separator + Config + Collapse)
 ───────────────────────────────────────────────────────────  */
 
 /* Remove border-top do layout.css (gradient ::before já cobre) */
 .sidebar-inner .sidebar-zona-footer .sidebar-foot {
   border-top: none;
-  padding: var(--s-3) var(--s-5) var(--s-5);
+  padding: var(--s-3) var(--s-2) var(--s-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
 }
 
-/* Itens footer: type-xs, menos destaque */
-.sidebar-inner .sidebar-zona-footer .nav-item {
-  font-size: var(--t-xs) !important;
-  opacity: 0.65;
-  transition: opacity 160ms ease, transform 160ms ease;
+/* Separador premium acima do botão Configurações — RNF05 */
+.sidebar-inner .sidebar-zona-footer .sidebar-foot-separator {
+  height: 1px;
+  margin: 0 var(--s-3) var(--s-2);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--border-soft) 20%,
+    var(--line-3) 50%,
+    var(--border-soft) 80%,
+    transparent
+  );
 }
 
-.sidebar-inner .sidebar-zona-footer .nav-item:hover {
-  opacity: 0.90;
-}
-
-/* Chat AI — destaque sutil, sempre presente */
-.sidebar-inner .sidebar-zona-footer .nav-item[data-nav="chat-ia"] {
-  background: linear-gradient(90deg, var(--sb-chat-sig), transparent);
+/* Botão Configurações fixo — premium gold subtle */
+.sidebar-inner .sidebar-zona-footer .sidebar-config-btn {
+  margin: 0 var(--s-2);
+  padding: 10px var(--s-3);
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  border-radius: var(--r-md);
+  background: linear-gradient(135deg, var(--color-gold-subtle), transparent);
   border: 1px solid var(--line-2);
-  border-radius: var(--r-sm);
-  margin: var(--s-3) var(--s-3) var(--s-2);
   color: var(--text-2);
-  opacity: 1;
   font-size: var(--t-sm) !important;
+  font-weight: 500;
+  letter-spacing: var(--tracking-snug);
+  opacity: 1;
+  cursor: pointer;
   transition: all 200ms var(--ease-out);
+  position: relative;
 }
 
-.sidebar-inner .sidebar-zona-footer .nav-item[data-nav="chat-ia"]:hover {
-  background: linear-gradient(90deg, var(--sb-chat-sigH), var(--sb-dot-sig));
+.sidebar-inner .sidebar-zona-footer .sidebar-config-btn:hover {
+  background: linear-gradient(135deg, var(--color-gold-glow), var(--color-gold-subtle));
   border-color: var(--line-3);
   color: var(--text-1);
-  box-shadow: var(--shadow-glow);
+  box-shadow: var(--shadow-1);
   transform: translateX(2px);
   opacity: 1;
 }
 
-.sidebar-inner .sidebar-zona-footer .nav-item[data-nav="chat-ia"] svg {
+.sidebar-inner .sidebar-zona-footer .sidebar-config-btn.active {
+  background: linear-gradient(135deg, var(--color-gold-glow), var(--color-gold-subtle));
+  border-color: var(--color-gold);
   color: var(--color-gold);
+  opacity: 1;
 }
 
-html[data-mode="negocio"] .sidebar-inner .sidebar-zona-footer .nav-item[data-nav="chat-ia"] {
-  background: linear-gradient(90deg, var(--sb-chat-inf), transparent);
-  border-color: var(--sb-border-inf);
+.sidebar-inner .sidebar-zona-footer .sidebar-config-btn:focus-visible {
+  outline: 1.5px solid var(--signature);
+  outline-offset: 3px;
 }
 
-html[data-mode="negocio"] .sidebar-inner .sidebar-zona-footer .nav-item[data-nav="chat-ia"]:hover {
-  background: linear-gradient(90deg, var(--sb-chat-infH), transparent);
-  border-color: var(--sb-bord-infH);
-  box-shadow: 0 0 16px var(--sb-ring-inf);
+.sidebar-inner .sidebar-zona-footer .sidebar-config-btn .config-btn-arrow {
+  margin-left: auto;
+  opacity: 0.4;
+  transition: opacity 160ms ease, transform 160ms ease;
 }
 
-html[data-mode="negocio"] .sidebar-inner .sidebar-zona-footer .nav-item[data-nav="chat-ia"] svg {
-  color: var(--info);
+.sidebar-inner .sidebar-zona-footer .sidebar-config-btn:hover .config-btn-arrow {
+  opacity: 0.8;
+  transform: translateX(2px);
+}
+
+.sidebar-inner .sidebar-zona-footer .sidebar-config-btn svg {
+  color: var(--color-gold);
+  flex-shrink: 0;
 }
 
 /* Collapse btn: o JS muda o ícone — sem rotate CSS aqui */
@@ -618,7 +648,7 @@ body.sidebar-colapsada .sidebar-inner .user-info {
 body.sidebar-colapsada .sidebar-inner .nav-label,
 body.sidebar-colapsada .sidebar-inner .nav-group-arrow,
 body.sidebar-colapsada .sidebar-inner .nav-badge,
-body.sidebar-colapsada .sidebar-inner .theme-label {
+body.sidebar-colapsada .sidebar-inner .config-btn-arrow {
   opacity: 0;
   max-width: 0;
   overflow: hidden;
@@ -671,20 +701,22 @@ body.sidebar-colapsada .sidebar-inner .nav-group-items {
 
 /* Footer compacto no rail */
 body.sidebar-colapsada .sidebar-inner .sidebar-zona-footer .sidebar-foot {
-  justify-content: center;
   padding: var(--s-3) var(--s-2) var(--s-5);
-  flex-wrap: wrap;
+  align-items: center;
   gap: var(--s-2);
 }
 
-body.sidebar-colapsada .sidebar-inner .sidebar-zona-footer .theme-toggle-row {
-  display: none;
+/* Separador some no rail */
+body.sidebar-colapsada .sidebar-inner .sidebar-zona-footer .sidebar-foot-separator {
+  margin: 0 var(--s-2) var(--s-2);
 }
 
-body.sidebar-colapsada .sidebar-inner .sidebar-zona-footer .nav-item[data-nav="chat-ia"] {
-  margin: var(--s-3) var(--s-2) var(--s-2);
+/* Botão Configurações compacto no rail */
+body.sidebar-colapsada .sidebar-inner .sidebar-zona-footer .sidebar-config-btn {
+  margin: 0;
+  width: calc(var(--sidebar-w-collapsed) - var(--s-4));
   justify-content: center;
-  border-radius: var(--r-md);
+  padding: 10px 0;
   transform: none !important;
 }
 
@@ -794,6 +826,11 @@ body.sidebar-colapsada .sidebar-inner [data-tooltip]:hover::after {
     display: none;
   }
 
+  /* Collapse-btn some no mobile — sidebar abre/fecha via hamburger */
+  .collapse-btn {
+    display: none;
+  }
+
   /* Drawer aberto */
   #sidebar.mobile-open {
     transform: translateX(0);
@@ -859,8 +896,14 @@ body.sidebar-colapsada .sidebar-inner [data-tooltip]:hover::after {
   }
 
   #sidebar.mobile-open .sidebar-inner .sidebar-zona-footer .sidebar-foot {
-    justify-content: space-between;
-    padding: var(--s-3) var(--s-5) var(--s-5);
+    padding: var(--s-3) var(--s-3) var(--s-5);
+    align-items: stretch;
+  }
+
+  #sidebar.mobile-open .sidebar-inner .sidebar-zona-footer .sidebar-config-btn {
+    width: auto;
+    justify-content: flex-start;
+    padding: 10px var(--s-3);
   }
 
   /* Dot visível no drawer */

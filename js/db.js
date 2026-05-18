@@ -52,6 +52,7 @@ const DB = (() => {
       nomeUsuario: 'Você',
       saldoInicial: 0,
       avatarCor: '#A78BFA',
+      avatar: 'masc-1',
     }, read(KEY.config, null) || {});
   }
 

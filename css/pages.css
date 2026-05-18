@@ -878,66 +878,464 @@
   transition: width 0.8s var(--ease-out);
 }
 
-/* ───────────────── CONFIG ───────────────── */
-.config-stack {
-  max-width: 720px;
+/* ═══════════════════════════════════════════════════════════
+   CONFIG PAGE PREMIUM — Apple+ Tier · OBSIDIAN Design System
+   skill-forge-visual v5.1 | Forge v5.2 | 2026-05-18
+═══════════════════════════════════════════════════════════ */
+
+/* ─── HERO ─── */
+.cfg-hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--r-xl);
+  margin-bottom: var(--s-6);
+  min-height: 180px;
   display: flex;
-  flex-direction: column;
-  gap: var(--s-5);
+  align-items: flex-end;
 }
 
-.config-section {
-  background: var(--surface-2);
+.cfg-hero-bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    var(--color-gold-subtle) 0%,
+    var(--surface-1) 40%,
+    var(--color-gold-glow) 100%
+  );
   border: 1px solid var(--line-2);
-  border-radius: var(--r-lg);
-  padding: var(--s-6);
+  border-radius: var(--r-xl);
 }
 
-.config-section-head {
+/* Aurora animada no hero */
+.cfg-hero-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 80% 60% at 20% 0%,
+    var(--color-gold-glow),
+    transparent 70%
+  );
+  border-radius: inherit;
+  animation: cfgAurora 6s ease-in-out infinite alternate;
+}
+
+@keyframes cfgAurora {
+  from { opacity: 0.6; transform: scale(1); }
+  to   { opacity: 1;   transform: scale(1.05); }
+}
+
+.cfg-hero-content {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
-  gap: var(--s-3);
-  margin-bottom: var(--s-5);
-  padding-bottom: var(--s-3);
-  border-bottom: 1px solid var(--line-1);
+  gap: var(--s-5);
+  padding: var(--s-7) var(--s-6) var(--s-6);
+  width: 100%;
 }
 
-.config-section-head h3 {
-  font-family: var(--font-display);
-  font-size: var(--t-md);
-  font-weight: 400;
-  flex: 1;
+/* Avatar ring no hero */
+.cfg-avatar-wrap {
+  position: relative;
+  flex-shrink: 0;
 }
 
-.avatar-edit-row {
-  display: flex;
-  align-items: center;
-  gap: var(--s-4);
-  margin-bottom: var(--s-4);
+.cfg-avatar-ring {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  padding: 3px;
+  background: linear-gradient(135deg, var(--color-gold), var(--color-gold-muted));
+  box-shadow: 0 0 24px var(--color-gold-glow);
 }
 
-.avatar-preview {
-  width: 80px; height: 80px;
-  border-radius: var(--r-full);
+.cfg-avatar-display {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: var(--surface-2);
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
-  font-weight: 600;
-  color: var(--base);
-  flex-shrink: 0;
-  position: relative;
 }
 
-.avatar-preview::after {
-  content: '';
+.cfg-avatar-display svg {
+  width: 100%;
+  height: 100%;
+}
+
+.cfg-avatar-edit-btn {
   position: absolute;
-  inset: -3px;
-  border-radius: inherit;
-  z-index: -1;
-  opacity: 0.5;
-  filter: blur(8px);
-  background: inherit;
+  bottom: 0;
+  right: 0;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--color-gold);
+  border: 2px solid var(--surface-1);
+  color: var(--base);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--d-fast);
+}
+
+.cfg-avatar-edit-btn:hover {
+  background: var(--color-gold-muted);
+  transform: scale(1.1);
+}
+
+.cfg-avatar-edit-btn:focus-visible {
+  outline: 1.5px solid var(--signature);
+  outline-offset: 3px;
+}
+
+.cfg-hero-name {
+  font-family: var(--font-display);
+  font-size: var(--t-2xl);
+  font-weight: 400;
+  color: var(--text-1);
+  letter-spacing: var(--tracking-tight);
+  line-height: 1.1;
+  margin: 0 0 var(--s-1);
+}
+
+.cfg-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-1);
+  font-size: var(--t-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wider);
+  color: var(--color-gold);
+  background: var(--color-gold-subtle);
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-full);
+  padding: 3px 10px;
+}
+
+/* ─── AVATAR PICKER ─── */
+.cfg-avatar-picker {
+  background: var(--surface-1);
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-xl);
+  padding: var(--s-5);
+  margin-bottom: var(--s-5);
+  animation: fadeSlideDown 200ms var(--ease-out);
+}
+
+@keyframes fadeSlideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.cfg-picker-label {
+  font-size: var(--t-sm);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wider);
+  color: var(--text-4);
+  margin-bottom: var(--s-3);
+}
+
+.cfg-picker-section-label {
+  font-size: var(--t-xs);
+  font-weight: 600;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+  margin-bottom: var(--s-2);
+}
+
+.cfg-avatar-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: var(--s-2);
+}
+
+.cfg-avatar-option {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 200ms var(--ease-out);
+  background: var(--surface-2);
+  padding: 0;
+}
+
+.cfg-avatar-option:hover {
+  border-color: var(--line-3);
+  transform: scale(1.08);
+}
+
+.cfg-avatar-option.selected {
+  border-color: var(--color-gold);
+  box-shadow: 0 0 0 2px var(--color-gold-glow), var(--shadow-glow);
+  transform: scale(1.05);
+}
+
+.cfg-avatar-option:focus-visible {
+  outline: 1.5px solid var(--signature);
+  outline-offset: 3px;
+}
+
+.cfg-avatar-option svg {
+  width: 100%;
+  height: 100%;
+}
+
+.cfg-picker-close {
+  width: 100%;
+  margin-top: var(--s-4);
+}
+
+/* ─── CARDS (iOS-style) ─── */
+.cfg-stack {
+  max-width: 720px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+}
+
+.cfg-card {
+  background: var(--surface-1);
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-xl);
+  overflow: hidden;
+  transition: border-color var(--d-fast);
+}
+
+.cfg-card:hover {
+  border-color: var(--line-3);
+}
+
+.cfg-card-head {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-4) var(--s-5);
+  border-bottom: 1px solid var(--line-1);
+}
+
+.cfg-card-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: var(--r-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.cfg-icon-violet { background: var(--violet-glow);   color: var(--violet); }
+.cfg-icon-amber  { background: var(--amber-glow);    color: var(--amber);  }
+.cfg-icon-green  { background: var(--green-bg);      color: var(--green);  }
+.cfg-icon-blue   { background: var(--blue-bg);       color: var(--blue);   }
+.cfg-icon-red    { background: var(--red-bg);        color: var(--red);    }
+
+.cfg-card-title {
+  font-size: var(--t-base);
+  font-weight: 600;
+  color: var(--text-1);
+  letter-spacing: var(--tracking-snug);
+  margin: 0;
+}
+
+.cfg-card-body {
+  padding: var(--s-4) var(--s-5) var(--s-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+}
+
+/* ─── FIELDS ─── */
+.cfg-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+}
+
+.cfg-field-label {
+  font-size: var(--t-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wider);
+  color: var(--text-3);
+}
+
+.cfg-input,
+.cfg-select {
+  background: var(--surface-2);
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-md);
+  color: var(--text-1);
+  font-family: var(--font-body);
+  font-size: var(--t-base);
+  padding: 10px var(--s-4);
+  transition: border-color var(--d-fast), box-shadow var(--d-fast);
+  width: 100%;
+}
+
+.cfg-input:focus,
+.cfg-select:focus {
+  outline: none;
+  border-color: var(--color-gold);
+  box-shadow: 0 0 0 3px var(--color-gold-subtle);
+}
+
+.cfg-field-hint {
+  font-size: var(--t-xs);
+  color: var(--text-4);
+}
+
+.cfg-field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s-4);
+}
+
+/* ─── THEME ROW ─── */
+.cfg-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-4);
+}
+
+.cfg-row-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cfg-row-label {
+  font-size: var(--t-base);
+  font-weight: 500;
+  color: var(--text-1);
+}
+
+.cfg-row-sub {
+  font-size: var(--t-xs);
+  color: var(--text-4);
+}
+
+.cfg-theme-control {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+
+.cfg-theme-icon {
+  font-size: 16px;
+  line-height: 1;
+}
+
+/* ─── ACTION ROWS (Dados) ─── */
+.cfg-data-actions {
+  gap: 0;
+  padding: 0;
+}
+
+.cfg-action-row {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-4) var(--s-5);
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--line-1);
+  color: var(--text-1);
+  cursor: pointer;
+  transition: background var(--d-fast);
+  text-align: left;
+  width: 100%;
+  font-family: var(--font-body);
+}
+
+.cfg-action-row:last-child {
+  border-bottom: none;
+}
+
+.cfg-action-row:hover {
+  background: var(--surface-2);
+}
+
+.cfg-action-row:focus-visible {
+  outline: 1.5px solid var(--signature);
+  outline-offset: -2px;
+}
+
+.cfg-action-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: var(--r-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.cfg-action-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cfg-action-label {
+  font-size: var(--t-base);
+  font-weight: 500;
+}
+
+.cfg-action-sub {
+  font-size: var(--t-xs);
+  color: var(--text-4);
+}
+
+.cfg-action-arrow {
+  color: var(--text-4);
+  flex-shrink: 0;
+}
+
+.cfg-action-danger .cfg-action-label {
+  color: var(--red);
+}
+
+.cfg-action-danger:hover {
+  background: var(--red-bg);
+}
+
+/* ─── SAVE BTN ─── */
+.cfg-save-btn {
+  align-self: flex-start;
+}
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 640px) {
+  .cfg-field-row { grid-template-columns: 1fr; }
+  .cfg-hero-content { padding: var(--s-5) var(--s-4) var(--s-4); }
+  .cfg-hero-name { font-size: var(--t-xl); }
+  .cfg-avatar-grid { grid-template-columns: repeat(6, 1fr); gap: var(--s-1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cfg-hero-bg::before,
+  .cfg-avatar-picker {
+    animation: none;
+  }
+  .cfg-avatar-edit-btn,
+  .cfg-avatar-option,
+  .cfg-card,
+  .cfg-action-row {
+    transition: none;
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════

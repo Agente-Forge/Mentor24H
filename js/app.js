@@ -177,8 +177,8 @@ const App = (() => {
 
   function syncUserUI() {
     const cfg = DB.getConfig();
-    const initials = (cfg.nomeUsuario || 'V').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() || 'V';
-    Config.syncSidebarAvatar(initials, cfg.avatarCor || '#D4A574', cfg.nomeUsuario || 'Você');
+    const avatarKey = cfg.avatar || (window.Avatars && Avatars.getDefault()) || 'masc-1';
+    Config.syncSidebarAvatar(avatarKey, cfg.nomeUsuario || 'Você');
   }
 
   function initSaudacao() {
