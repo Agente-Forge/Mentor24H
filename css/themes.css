@@ -25,10 +25,11 @@
   --glass-blur: blur(20px) saturate(120%);
 
   /* ─── Lines / Borders ─── */
-  --line-1: rgba(100, 80, 50, 0.08);
-  --line-2: rgba(100, 80, 50, 0.14);
-  --line-3: rgba(100, 80, 50, 0.24);
-  --line-4: rgba(100, 80, 50, 0.38);
+  --line-1: rgba(100, 80, 50, 0.13);
+  --line-2: rgba(100, 80, 50, 0.20);
+  --line-3: rgba(100, 80, 50, 0.32);
+  --line-4: rgba(100, 80, 50, 0.48);
+  --border-soft: rgba(100, 80, 50, 0.16);
 
   /* ─── Signature: Ouro sobre Cream ─── */
   --color-gold:        #9B6E3A;   /* Ouro mais escuro para contraste no claro */
@@ -91,6 +92,12 @@
   --shadow-glow: 0 0 20px rgba(155, 110, 58, 0.16);
 
   --noise-opacity: 0.014;
+}
+
+/* ─── Light theme — component overrides ─── */
+[data-theme="light"] .theme-track {
+  background: var(--surface-5);
+  border-color: var(--line-3);
 }
 
 /* ─── Validação WCAG AA (contraste mínimo 4.5:1) ─── */
