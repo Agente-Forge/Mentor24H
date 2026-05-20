@@ -412,3 +412,154 @@
   .dp-tarefa-check,
   .dp-nota { transition: none; }
 }
+
+/* ─────────────────────────────────────────────────────────
+   11. TIMELINE WIDGET (.tl-*)
+   Linha do tempo do dia — ouro para pessoal, safira para serviço.
+   Filosofia Quiet Intelligence: indicação sutil, não gritante.
+───────────────────────────────────────────────────────────  */
+
+.tl-widget {
+  background: var(--surface-2);
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-lg);
+  padding: var(--s-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+
+.tl-titulo {
+  font-family: var(--font-body);
+  font-size: var(--t-xs);
+  font-weight: 600;
+  color: var(--text-3);
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wider);
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+
+.tl-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* ── Item base ── */
+.tl-item {
+  display: grid;
+  grid-template-columns: 40px 10px 1fr;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-2) 0;
+  border-bottom: 1px solid var(--line-1);
+  border-left: 3px solid transparent;
+  padding-left: var(--s-2);
+  transition: background var(--dp-d-fast) var(--dp-ease);
+}
+
+.tl-item:last-child { border-bottom: none; }
+
+.tl-item:hover { background: var(--surface-3); }
+
+/* ── Cor semântica por tipo ── */
+.tl-item--pessoal { border-left-color: var(--signature); }
+.tl-item--servico { border-left-color: var(--info); }
+
+/* ── Hora ── */
+.tl-item-hora {
+  font-family: var(--font-mono);
+  font-size: var(--t-xs);
+  font-weight: 500;
+  color: var(--text-3);
+  line-height: 1;
+  text-align: right;
+}
+
+/* ── Dot colorido ── */
+.tl-item-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--r-full);
+  background: var(--line-3);
+  flex-shrink: 0;
+  justify-self: center;
+}
+
+.tl-item--pessoal .tl-item-dot { background: var(--signature); }
+.tl-item--servico .tl-item-dot { background: var(--info); }
+
+/* ── Corpo do item ── */
+.tl-item-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.tl-item-titulo {
+  font-size: var(--t-sm);
+  color: var(--text-1);
+  font-family: var(--font-body);
+  line-height: var(--leading-snug);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tl-item-sub {
+  font-size: var(--t-xs);
+  color: var(--text-mute);
+  font-style: italic;
+}
+
+/* ── Estado vazio ── */
+.tl-vazio {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-2);
+  padding: var(--s-4) 0;
+  color: var(--text-mute);
+}
+
+.tl-vazio-texto {
+  font-size: var(--t-sm);
+  font-style: italic;
+}
+
+/* ── Botão "Ver agenda completa" ── */
+.tl-ver-mais {
+  align-self: flex-end;
+  background: none;
+  border: none;
+  font-family: var(--font-body);
+  font-size: var(--t-xs);
+  color: var(--signature);
+  cursor: pointer;
+  padding: var(--s-1) 0;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: transparent;
+  transition:
+    color var(--dp-d-fast) var(--dp-ease),
+    text-decoration-color var(--dp-d-fast) var(--dp-ease);
+}
+
+.tl-ver-mais:hover {
+  color: var(--text-1);
+  text-decoration-color: var(--line-3);
+}
+
+/* ── Light mode ── */
+[data-theme="light"] .tl-item--pessoal { border-left-color: var(--signature); }
+[data-theme="light"] .tl-item--servico { border-left-color: var(--info); }
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+  .tl-item,
+  .tl-ver-mais { transition: none; }
+}

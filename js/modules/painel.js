@@ -412,6 +412,11 @@ const Painel = (() => {
 
         ${buildAlertas(contatos)}
 
+        <div class="pn-section">
+          <h2 class="pn-section-title"><span data-icon="clock" data-size="16"></span> Últimas Vendas</h2>
+          ${buildVendasRecentes(txs)}
+        </div>
+
         <div class="pn-two-col">
           <div class="pn-left-col">
             ${buildGraficoVendas(txs)}

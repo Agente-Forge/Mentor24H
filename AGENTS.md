@@ -1,9 +1,10 @@
 # 🤖 AGENTS.md — Padrões de Código Mentor24h
 
-**Versão:** 1.0  
+**Versão:** 1.1  
 **Criado:** 2026-05-11 (skill-scaffolder)  
+**Atualizado:** 2026-05-20 (skill-pae — preenchido com padrões reais)  
 **Proprietário:** Léo  
-**Status:** ⏳ AGUARDANDO PREENCHIMENTO
+**Status:** ✅ PREENCHIDO
 
 ---
 
@@ -11,13 +12,11 @@
 
 Este documento define os **padrões, convenções e decisões arquiteturais** do Mentor24h.
 
-Cada skill que trabalha neste projeto consultará este documento para:
+Cada skill que trabalha neste projeto consulta este documento para:
 - ✅ Saber como escrever código que cabe no projeto
 - ✅ Entender a filosofia de design
 - ✅ Saber quais convenções seguir
 - ✅ Não reinventar roda (reuso de padrões)
-
-**Você (Léo) preenche isso**, depois compartilha com Claude/skills.
 
 ---
 
@@ -26,110 +25,158 @@ Cada skill que trabalha neste projeto consultará este documento para:
 ### 1.1 Organização de Pastas
 
 ```
-Descreva como você organiza pasta src/, css/, js/, tests/:
-- Qual é a convenção de naming (kebab-case, camelCase)?
-- Qual é a profundidade máxima de pastas?
-- Como você separa domínios (finance, chat, personal)?
-
-EXEMPLO (preencha com seus padrões):
+controle-financeiro v2/
+├── index.html          ← único ponto de entrada
+├── css/                ← todos os estilos
+│   ├── tokens.css      ← design tokens (fonte da verdade)
+│   ├── reset.css
+│   ├── layout.css
+│   ├── bento.css
+│   ├── components.css
+│   ├── pages.css
+│   └── motion.css
+├── js/                 ← módulos de funcionalidade
+│   ├── app.js          ← bootstrap e init global
+│   ├── db.js           ← camada de dados (localStorage)
+│   ├── router.js       ← navegação SPA
+│   ├── utils.js        ← helpers e formatadores
+│   ├── modal.js        ← sistema de modais
+│   ├── toast.js        ← notificações
+│   ├── icons.js        ← ícones SVG
+│   ├── theme.js        ← troca de tema
+│   └── [módulo].js     ← um arquivo por domínio
+├── js/modules/         ← módulos complexos multi-arquivo
+│   ├── dashboard-pessoal.js
+│   └── painel.js
+└── Estructura-Proyecto/ ← documentação do projeto
+    ├── 01-documentacao/
+    └── 02-protocolo/
 ```
 
 | Aspecto | Padrão | Exemplo |
 |---------|--------|---------|
-| Pasta de módulo | lowercase com hífen | `js/chat-wa/` |
-| Arquivo JS | camelCase | `llm.js`, `chat-wa.js` |
-| Arquivo CSS | kebab-case | `chat-styles.css` |
-| Arquivo HTML | index em cada seção | `pages/agenda/index.html` |
-| Testes | \*.test.js | `db.test.js` |
-
-**Preencha você:**
-```
-Você segue essas convenções? Tem exceções?
-Qual é a sua regra de organização?
-```
+| Arquivo JS | camelCase | `llm.js`, `chatWa.js` |
+| Arquivo CSS | kebab-case | `tokens.css`, `chat-styles.css` |
+| Classe CSS | kebab-case | `.nav-item`, `.btn-primary` |
+| Variável JS | camelCase | `const userConfig`, `let currentPage` |
+| Constante | UPPER_SNAKE | `const DB_KEY = 'mentor24h.'` |
+| Profundidade máxima | 2 níveis | `js/modules/` é o máximo |
 
 ### 1.2 Namespacing & Módulos
 
-```
-Como você nomeia módulos globais (IIFE, singleton)?
+Todos os módulos usam **padrão IIFE** que expõe um objeto global:
 
-ATUAL (Mentor24h):
-- DB (database global)
-- Router (router global)
-- LLM (chat AI)
-- ChatWA (whatsapp)
-- Agenda (agenda module)
-etc.
+```javascript
+const ModuleName = (() => {
+  // estado privado
+  let _privateVar = null;
 
-PADRÃO:
-Todos são IIFE que retornam { render, init, ... }
+  function render() { ... }
+  function init() { ... }
+  function bindEvents() { ... }
+
+  return { render, init };
+})();
 ```
 
-**Preencha você:**
-```
-Mantém esse padrão IIFE?
-Quer mudar para algo else (classes, ES6 modules)?
-```
+**Módulos globais existentes:**
+- `DB` — camada de dados (localStorage)
+- `Router` — navegação SPA
+- `LLM` — chat AI multi-provider
+- `ChatWA` — WhatsApp simulado
+- `Modal` — sistema de modais
+- `Toast` — notificações
+- `Icons` — ícones SVG
+- `Theme` — troca de tema claro/escuro
+- `Agenda` — módulo de agenda
+- `Medicamentos` — módulo de saúde
+
+**Regra:** Manter IIFE. Não migrar para ES6 modules nem classes. Sem TypeScript.
 
 ---
 
 ## 🎨 SEÇÃO 2: DESIGN & ESTILOS
 
-### 2.1 Design Tokens
+### 2.1 Design Tokens (fonte da verdade: `css/tokens.css`)
 
-```
-Quais são seus design tokens CANÔNICOS?
-(Léo, você já tem isso em css/tokens.css, mas detalhamos aqui)
-
-COLORS:
-- Primário: #A78BFA (violeta)
-- Secundário: #F472B6 (magenta)
-- Accent: #5EE39A (verde), #7BB6FF (azul)
-- Neutro: #08080F (bg), #FFFFFF (text light)
-- Status: #FF6B7A (red/error), #FBBF24 (amber/warning)
-
-SPACING:
-- xs: 0.25rem (4px)
-- sm: 0.5rem (8px)
-- md: 1rem (16px)
-- lg: 1.5rem (24px)
-- xl: 2rem (32px)
-
-TYPOGRAPHY:
-- Display: Instrument Serif, italic
-- Body: Geist, 400
-- Mono: Geist Mono, 500
-
-EFFECTS:
-- Glassmorphism: backdrop-filter: blur(10px), opacity 0.8
-- Shadow: 0 8px 32px rgba(0,0,0,0.1)
-- Radius: 12px (default)
+**CORES — Modo Pessoal (Obsidian/Ouro):**
+```css
+--color-gold:        #D4A574  /* accent pessoal — ouro líquido */
+--color-gold-muted:  #B8933F
+--bg-primary:        #0B0D0F  /* fundo dark */
+--bg-secondary:      #111318
+--text-primary:      #F0EDE8
 ```
 
-**Preencha você:**
+**CORES — Modo Negócio (Safira Corporativa):**
+```css
+--info:              #6D8EA8  /* accent negócio — safira */
+--info-dark:         #3D6480  /* safira para tema light */
 ```
-Tem outros tokens? Cores adicionais? Mudanças?
+
+**CORES — Semântica de Agenda (GI-001):**
+```css
+/* Evento pessoal → ouro do modo pessoal */
+--agenda-pessoal:    #D4A574
+
+/* Evento de serviço → safira do modo negócio */
+--agenda-servico:    #6D8EA8
+```
+
+**STATUS:**
+```css
+--success:  #4ADE80
+--error:    #F87171
+--warning:  #FBBF24
+--info:     #60A5FA
+```
+
+**TEMA LIGHT (Cream Linen):**
+```css
+--bg-primary:        #F5F0E8
+--color-gold:        #9B6E3A  /* ouro escuro para contraste */
+--info:              #3D6480  /* safira escura para contraste */
+```
+
+**SPACING:**
+```css
+--space-xs:  0.25rem   /* 4px  */
+--space-sm:  0.5rem    /* 8px  */
+--space-md:  1rem      /* 16px */
+--space-lg:  1.5rem    /* 24px */
+--space-xl:  2rem      /* 32px */
+```
+
+**TIPOGRAFIA:**
+```css
+--font-display: 'Instrument Serif', serif   /* títulos, italic */
+--font-body:    'Geist', sans-serif         /* corpo, 400 */
+--font-mono:    'Geist Mono', monospace     /* código, 500 */
+```
+
+**EFEITOS:**
+```css
+--glass:    backdrop-filter: blur(10px); background: rgba(255,255,255,0.05);
+--shadow:   0 8px 32px rgba(0,0,0,0.1)
+--radius:   12px   /* padrão para cards e modais */
+--radius-sm: 8px   /* botões e badges */
 ```
 
 ### 2.2 Componentes Reutilizáveis
 
-```
-Liste os componentes que você SEMPRE reutiliza:
+| Componente | Como usar | Arquivo |
+|------------|-----------|---------|
+| Card bento | `<div class="bento-card">` | `bento.css` |
+| Botão primário | `<button class="btn btn-primary">` | `components.css` |
+| Botão ghost | `<button class="btn btn-ghost">` | `components.css` |
+| Botão pequeno | `<button class="btn btn-sm">` | `components.css` |
+| Modal | `Modal.open({ title, content, actions })` | `modal.js` |
+| Toast sucesso | `Toast.success('mensagem')` | `toast.js` |
+| Toast erro | `Toast.error('mensagem')` | `toast.js` |
+| Ícone | `Icons.html('nome-do-icone')` | `icons.js` |
+| Badge | `<span class="badge">` | `components.css` |
 
-EXEMPLO (Mentor24h atual):
-- Card (bento grid item)
-- Button (btn, btn-primary, btn-ghost, btn-sm)
-- Modal (Modal.novaConta(), Modal.novaTransacao())
-- Toast (Toast.success(), Toast.error())
-- Icon (Icons.html(), Icons.render())
-- Badge (wa-badge para contatos não lidos)
-```
-
-**Preencha você:**
-```
-Quais são os componentes core que você reutiliza sempre?
-Como você nomeia classes CSS desses componentes?
-```
+**Regra:** Sempre reutilizar esses componentes. Nunca criar CSS inline para coisas que já existem.
 
 ---
 
@@ -137,102 +184,132 @@ Como você nomeia classes CSS desses componentes?
 
 ### 3.1 Estilo de Código
 
-```
-Qual é seu estilo preferido?
+```javascript
+// ✅ CORRETO — padrão do projeto
+const MinhaFeature = (() => {
+  const KEY = 'mentor24h.minha-feature';
+  let _estado = [];
 
-ATUAL (Mentor24h):
-- IIFE module pattern (closure)
-- Funções em minúsculas (render(), bindEvents())
-- Variáveis em camelCase
-- Sem TypeScript (JavaScript puro)
-- localStorage com namespace 'mentor24h.*'
+  function render() {
+    const container = document.getElementById('minha-feature');
+    if (!container) return;
+    container.innerHTML = _buildHTML();
+    _bindEvents();
+  }
+
+  function _buildHTML() {
+    return _estado.map(item => `
+      <div class="bento-card">
+        <h3>${escapeHtml(item.nome)}</h3>
+      </div>
+    `).join('');
+  }
+
+  function _bindEvents() {
+    document.querySelectorAll('[data-action]').forEach(el => {
+      el.addEventListener('click', _handleAction);
+    });
+  }
+
+  return { render, init: render };
+})();
 ```
 
-**Preencha você:**
-```
-Segue esses padrões? Quer mudar algo?
-Tem regras sobre: const vs let? arrow functions? destructuring?
-```
+**Regras:**
+- `const` por padrão, `let` só quando reassignment necessário, nunca `var`
+- Arrow functions para callbacks curtos, `function` para funções nomeadas
+- Prefixo `_` para funções privadas dentro do IIFE
+- Destructuring quando simplifica (não forçar)
+- Template literals para HTML, nunca concatenação com `+`
+- `escapeHtml()` sempre antes de inserir dados do usuário em innerHTML
 
 ### 3.2 DB & Persistência
 
+```javascript
+// Namespace global
+const DB_PREFIX = 'mentor24h.';
+
+// Padrão de cada collection:
+// { id: uuid(), campo1, campo2, createdAt, updatedAt }
+
+// Uso via DB global:
+DB.getAgenda()           // retorna array
+DB.saveEvento(evento)    // salva/atualiza por id
+DB.deleteEvento(id)      // remove por id
+DB.getConfig()           // config geral do app
+DB.saveConfig(config)    // salva config
 ```
-Como você estrutura dados em localStorage?
 
-ATUAL (Mentor24h):
-const KEY = 'mentor24h.';
+**Decisão:** Manter **localStorage** permanentemente como cache offline.  
+Quando Supabase entrar: `localStorage = buffer offline`, `Supabase = fonte de verdade`.  
+Não migrar para IndexedDB — volume de dados não justifica a complexidade.
 
-DB = {
-  getConfig() { ... },
-  saveConfig() { ... },
-  getAgenda() { ... },
-  saveEvento() { ... },
-  // ... 14 collections
+**Schema de cada item:**
+```javascript
+{
+  id: crypto.randomUUID(),   // sempre UUID
+  // campos do domínio...
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString()
 }
-
-Cada collection é um JSON array com { id, ..., updatedAt }
-```
-
-**Preencha você:**
-```
-Quer manter localStorage ou migrar para IndexedDB?
-Como você quer estruturar dados?
-Qual é a estratégia de versionamento (schema migrations)?
 ```
 
 ### 3.3 Async & API Calls
 
-```
-Como você chamaria uma API real no futuro?
-
-EXEMPLO (hipotético):
-async function fetchLLMResponse(messages) {
+```javascript
+// Padrão para chamadas externas (LLM, futuro Supabase):
+async function chamarAPI(dados) {
   try {
-    const response = await fetch(provider.url + '/chat/completions', {
+    const response = await fetch(url, {
       method: 'POST',
-      headers: { 'Authorization': `Bearer ${config.apiKey}` },
-      body: JSON.stringify({ messages, model, temperature: 0.7 })
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${config.apiKey}`
+      },
+      body: JSON.stringify(dados)
     });
-    if (!response.ok) throw new Error(response.statusText);
+
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
     return await response.json();
-  } catch (e) {
-    Toast.error('Erro ao chamar API', e.message);
-    return null;
+
+  } catch (erro) {
+    Toast.error('Erro ao conectar', erro.message);
+    console.error('[ModuleName]', erro);
+    return null;   // caller verifica null antes de usar
   }
 }
 ```
 
-**Preencha você:**
-```
-Esse padrão te agrada?
-Como você prefere tratar erros?
-Quer logging estruturado? Retry logic?
-```
+**Regras:**
+- Sempre try/catch em fetch
+- Toast.error() para erros visíveis ao usuário
+- console.error() com prefixo `[ModuleName]` para debug
+- Retornar `null` em erro (não lançar exceção para cima)
+- Sem retry automático por enquanto
 
 ### 3.4 Router & Navigation
 
-```
-Como funciona sua navegação SPA?
+```javascript
+// Navegação:
+Router.navigate('dashboard')   // vai para a página
+Router.navigate('chat-ai')     // kebab-case para páginas multi-palavra
 
-ATUAL (Mentor24h):
-Router.navigate('chat-ai') → 
-  1. Remove .active de todas as páginas
-  2. Adiciona .active à página nova
-  3. Chama renderer function (renderers[page]())
-  4. Icons.render()
-  5. Sincroniza bottom nav mobile
+// Registro de página (em cada módulo):
+Router.register('minha-pagina', MinhaFeature.render);
 
-PADRÃO: 
-Router.PAGES = { dashboard, 'chat-ai', ... }
-Router.register(page, rendererFn)
-Router.navigate(page)
+// Páginas disponíveis (Router.PAGES):
+// dashboard, chat-ai, agenda, medicamentos, tarefas,
+// contatos, financas, metas, kanban, negocio, config
 ```
 
-**Preencha você:**
-```
-Quer manter esse padrão?
-Como você quer lidar com: URL state? Browser history? Deep linking?
-```
+**O que Router faz ao navegar:**
+1. Remove `.active` de todas as páginas
+2. Adiciona `.active` à página nova
+3. Chama o renderer registrado (`renderers[page]()`)
+4. Chama `Icons.render()` para reprocessar ícones
+5. Sincroniza bottom nav mobile
+
+**Regra:** Não manipular `.active` manualmente. Sempre usar `Router.navigate()`.
 
 ---
 
@@ -240,54 +317,31 @@ Como você quer lidar com: URL state? Browser history? Deep linking?
 
 ### 4.1 Estratégia de Teste
 
+**Escolha: B — Unit tests básicos nos módulos críticos.**
+
+Frameworks: **Vitest** (zero config, roda no browser, ideal para JS puro sem build)
+
+**O que testar:**
 ```
-Qual é seu plano de teste?
+✅ CRÍTICO (deve ter testes):
+   db.js       — CRUD, localStorage sync, schema validation
+   router.js   — navegação, registro de páginas, .active state
 
-OPÇÃO A (Recomendado para Fase 1):
-- Unit tests: DB.js, router.js, utils.js (Jest/Vitest)
-- E2E: Fluxos principais (Cypress/Playwright)
-- Coverage: Mínimo 70%
-
-OPÇÃO B (Rápido):
-- Testes manuais + checklist
-- Sem automação
-- Documentar casos de teste
-
-OPÇÃO C (Avançado):
-- Unit + Integration + E2E
-- Coverage 90%+
-- CI/CD com GitHub Actions
+○ NICE-TO-HAVE (próximas sprints):
+   utils.js    — formatadores, helpers
+   llm.js      — fallback de provider, parse de resposta
 ```
 
-**Preencha você:**
-```
-Qual estratégia você prefere?
-Quer começar com tests na Fase 1?
-Qual é o framework preferido (Jest, Vitest, etc)?
-```
+**Quando adicionar:** antes de skill-construtor rodar no Sprint 1.
 
 ### 4.2 Cobertura Mínima
 
-```
-SUGESTÃO (Mentor24h):
-Crítico (deve testar):
-✅ DB.js — CRUD operations, localStorage sync
-✅ Router.js — Navigation, page rendering
-✅ LLM.js — Provider fallback, API calls
-✅ ChatWA.js — Message flow, CRM updates
-✅ Utils.js — Formatters, helpers
-
-Nice-to-have:
-○ Dashboard.js — Cards rendering
-○ Modal.js — Open/close flow
-○ Toast.js — Message display
-```
-
-**Preencha você:**
-```
-Concorda com essa priorização?
-Qual é a cobertura mínima que você quer?
-```
+| Módulo | Cobertura mínima | Prioridade |
+|--------|-----------------|------------|
+| db.js | 80% | 🔴 Crítico |
+| router.js | 80% | 🔴 Crítico |
+| utils.js | 60% | 🟡 Importante |
+| Demais | Sem obrigação | 🟢 Opcional |
 
 ---
 
@@ -296,49 +350,46 @@ Qual é a cobertura mínima que você quer?
 ### 5.1 Senhas & Secrets
 
 ```
-REGRA CANÔNICA:
 ❌ NUNCA commitar:
-  - API keys
-  - Database credentials
-  - Access tokens
-  - Private keys
+  - API keys (OpenAI, Anthropic, OpenRouter, Gemini)
+  - Tokens de acesso
+  - Credenciais de Supabase (quando entrar)
 
-✅ SIM commitar:
-  - .env.example (template vazio)
-  - Public keys
-  - Configurações públicas
+✅ Fluxo atual (MVP):
+  Usuário digita API key na tela de configurações
+  → salva em localStorage (criptografado base64 no mínimo)
+  → nunca vai para git
 
-ATUAL (Mentor24h):
-Usuário coloca API key na config UI → salva em localStorage
-(Não é ideal, mas ok para MVP)
-
-FASE 2:
-Migrar para .env + backend proxy
-```
-
-**Preencha você:**
-```
-Como você quer manejar secrets?
-Pode usar .env durante desenvolvimento?
+✅ Fluxo futuro (Supabase):
+  .env para development, variáveis de ambiente no deploy
+  Backend proxy para não expor keys no frontend
 ```
 
 ### 5.2 Validação & Sanitização
 
-```
-PADRÃO ATUAL (Mentor24h):
-function escapeHtml(s) {
-  return (s || '').replace(/&/g,'&amp;')...
+```javascript
+// Sempre antes de inserir dados do usuário em innerHTML:
+function escapeHtml(str) {
+  return (str || '').toString()
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
 }
 
-Usa isso antes de exibir dados em HTML
+// Validação de entrada antes de salvar:
+function validarEvento(evento) {
+  if (!evento.titulo?.trim()) throw new Error('Título obrigatório');
+  if (!evento.data) throw new Error('Data obrigatória');
+  return true;
+}
 ```
 
-**Preencha você:**
-```
-Quer adicionar validação mais robusta?
-Qual é a estratégia para XSS prevention?
-CSRF protection necessária?
-```
+**Regras:**
+- `escapeHtml()` em todo dado de usuário antes de ir para o DOM
+- Validar no ponto de entrada (submit do form), não no DB
+- XSS prevention via escapeHtml — não confiar em innerHTML sem sanitizar
 
 ---
 
@@ -346,44 +397,45 @@ CSRF protection necessária?
 
 ### 6.1 Comentários no Código
 
-```
-FILOSOFIA ATUAL (Mentor24h):
-Mínimos comentários — código bem-nomeado é auto-explicativo
+**Filosofia: mínimos comentários — código bem-nomeado é auto-explicativo.**
 
-QUANDO COMENTAR:
-✅ Lógica não-óbvia
-✅ Workarounds (com contexto)
-✅ Aviso de breaking change
-✅ Referência a issue/PR
+```javascript
+// ✅ Comentar quando o WHY não é óbvio:
+// iOS Safari não suporta push notifications sem add-to-homescreen
+if (isIOS && !isPWAInstalled) return;
 
-❌ NUNCA:
-- Comentar óbvio ("increment counter")
-- Documentar O QUÊ (use nome claro)
-- Comments antigos/desatualizado
-```
+// ✅ Workaround com contexto:
+// Delay necessário — Router.navigate() é assíncrono no Safari
+setTimeout(() => Icons.render(), 50);
 
-**Preencha você:**
-```
-Segue essa filosofia?
-Quer adicionar JSDoc?
+// ❌ Nunca comentar o óbvio:
+// incrementa contador  ← desnecessário
+count++;
+
+// ❌ Nunca comentar O QUÊ (o nome já diz):
+// retorna lista de eventos da agenda  ← desnecessário
+function getAgenda() { ... }
 ```
 
 ### 6.2 Commit Messages
 
 ```
-PADRÃO RECOMENDADO:
-feat: adiciona chat AI multi-provider
-fix: corrige altura dos shells de chat
-docs: adiciona guia de setup
-refactor: reorganiza estrutura DB
+Padrão: <tipo>: <descrição curta em PT-BR>
 
-Com corpo descrevendo POR QUÊ
-```
+feat: adiciona agenda híbrida com filtros por tipo
+fix: corrige overflow no card do dashboard mobile
+docs: atualiza AGENTS.md com padrões de testes
+refactor: extrai lógica de notificação para utils.js
+style: ajusta espaçamento do bento grid em mobile
+chore: adiciona manifest.json para PWA
 
-**Preencha você:**
-```
-Como você quer estruturar commits?
-Precisa de conventional commits?
+Corpo (quando necessário — o POR QUÊ, não o O QUÊ):
+feat: adiciona service worker básico
+
+Necessário para PWA offline-first. Arquitetura
+agnóstica pronta para Supabase futuro — trigger
+de push troca de timer local para Edge Function
+sem reescrever o SW.
 ```
 
 ---
@@ -392,37 +444,42 @@ Precisa de conventional commits?
 
 ### 7.1 Versionamento
 
-```
-SEMVER (Semantic Versioning):
-- MAJOR (1.0.0): Breaking changes
-- MINOR (0.1.0): New features
-- PATCH (0.0.1): Bug fixes
+**Usar SEMVER (Semantic Versioning):**
 
-MENTOR24H ATUAL:
-v1.0.0 (lançamento)
+```
+MAJOR.MINOR.PATCH
+
+MAJOR (v2.0.0): mudança de arquitetura (ex: entrada do Supabase)
+MINOR (v1.1.0): nova feature ou sprint concluído
+PATCH (v1.0.1): bug fix
+
+Estado atual: v1.0.0 (MVP base)
+Pós-Sprint 1: v1.1.0
+Pós-Sprint 2: v1.2.0
+Pós-Sprint 3: v1.3.0
+Com Supabase: v2.0.0
 ```
 
-**Preencha você:**
-```
-Quer usar SEMVER?
-Qual é a estratégia de versioning?
+```bash
+# Como criar uma release:
+git tag v1.1.0
+git push origin v1.1.0
+# Criar Release no GitHub com 1-2 linhas descrevendo o que entrou
 ```
 
 ### 7.2 Release Checklist
 
-```
-Antes de deploy para main:
-☐ Testes passando
-☐ Performance OK (Lighthouse >90)
-☐ Security audit (SBOM atualizado)
-☐ Docs atualizada
-☐ CHANGELOG.md escrito
-```
+Antes de fazer tag e push para main:
 
-**Preencha você:**
 ```
-Qual é seu checklist?
-Quer automação (GitHub Actions)?
+☐ Funcionalidades do sprint testadas manualmente (golden path)
+☐ Mobile testado (Chrome DevTools + dispositivo real se possível)
+☐ Tema claro e escuro funcionando
+☐ Modo pessoal e negócio funcionando
+☐ localStorage não corrompido (abrir DevTools → Application → Storage)
+☐ Console sem erros críticos
+☐ PLANO-MENTOR24H.md atualizado com o que foi feito
+☐ git tag com versão SEMVER
 ```
 
 ---
@@ -431,44 +488,44 @@ Quer automação (GitHub Actions)?
 
 ### 8.1 Para Outras Skills/Devs
 
-```
-Se alguém vai trabalhar em Mentor24h depois de você:
+**Leitura obrigatória antes de qualquer trabalho no projeto:**
 
-DEVE LER:
-1. Este arquivo (AGENTS.md)
-2. SPEC.md (o quê foi construído)
-3. CONSTITUTION.md (regras invioláveis)
-4. .memoria/decision-log.json (POR QUÊ foram feitas decisões)
+1. `AGENTS.md` ← este arquivo (padrões de código)
+2. `SPEC.md` ← arquitetura completa, 24 módulos, design system
+3. `CONSTITUTION.md` ← 22 leis invioláveis do projeto
+4. `PLANO-MENTOR24H.md` ← roadmap e histórico de decisões
 
-DEVE EXECUTAR:
-npm install (se houver)
-npm test (verificar que tudo funciona)
-Abrir http://localhost:5500 (Live Server)
+**Como rodar localmente:**
+```
+1. Abrir pasta no VS Code
+2. Instalar extensão "Live Server"
+3. Clicar em "Go Live" (canto inferior direito)
+4. Acessar http://127.0.0.1:5500
+   (NÃO abrir index.html direto — file:// bloqueia fetch)
 ```
 
-**Preencha você:**
-```
-Que recursos novo dev deveria ler first?
-Qual é o processo de onboarding?
-```
+**Stack:** Zero dependências. Sem npm install. Sem build step.  
+Abriu o Live Server → funciona.
+
+### 8.2 Convenções de Comunicação entre Skills
+
+Quando uma skill terminar seu trabalho:
+1. Registrar progresso: `Update-SkillProgress` (PAE-Functions.ps1)
+2. Entregar relay claro para a próxima skill
+3. Documentar decisões tomadas em `PLANO-MENTOR24H.md`
+4. Atualizar este AGENTS.md se algum padrão mudou
 
 ---
 
-## ✅ CHECKLIST: PRÓXIMAS AÇÕES
+## ✅ STATUS
 
-- [ ] Você preencheu seções 1-8 acima com seus padrões
-- [ ] Revisou com Claude/skills para validação
-- [ ] Commitou AGENTS.md em git
-- [ ] Agora sim, skill-orquestrador pode fazer entrevista
-- [ ] skill-consultor usa AGENTS.md para escrever PRD
+- [x] Seção 1 — Estrutura & Organização
+- [x] Seção 2 — Design & Estilos
+- [x] Seção 3 — JavaScript
+- [x] Seção 4 — Testes
+- [x] Seção 5 — Segurança
+- [x] Seção 6 — Documentação
+- [x] Seção 7 — Deployments
+- [x] Seção 8 — Handoff
 
----
-
-## 📞 SUPORTE
-
-Se uma skill tiver dúvida sobre padrão:
-1. Consulta AGENTS.md (você preencheu aqui)
-2. Se ambíguo, pergunta em .memoria/open_questions.json
-3. Você responde e atualiza AGENTS.md
-
-**Preencha todas as 8 seções acima e tenho certeza que o código fica coeso!** 🎯
+**AGENTS.md completo. skill-construtor pode prosseguir.**

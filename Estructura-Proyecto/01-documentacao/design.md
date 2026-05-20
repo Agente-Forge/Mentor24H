@@ -1,360 +1,363 @@
-# design.md — Mentor24h
-**Forge v5.2** | Appetite: M (4-6 semanas) | Gerado por: skill-planner v5.1  
-**Data:** 2026-05-12 | **Status:** ✅ APROVADO
+# design.md — Mentor24h v5.2
+**Forge v5.2** | Appetite: L (3 sprints) | Gerado por: skill-planner v5.1
+**Data:** 2026-05-20 | **Supersede:** versão 2026-05-12
+**Input:** STRATEGIC-BRIEF.md + FORGE-CHECKLIST.md + AGENTS.md + CONSTITUTION.md
 
 ---
 
 ## Arquitetura de Alto Nível
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                        index.html                           │
-│  ┌──────────┐  ┌───────────────────────────────────────┐   │
-│  │ Sidebar  │  │           Main Content                 │   │
-│  │ (nav)    │  │  ┌─────────────────────────────────┐  │   │
-│  │          │  │  │        Page (active)             │  │   │
-│  │ nav-item │  │  │   render() do módulo ativo       │  │   │
-│  │ nav-group│  │  └─────────────────────────────────┘  │   │
-│  └──────────┘  └───────────────────────────────────────┘   │
-│  ┌─────────────────────────────────────────────────────┐   │
-│  │           Bottom Nav (mobile)                        │   │
-│  └─────────────────────────────────────────────────────┘   │
-└─────────────────────────────────────────────────────────────┘
-         │
-         ▼
-┌─────────────────────────────────────────────────────────────┐
-│                    js/core/                                 │
-│  ┌──────────┐  ┌──────────┐  ┌──────────────────────────┐  │
-│  │  app.js  │  │router.js │  │        db.js             │  │
-│  │  (init)  │  │ (pages)  │  │  (localStorage CRUD)     │  │
-│  └──────────┘  └──────────┘  └──────────────────────────┘  │
-└─────────────────────────────────────────────────────────────┘
-         │
-         ▼
-┌─────────────────────────────────────────────────────────────┐
-│                   js/modules/                               │
-│  dashboard.js  llm.js  chat-wa.js  agenda.js               │
-│  medicamentos.js  tarefas.js  contatos.js                   │
-│  contas.js  transacoes.js  metas.js  kanban.js             │
-│  config.js                                                  │
-└─────────────────────────────────────────────────────────────┘
-         │
-         ▼
-┌─────────────────────────────────────────────────────────────┐
-│                   js/utils/                                 │
-│  icons.js  utils.js  command-palette.js                    │
-└─────────────────────────────────────────────────────────────┘
-         │
-         ▼
-┌─────────────────────────────────────────────────────────────┐
-│              localStorage (mentor24h.*)                     │
-│  config  contas  transacoes  metas  agenda                  │
-│  medicamentos  med-doses  tarefas  contatos                 │
-│  chat-contatos  chat-msgs  llm-config  llm-conversas        │
-└─────────────────────────────────────────────────────────────┘
-         │
-         ▼ (APIs externas — opcional, configurado pelo usuário)
-┌─────────────────────────────────────────────────────────────┐
-│  OpenRouter API  │  OpenAI API  │  Gemini API  │  Claude API │
-└─────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────┐
+│  FRONTEND  HTML5 + CSS puro + JS ES6+ (padrão IIFE)          │
+│                                                              │
+│  ┌─────────────┐  ┌──────────────┐  ┌───────────────────┐   │
+│  │  js/modules/ │  │  js/utils/   │  │    js/core/       │   │
+│  │  (features)  │  │  (helpers)   │  │  app · router     │   │
+│  └──────┬──────┘  └──────────────┘  └──────────────────┘│   │
+│         │                                    │            │   │
+│         ▼              🆕 v5.2               ▼            │   │
+│  ┌─────────────────────────────────────────────────────┐ │   │
+│  │           js/core/repository.js  (NOVO)             │ │   │
+│  │   Interface CRUD centralizada — adapter pattern      │ │   │
+│  └──────────────────────┬──────────────────────────────┘ │   │
+│                         │                                 │   │
+│                         ▼                                 │   │
+│  ┌─────────────────────────────────────────────────────┐ │   │
+│  │           js/core/db.js  (existente)                │ │   │
+│  │   16 collections, schemas, migrations               │ │   │
+│  └──────────────────────┬──────────────────────────────┘ │   │
+│                         │                                 │   │
+│                         ▼                                 │   │
+│              localStorage (mentor24h.*)                   │   │
+└──────────────────────────────────────────────────────────────┘
+
+Deploy: GitHub Pages (estático, automático via GitHub Actions)
+PWA:    manifest.json + sw.js (cache-first) — 🆕 v5.2
 ```
 
-**Deploy:** GitHub Pages (estático, zero servidor)
+**Stack não muda:** HTML+CSS+JS puro. Nenhuma dependência nova de framework.
+**Novidade v5.2:** repository.js (adapter) + 7 novos módulos + PWA.
 
 ---
 
 ## Decisões Arquiteturais
 
-### DEC-001 — IIFE como padrão de módulo JS
-**Decisão:** Todos os módulos usam IIFE retornando `{ render, init }`.  
-**Motivo:** Encapsulamento sem TypeScript nem bundler. Evita poluição do escopo global.  
-**Alternativas descartadas:** ES6 modules (requer servidor ou bundler), Classes (overhead para MVP)  
-**Tradeoffs:** ✅ Simples, zero config | ❌ Não tem tree-shaking  
-**Fit com appetite M:** Total — zero tempo de setup, funciona direto no browser
+### DEC-001 — Repository/Adapter Pattern sobre localStorage
 
-### DEC-002 — localStorage com namespace `mentor24h.`
-**Decisão:** Persistência 100% local, com prefixo namespace para evitar colisão.  
-**Motivo:** 1 usuário, zero custo, funciona offline. Supabase só faz sentido na Fase 2 (multi-user).  
-**Alternativas descartadas:** IndexedDB (complexidade extra sem benefício no MVP), Firebase (custo + lock-in)  
-**Tradeoffs:** ✅ Offline, zero custo, simples | ❌ Limite 5MB, preso no browser  
-**Fit com appetite M:** Total — sem setup de backend, sem auth
+**Decisão:** Criar `js/core/repository.js` como thin wrapper sobre `db.js`. Todos os módulos v5.2 usam `Repository.*`; módulos existentes continuam usando `DB.*` sem alteração.
 
-### DEC-003 — CSS puro com tokens (sem framework)
-**Decisão:** CSS puro em arquivos separados por responsabilidade. Zero Tailwind, zero Bootstrap.  
-**Motivo:** Controle total sobre design system OBSIDIAN. Frameworks genéricos criam visual genérico.  
-**Alternativas descartadas:** Tailwind (classes no HTML = mistura de concerns), Bootstrap (design genérico)  
-**Tradeoffs:** ✅ Design único e controlado | ❌ Mais CSS manual  
-**Fit com appetite M:** Total — DESIGN-BRIEF aprovado, tokens já definidos no AGENTS.md
+**Motivo:** d014 — migração para Supabase no futuro requer que nenhum módulo dependa diretamente de localStorage. Com o adapter, substituir a implementação do repository = migração concluída, sem tocar nos 34+ módulos.
 
-### DEC-004 — Router SPA custom (sem library)
-**Decisão:** Router próprio que alterna `.active` em páginas e chama `render()` do módulo.  
-**Motivo:** O roteamento do Mentor24h é simples (17 páginas, sem parâmetros de URL complexos).  
-**Alternativas descartadas:** React Router (exige React), page.js (dependência desnecessária)  
-**Tradeoffs:** ✅ Zero dependência | ❌ Sem deep linking nem browser history  
-**Fit com appetite M:** Total — implementado em ~50 linhas
+**Alternativas descartadas:**
+- Refatorar `db.js` para interface Supabase-compatible (risco alto de regressão nos módulos existentes)
+- Não abstrair (gera reescrita massiva na Fase Escala)
 
-### DEC-005 — Multi-provider LLM com fallback
-**Decisão:** LLM.js suporta OpenRouter, OpenAI, Gemini e Claude com fallback automático.  
-**Motivo:** Sem lock-in. OpenRouter permite acessar Claude sem CORS restrito.  
-**Alternativas descartadas:** Só OpenAI (lock-in), só Claude direct (CORS problemas em browser)  
-**Tradeoffs:** ✅ Flexibilidade máxima | ❌ Lógica de provider mais complexa  
-**Fit com appetite M:** LLM.js isolado — outros módulos não sofrem a complexidade
+**Tradeoffs:** +1.5 dias no Sprint 1; protege todos os sprints futuros de reescrita. Custo-benefício positivo.
+
+**Fit com appetite L:** A task mais pesada do Sprint 1, mas desbloqueadora de tudo. Sem ela, a dívida técnica custa 3× o tempo na migração Supabase.
+
+---
+
+### DEC-002 — PWA Cache-First Strategy
+
+**Decisão:** Service Worker com cache-first para assets estáticos (`.html`, `.css`, `.js`, fontes, ícones). Dados em localStorage já são offline por natureza — não precisam de estratégia adicional.
+
+**Motivo:** A maior parte do app são arquivos estáticos; localStorage é inerentemente offline. Cache-first é a estratégia mais simples e eficaz para o cenário.
+
+**Alternativas descartadas:**
+- Stale-while-revalidate (mais complexo para pouco benefício adicional)
+- Network-first (cancela o offline-first se sem internet)
+
+**Tradeoffs:** Primeira carga exige conexão; subsequentes são offline. Aceitável para o MVP.
+
+---
+
+### DEC-003 — Push Notifications via browser Notification API (sem serviço externo)
+
+**Decisão:** Usar `Notification API` nativa do browser para lembretes locais. Zero backend, zero serviço externo, zero custo, funciona offline.
+
+**Motivo:** LEI 1 da Constitution veda chamadas a backend externo no MVP. Notification API atende o caso de uso (lembrete de hábito no horário certo) sem nenhuma dependência.
+
+**Alternativas descartadas:**
+- OneSignal/Pusher: requer backend, viola LEI 1
+- Push via Supabase: fora do escopo deste ciclo
+
+**Tradeoffs:** iOS Safari tem suporte limitado à Notification API — degradação graciosa (funciona sem notificações, não quebra). Chrome desktop: suporte pleno.
+
+---
+
+### DEC-004 — PDF via @media print + window.print() (sem jsPDF)
+
+**Decisão:** Templates HTML com CSS `@media print` dedicado. `window.print()` aciona o diálogo nativo do browser onde o usuário salva como PDF.
+
+**Motivo:** Zero dependência externa; CSS controla layout com precisão; sem peso de bundle; sem custo. AGENTS.md §7 veda libs externas não previstas no PRD.
+
+**Alternativas descartadas:**
+- jsPDF: dependência externa, viola política de zero deps
+- html2canvas: pesado, não garante fidelidade visual
+
+**Tradeoffs:** Usuário precisa clicar "Salvar como PDF" manualmente no diálogo de impressão. Aceitável no MVP — a revendedora já está familiarizada com esse fluxo.
+
+---
+
+### DEC-005 — Agenda Híbrida como módulo novo (não reescrita de agenda.js)
+
+**Decisão:** Criar `js/modules/agenda-hibrida.js` novo. Reutiliza `DB.getAgenda()` e extende o schema com `tipo`, `cliente`, `valor` via migração não-destrutiva.
+
+**Motivo:** `agenda.js` existente funciona bem para uso pessoal. Reescrevê-lo geraria risco de regressão. O módulo híbrido é uma view unificada que agrega os mesmos dados com campos extras.
+
+**Alternativas descartadas:**
+- Reescrever `agenda.js` (risco de regressão em feature já validada)
+- Criar schema separado (duplicidade de dados)
+
+**Tradeoffs:** Dois módulos de agenda coexistem; `agenda-hibrida.js` é a view principal daqui em diante. Aceitável.
+
+---
+
+### DEC-006 — Charts via SVG gerado em JS puro (sem Chart.js)
+
+**Decisão:** Gerar SVG de barras dinamicamente em `relatorios.js` com template literals JavaScript. Suficiente para barras mensais simples dos últimos 6 meses.
+
+**Motivo:** AGENTS.md veda libs externas não previstas; Chart.js adicionaria ~60KB ao bundle. SVG puro é leve, acessível e controlável via CSS.
+
+**Alternativas descartadas:**
+- Chart.js: dependência externa não prevista
+- Canvas API: menos acessível (sem suporte a screen readers)
+
+**Tradeoffs:** Limitado a barras/linhas simples. Aceitável para o MVP do analytics de negócio.
 
 ---
 
 ## Componentes Principais
 
-### COMP-001 — DB (js/core/db.js)
-**Responsabilidade:** CRUD de todas as collections em localStorage.
+### COMP-001 — Repository (js/core/repository.js) 🆕
+**Responsabilidade:** Interface CRUD centralizada; wrapper sobre `DB.*`; adiciona `user_id`, `createdAt`, `updatedAt` automaticamente.
 
 ```
-Input:  dados do módulo (objeto JS)
-Output: dados lidos do localStorage (array/objeto)
+Input:  Repository.get(collection, filters?)  → item[]
+        Repository.getById(collection, id)    → item | null
+        Repository.save(collection, item)     → item (com timestamps)
+        Repository.remove(collection, id)     → void
+Output: Dados com user_id: 'local' + timestamps ISO
 ```
 
-**Collections (16):**
-```javascript
-const KEYS = {
-  config:         'mentor24h.config',
-  contas:         'mentor24h.contas',
-  transacoes:     'mentor24h.transacoes',
-  metas:          'mentor24h.metas',
-  agenda:         'mentor24h.agenda',
-  medicamentos:   'mentor24h.medicamentos',
-  medDoses:       'mentor24h.med-doses',
-  tarefas:        'mentor24h.tarefas',
-  contatos:       'mentor24h.contatos',
-  chatContatos:   'mentor24h.chat-contatos',
-  chatMsgs:       'mentor24h.chat-msgs',
-  llmConfig:      'mentor24h.llm-config',
-  llmConversas:   'mentor24h.llm-conversas',
-  produtos:       'mentor24h.produtos',       // Fase 2
-  vendas:         'mentor24h.vendas',         // Fase 2
-  clientes:       'mentor24h.clientes-neg',   // Fase 2
-};
-```
-
-**Interface padrão:**
-```javascript
-DB.get(key)           // → array
-DB.save(key, array)   // → void
-DB.add(key, item)     // → item com id gerado
-DB.update(key, item)  // → item atualizado
-DB.remove(key, id)    // → void
-DB.getConfig()        // → objeto config
-DB.saveConfig(config) // → void
-```
-
-**Dependências:** nenhuma  
-**Testabilidade:** Testar manualmente — salvar item, recarregar página, verificar persistência
+**Dependências:** `db.js`
+**Testabilidade:** Mock de `DB.*`; verificar que `user_id` e timestamps são injetados.
 
 ---
 
-### COMP-002 — Router (js/core/router.js)
-**Responsabilidade:** Navegação SPA entre as 17 páginas.
+### COMP-002 — DashboardPessoal (js/modules/dashboard-pessoal.js) 🆕
+**Responsabilidade:** Bento grid com cards dinâmicos do dia para modo Pessoal. CSS já pronto em `dashboard-pessoal.css`.
 
 ```
-Input:  nome da página (string, ex: 'dashboard')
-Output: renderiza página ativa, atualiza nav, chama render() do módulo
+Input:  Repository.get de tarefas, agenda, medicamentos, contas, hábitos
+Output: HTML .dp-* em <section data-page="dashboard-pessoal">
 ```
 
-**Interface:**
-```javascript
-Router.PAGES = { dashboard, 'chat-ai', 'chat-wa', agenda, ... } // 17 páginas
-Router.register(page, renderFn)   // registra renderer
-Router.navigate(page)             // navega para página
-Router.getCurrentPage()           // → string
-```
-
-**Dependências:** Icons (para re-render após navegação)  
-**Testabilidade:** Clicar em cada item da sidebar e verificar se página correta aparece
+**Dependências:** `repository.js`, `timeline.js`, `habitos.js`
+**Testabilidade:** Mock de dados → verificar cards aparecem/somem conforme conteúdo.
 
 ---
 
-### COMP-003 — LLM (js/modules/llm.js)
-**Responsabilidade:** Chat AI com multi-provider e histórico de conversas.
+### COMP-003 — PainelNegocio (js/modules/painel.js — reescrita) ♻️
+**Responsabilidade:** KPIs reais do negócio + atividade recente. CSS já pronto em `painel-negocio.css`.
 
 ```
-Input:  mensagem do usuário (string) + conversaId + config do provider
-Output: resposta da AI (string) + atualização do histórico
+Input:  Repository.get de transacoes, contatos, vendas
+Output: HTML .pn-* em <section data-page="painel">
 ```
 
-**Interface:**
-```javascript
-LLM.render()                              // renderiza UI do chat
-LLM.sendMessage(conversaId, content)     // → Promise<string>
-LLM.createConversa()                      // → conversaId
-LLM.callProvider(messages, config)       // → Promise<string>
-```
-
-**Providers:**
-```javascript
-PROVIDERS = {
-  openrouter: { url: 'https://openrouter.ai/api/v1', cors: true },
-  openai:     { url: 'https://api.openai.com/v1',    cors: true },
-  gemini:     { url: 'https://generativelanguage.googleapis.com', cors: true },
-  claude:     { url: 'https://api.anthropic.com/v1', cors: 'limitado' },
-}
-```
-
-**Dependências:** DB (para config e conversas), Toast (para erros)  
-**Testabilidade:** Configurar OpenRouter key → enviar mensagem → verificar resposta
+**Dependências:** `repository.js`
+**Testabilidade:** Mock dados financeiros → verificar KPI valores e formatação R$.
 
 ---
 
-### COMP-004 — Dashboard (js/modules/dashboard.js)
-**Responsabilidade:** Cards dinâmicos com resumo inteligente do dia.
+### COMP-004 — Timeline (js/modules/timeline.js) 🆕
+**Responsabilidade:** Widget linha do tempo das próximas 24h integrando agenda pessoal + serviços.
 
 ```
-Input:  dados de todas as collections (via DB)
-Output: HTML dos cards ativos (só os que têm conteúdo)
+Input:  Eventos de agenda + agenda-hibrida das próximas 24h (via Repository)
+Output: HTML .tl-* inserido em slot #dashboard-timeline no dashboard pessoal
 ```
 
-**Interface:**
-```javascript
-Dashboard.render()        // renderiza dashboard completo
-Dashboard.buildCards()    // → array de cards HTML
-Dashboard.getGreeting()   // → string saudação contextual
-```
-
-**Dependências:** DB (todas as collections), Icons  
-**Testabilidade:** Adicionar evento para hoje → verificar card aparece no Dashboard
+**Dependências:** `repository.js`
+**Testabilidade:** Mock eventos → verificar ordenação por horário, cor por tipo.
 
 ---
 
-### COMP-005 — CommandPalette (js/utils/command-palette.js)
-**Responsabilidade:** Busca global e navegação por teclado.
+### COMP-005 — AgendaHibrida (js/modules/agenda-hibrida.js) 🆕
+**Responsabilidade:** Agenda unificada pessoal + serviço com filtros e diferenciação visual.
 
 ```
-Input:  tecla Ctrl+K (evento de teclado)
-Output: palette aberta com ações filtradas
+Input:  evento { tipo: 'pessoal'|'servico', cliente?: id, valor?: number, ...campos agenda }
+Output: HTML .ah-* em <section data-page="agenda-hibrida">
 ```
 
-**Interface:**
-```javascript
-CommandPalette.init()         // registra listener Ctrl+K / ⌘K
-CommandPalette.open()         // abre palette
-CommandPalette.close()        // fecha palette
-CommandPalette.register(actions) // registra lista de ações
-```
-
-**Ações registradas:** Navegar para qualquer página + criar novo (evento, medicamento, tarefa, etc.)  
-**Dependências:** Router  
-**Testabilidade:** Ctrl+K → digitar "agenda" → Enter → verificar navegação
+**Dependências:** `repository.js` (agenda + contatos)
+**Testabilidade:** Mock eventos mistos → verificar cor semântica, filtros, campos de serviço.
 
 ---
 
-## Modelo de Dados
+### COMP-006 — Habitos (js/modules/habitos.js) 🆕
+**Responsabilidade:** CRUD hábitos + streak counter + agendamento de push local.
+
+```
+Input:  habito { nome, horario, frequencia: 'daily'|'weekly' }
+Output: HTML .hab-* em <section data-page="habitos">
+        Notification API scheduling no horário do hábito
+```
+
+**Dependências:** `repository.js`, `Notification API` (browser native)
+**Testabilidade:** Mock permissão notificação; verificar streak incrementa/zera corretamente.
+
+---
+
+### COMP-007 — Notas (js/modules/notas.js) 🆕
+**Responsabilidade:** CRUD notas rápidas com pin, busca textual e widget no dashboard.
+
+```
+Input:  nota { texto: string (max 280), pin: boolean, categoria?: string }
+Output: HTML .nota-* em <section data-page="notas">
+        Widget .nota-widget em dashboard pessoal
+```
+
+**Dependências:** `repository.js`
+**Testabilidade:** CRUD completo; busca textual filtra corretamente; pin sobe nota para o topo.
+
+---
+
+### COMP-008 — Relatorios (js/modules/relatorios.js) 🆕
+**Responsabilidade:** Analytics de negócio — financeiro mensal, top clientes/produtos, gráfico SVG puro.
+
+```
+Input:  Repository.get de transacoes, vendas, clientes, produtos (com filtro de período)
+Output: HTML .rel-* em <section data-page="relatorios">
+        SVG de barras gerado inline via template literals
+```
+
+**Dependências:** `repository.js`
+**Testabilidade:** Mock dados de 6 meses → verificar cálculos financeiros + SVG gerado com dimensões corretas.
+
+---
+
+### COMP-009 — Assistente (js/modules/assistente.js) 🆕
+**Responsabilidade:** Análise local de dados e geração de até 3 insights proativos. Zero LLM — lógica local pura.
+
+```
+Input:  Dados de todas as collections via Repository (triggered em app.init)
+Output: Array de insights { texto, tipo, acao, key }
+        Renderizado em #dashboard-insights no dashboard
+```
+
+**Dependências:** `repository.js`
+**Testabilidade:** Mock cenários (conta vencendo, cliente inativo) → verificar insight correto gerado; dismiss persiste 7 dias.
+
+---
+
+## Modelo de Dados — Extensões v5.2
+
+### Novas collections (não-destrutivas — adicionar em db.js)
 
 ```javascript
-// Estrutura padrão de todo registro
+// mentor24h.habitos
 {
-  id:        crypto.randomUUID(),   // string única
-  createdAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString(),
-  // + campos específicos
+  id, nome, horario,           // "07:30"
+  frequencia: 'daily'|'weekly',
+  streak: 0,
+  ultimoCheck: null,           // ISO date string
+  notificacaoPermitida: false,
+  createdAt, updatedAt, user_id: 'local'
 }
 
-// Conta bancária
-{ id, nome, banco, saldo, tipo: 'corrente'|'poupança'|'investimento', createdAt, updatedAt }
+// mentor24h.notas
+{
+  id, texto,                   // max 280 chars
+  pin: false,
+  categoria: null,
+  createdAt, updatedAt, user_id: 'local'
+}
 
-// Transação
-{ id, contaId, descricao, valor, categoria, tipo: 'receita'|'despesa', data, createdAt, updatedAt }
-
-// Evento de agenda
-{ id, titulo, data, hora, descricao, createdAt, updatedAt }
-
-// Medicamento
-{ id, nome, horario, frequencia: 'diária'|'semanal'|'mensal', createdAt, updatedAt }
-
-// Dose tomada
-{ id, medicamentoId, tomadaEm: ISO_string, createdAt }
-
-// Tarefa
-{ id, titulo, descricao, prioridade: 'alta'|'media'|'baixa', status: 'pendente'|'em_andamento'|'concluido', createdAt, updatedAt }
-
-// Contato
-{ id, nome, telefone, email, tags: [], notas, createdAt, updatedAt }
-
-// Contato WhatsApp CRM
-{ id, nome, telefone, tags: [], ultimaMensagem, naoLidas: 0, notas, createdAt, updatedAt }
-
-// Mensagem WhatsApp CRM
-{ id, contatoId, texto, de: 'eu'|'contato', hora, status: 'enviado'|'recebido', createdAt }
-
-// Config LLM
-{ provider: 'openrouter', apiKey: '...', model: '...', systemPrompt: '...', temperature: 0.7 }
-
-// Conversa LLM
-{ id, titulo, msgs: [{role: 'user'|'assistant', content: '...'}], criadoEm, updatedAt }
+// mentor24h.insights-dispensados
+{
+  insightKey,                  // string identificadora do insight
+  dispensadoAte,               // ISO date (+7 dias)
+  createdAt
+}
 ```
+
+### Extensões não-destrutivas (campos com default null)
+
+```javascript
+// agenda — adicionar:
+{ tipo: 'pessoal',  cliente: null, valor: null }
+
+// tarefas — adicionar:
+{ recorrencia: null }          // null | 'daily' | 'weekly' | 'monthly'
+
+// produtos — adicionar:
+{ custo: null, margemPct: null }
+```
+
+> Todos os registros existentes continuam funcionando — campos novos têm default null
+> e não afetam lógica anterior. Migração é aditiva.
 
 ---
 
 ## Fluxo de Dados Principal
 
 ```
-[Léo clica "Nova Tarefa"]
-        │
-        ▼
-[CommandPalette ou botão na página Tarefas]
-        │
-        ▼
-[Modal.novaTarefa() → coleta dados do formulário]
-        │
-        ▼
-[DB.add('mentor24h.tarefas', { ...dados, id: uuid, createdAt, updatedAt })]
-        │
-        ▼
-[localStorage.setItem('mentor24h.tarefas', JSON.stringify(array))]
-        │
-        ▼
-[Tarefas.render() → lista atualizada na tela]
-        │
-        ▼
-[Dashboard.render() → card de tarefas atualizado se alta prioridade]
+Módulo UI (agenda-hibrida.js, habitos.js, etc.)
+  ↓ chama
+Repository.save('agenda', evento)
+  ↓ injeta user_id, timestamps; delega para
+DB.addAgenda(evento)
+  ↓ grava em
+localStorage['mentor24h.agenda'] = JSON.stringify([...])
+
+// Para migração Supabase (fase futura):
+// Módulo UI → Repository (inalterado)
+// Repository → supabase.from('agenda').insert(evento) ← troca só aqui
 ```
 
 ---
 
-## Estrutura de Arquivos Final
+## Estrutura de Arquivos — Novos em v5.2
 
 ```
-controle-financeiro v2/
-├── index.html                    ← único HTML, SPA
-├── css/
-│   ├── tokens.css                ← design tokens OBSIDIAN (cores, fontes, espaçamento)
-│   ├── typography.css            ← Fraunces + Switzer + JetBrains Mono
-│   ├── reset.css                 ← zeragem de estilos do browser
-│   ├── layout.css                ← sidebar accordion, bottom nav, grid
-│   ├── components.css            ← btn, card, modal, toast, badge, input
-│   ├── pages.css                 ← estilos específicos por página
-│   └── themes.css                ← variáveis do tema claro
-├── js/
-│   ├── core/
-│   │   ├── db.js                 ← CRUD localStorage (16 collections)
-│   │   ├── router.js             ← SPA router (17 páginas)
-│   │   └── app.js                ← init, registra módulos e routes
-│   ├── modules/
-│   │   ├── dashboard.js          ← cards dinâmicos
-│   │   ├── llm.js                ← chat AI multi-provider
-│   │   ├── chat-wa.js            ← WhatsApp CRM simulado
-│   │   ├── agenda.js
-│   │   ├── medicamentos.js
-│   │   ├── tarefas.js
-│   │   ├── contatos.js
-│   │   ├── contas.js
-│   │   ├── transacoes.js
-│   │   ├── metas.js
-│   │   ├── kanban.js
-│   │   └── config.js
-│   └── utils/
-│       ├── icons.js              ← Lucide SVG helpers
-│       ├── utils.js              ← escapeHtml, formatters, helpers
-│       └── command-palette.js    ← Ctrl+K global
-├── data/
-│   ├── default-config.json
-│   └── seed.json
-├── Estructura-Proyecto/          ← documentação FORGE
-└── .memoria/                     ← memória do projeto
+js/
+  core/
+    repository.js          🆕 adapter CRUD centralizado
+  modules/
+    dashboard-pessoal.js   🆕 (CSS já existe em dashboard-pessoal.css)
+    painel.js              ♻️ reescrita (CSS já existe em painel-negocio.css)
+    timeline.js            🆕 widget do dia
+    agenda-hibrida.js      🆕 agenda unificada pessoal+serviço
+    habitos.js             🆕 hábitos + streak + push
+    notas.js               🆕 notas rápidas
+    relatorios.js          🆕 analytics + SVG charts
+    assistente.js          🆕 insights proativos locais
+
+css/  (todos existentes — sem novos arquivos CSS necessários)
+  dashboard-pessoal.css    ✅ já existe (Sprint Beta CSS)
+  painel-negocio.css       ✅ já existe (Sprint Beta CSS)
+  negocio.css              ✅ já existe
+
+manifest.json              🆕 PWA
+sw.js                      🆕 Service Worker
 ```
+
+---
+
+## Leis Ativas neste Ciclo (Constitution)
+
+| Lei | Impacto no v5.2 |
+|-----|-----------------|
+| LEI 1 — Local-First | localStorage permanece; Supabase fora deste ciclo |
+| LEI 2 — Quiet Intelligence | Ouro/safira semânticos; animações suaves; sem cores saturadas |
+| LEI 3 — Single Source of Truth | Todo CSS via `tokens.css`; zero valor hardcoded |
+| LEI 4 — Reutilizar | CSS dos dashboards já existe; Repository delega para DB existente |
+| LEI 5 — Dashboard é o centro | Timeline + hábitos + insights + notas integram no dashboard |
+| SEC-2 — Escape HTML | Todo input passa por `escapeHtml()` antes do DOM |
+| F-3 — Appetite é lei | 3 sprints, máx 76 tasks (planejado: 36 tasks) |
+| F-5 — Sentinela tem veto | Code review obrigatório antes de marcar sprint como done |

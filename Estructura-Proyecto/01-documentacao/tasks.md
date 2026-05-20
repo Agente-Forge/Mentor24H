@@ -1,367 +1,360 @@
-# tasks.md — Mentor24h
-**Forge v5.2** | Appetite: M (4-6 semanas) | 5 Sprints | 40 Tasks  
-Gerado por: skill-planner v5.1 | **Data:** 2026-05-12
+# tasks.md — Mentor24h v5.2
+**Forge v5.2** | Appetite: L (3 sprints) | 3 Sprints | 36 Tasks
+Gerado por: skill-planner v5.1 | **Data:** 2026-05-20
+**Supersede:** versão 2026-05-12 (5 sprints, 40 tasks, appetite M)
 
 ---
 
 ## 🎲 BETTING TABLE GERAL
 
 ```
-Estamos apostando 5 semanas de trabalho no MVP do Mentor24h.
-Appetite: M — 4-6 semanas
-Sprints: 5 × ~1 semana
-Tasks: 40 tasks atômicas (máx. 2h cada)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎲 APOSTA GERAL — Mentor24h v5.2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Escopo apostado:
-✅ Sprint 1 — Fundação (DB + Router + App)
-✅ Sprint 2 — Design System + Navegação
-✅ Sprint 3 — Dashboard + Chat AI
-✅ Sprint 4 — Módulos Pessoal
-✅ Sprint 5 — Finanças + WhatsApp + Polish
+Apostamos: 3 sprints (appetite L)
+Em:        Evolução do Mentor24h para produto SaaS
+           pronto para revendedoras autônomas
+Entrega:   36 tasks atômicas (≤2h cada)
+           Sprint crítica: Sprint 1 (fundação)
 
-Fora da aposta (Fase 2+):
-❌ Auth/Login
-❌ Supabase/banco remoto
-❌ WhatsApp Business API real
-❌ Módulos de Negócio (Produtos, Vendas, Estoque, Clientes)
+Risco principal: camada de dados (Task 1.1) bloqueia
+                 tudo — deve ser a primeira a iniciar.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
 ---
 
-## SPRINT 1 — Fundação
+## Sprint 1 — Fundação + Núcleo Dual
 
 ### 🎲 BETTING TABLE — Sprint 1
 
 ```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🎲 Sprint 1 — Apostamos ~1 semana em:
-   Estrutura de pastas + DB + Router + App.js
-Risco: DB precisa estar 100% antes das outras sprints
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎲 [BETTING TABLE — Sprint 1]
+Apostamos: ~12h de trabalho
+Em:        Repository layer + Dashboards completos + PWA
+Risco:     Task 1.1 bloqueia 1.3 e 1.5 — iniciar aqui.
+           Tasks 1.2 e 1.10 tocam em arquivos core
+           (requerem aprovação per CONSTITUTION ⚠️Ask).
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
-**Objetivo:** Infraestrutura base funcionando. Navegar entre páginas, dados persistindo.  
-**Dependências:** nenhuma — é o ponto de partida  
-**Critério de done da sprint:** `Router.navigate('dashboard')` funciona + DB salva e lê dados
+**Objetivo:** Ter a fundação técnica (repository.js), os dois dashboards funcionais com dados reais, timeline do dia e PWA instalável.
+**Estimativa:** ~12h
+**Sensores:** Testes manuais no browser (AGENTS.md §4)
+**Dependências:** Nenhuma (sprint inaugural do ciclo v5.2)
+**CSS disponível:** `dashboard-pessoal.css` + `painel-negocio.css` já prontos
 
 ---
 
-### Tasks
+### Tasks Sprint 1
 
-- [ ] **T1.1** — Criar estrutura de pastas `js/core/`, `js/modules/`, `js/utils/`, `css/` — [XS]
-  - Arquivos alvo: estrutura de diretórios no projeto
-  - Critério de done: pastas existem, `index.html` referencia os arquivos novos
-  - Ref: design.md (Estrutura de Arquivos Final)
+- [ ] **Task 1.1** — Criar `js/core/repository.js` (adapter CRUD) — **M** (2h)
+  - Arquivos: `js/core/repository.js` (novo)
+  - Critério de done: `Repository.get()`, `.getById()`, `.save()`, `.remove()` funcionam internamente via `DB.*`; injeta `user_id: 'local'`, `createdAt`, `updatedAt` automaticamente
+  - Referência: REQ-001, DEC-001
+  - ⚡ **Sprint crítica: iniciar aqui** — bloqueia Tasks 1.3 e 1.5
 
-- [ ] **T1.2** — Criar `js/core/db.js` com CRUD base e 13 collections — [M]
-  - Arquivos alvo: `js/core/db.js`
-  - Critério de done: `DB.add()`, `DB.get()`, `DB.update()`, `DB.remove()` funcionam + dados persistem no F5
-  - Ref: design.md COMP-001, requirements.md REQ-001 ao REQ-010
+- [ ] **Task 1.2** — Expor métodos faltantes em `db.js` para suporte ao repository — **S** (1h) ⚠️ Ask
+  - Arquivos: `js/core/db.js` (arquivo core — requer aprovação)
+  - Critério de done: `DB.getAll(collection)`, `DB.getById(collection, id)`, `DB.remove(collection, id)` disponíveis (se não existirem); zero regressão nos módulos existentes
+  - Referência: REQ-001, DEC-001
+  - Depende de: Task 1.1 (para saber quais métodos são necessários)
 
-- [ ] **T1.3** — Criar `js/core/router.js` com 17 páginas registradas — [S]
-  - Arquivos alvo: `js/core/router.js`
-  - Critério de done: `Router.navigate('agenda')` troca a página ativa corretamente
-  - Ref: design.md COMP-002
+- [ ] **Task 1.3** — Criar `js/modules/dashboard-pessoal.js` com HTML `.dp-*` — **M** (2h)
+  - Arquivos: `js/modules/dashboard-pessoal.js` (novo)
+  - Critério de done: cards dinâmicos renderizam com dados reais (tarefas, medicamentos, saldo, próximo evento); card ausente quando sem dados; saudação dinâmica (bom dia/tarde/noite) funcional
+  - Referência: REQ-002
+  - Depende de: Task 1.1
 
-- [ ] **T1.4** — Criar `js/utils/utils.js` com helpers base (`escapeHtml`, `formatCurrency`, `formatDate`, `generateId`) — [S]
-  - Arquivos alvo: `js/utils/utils.js`
-  - Critério de done: `escapeHtml('<script>')` retorna `&lt;script&gt;`
-  - Ref: AGENTS.md §5.2, CONSTITUTION.md SEC-2
+- [ ] **Task 1.4** — Registrar dashboard-pessoal.js no Router e `index.html` — **XS** (30min) ⚠️ Ask (app.js)
+  - Arquivos: `index.html`, `js/core/app.js`
+  - Critério de done: `Router.navigate('dashboard-pessoal')` funciona; `<script>` registrado; modo Pessoal navega para o novo dashboard
+  - Depende de: Task 1.3
 
-- [ ] **T1.5** — Criar `js/utils/icons.js` com helpers Lucide — [S]
-  - Arquivos alvo: `js/utils/icons.js`
-  - Critério de done: `Icons.render()` substitui `data-lucide` por SVGs na página
+- [ ] **Task 1.5** — Reescrever `js/modules/painel.js` com HTML `.pn-*` — **M** (2h)
+  - Arquivos: `js/modules/painel.js` (substitui placeholder existente)
+  - Critério de done: 4 KPIs reais (receita mês, clientes ativos, temperatura dominante, atividade recente); últimas 5 transações listadas; estado vazio elegante
+  - Referência: REQ-003
+  - Depende de: Task 1.1
+  - ‖ Paralelizável com Task 1.3 (após Task 1.1)
 
-- [ ] **T1.6** — Criar `js/core/app.js` com init e registro de todos os módulos — [S]
-  - Arquivos alvo: `js/core/app.js`
-  - Critério de done: app inicializa sem erros no console, todas as páginas placeholder registradas
-  - Ref: design.md DEC-001
+- [ ] **Task 1.6** — Criar `js/modules/timeline.js` (widget linha do tempo do dia) — **M** (2h)
+  - Arquivos: `js/modules/timeline.js` (novo)
+  - Critério de done: lista eventos das próximas 24h ordenados por horário; ouro para pessoal, safira para serviço; estado "Dia livre" quando vazio
+  - Referência: REQ-004, DEC-005
+  - Depende de: Task 1.1
+  - ‖ Paralelizável com Task 1.5
 
-- [ ] **T1.7** — Criar `index.html` reestruturado com sidebar groups e todas as seções de página — [M]
-  - Arquivos alvo: `index.html`
-  - Critério de done: HTML válido, sidebar com 4 grupos (Chat, Negócio, Finanças, Pessoal), 17 seções `.page`
-  - Ref: design.md (arquitetura)
+- [ ] **Task 1.7** — Integrar `timeline.js` no dashboard pessoal — **XS** (30min)
+  - Arquivos: `js/modules/dashboard-pessoal.js`
+  - Critério de done: widget `.tl-*` aparece abaixo dos cards de KPI no dashboard pessoal; clique navega para agenda
+  - Depende de: Tasks 1.3 + 1.6
 
-- [ ] **T1.8** — Criar `css/reset.css` e vincular no index.html com Lucide + Google Fonts — [XS]
-  - Arquivos alvo: `css/reset.css`, `index.html` (head)
-  - Critério de done: browser carrega Fraunces + Switzer + JetBrains Mono + Lucide sem erros
+- [ ] **Task 1.8** — Criar `manifest.json` (PWA) — **S** (1h)
+  - Arquivos: `manifest.json` (novo), `index.html` (adicionar `<link rel="manifest">`)
+  - Critério de done: manifest válido (Lighthouse); ícones 192px + 512px referenciados; `display: standalone`; `apple-touch-icon` para iOS
+  - Referência: REQ-005, DEC-002
+  - ‖ Paralelizável com Task 1.9
+
+- [ ] **Task 1.9** — Criar `sw.js` (Service Worker cache-first) — **M** (2h)
+  - Arquivos: `sw.js` (novo)
+  - Critério de done: lista de assets pré-cacheados no install; cache-first no fetch; versão detecta update e exibe toast "Nova versão disponível"; app abre offline após 1ª carga conectada
+  - Referência: REQ-005, DEC-002
+  - ‖ Paralelizável com Task 1.8
+
+- [ ] **Task 1.10** — Registrar Service Worker em `app.js` — **XS** (30min) ⚠️ Ask (app.js)
+  - Arquivos: `js/core/app.js`
+  - Critério de done: `navigator.serviceWorker.register('/sw.js')` chamado em `init()`; sem erros no console
+  - Referência: REQ-005
+  - Depende de: Task 1.9
+
+- [ ] **Task 1.11** — Extensão de schema: `agenda` (tipo+cliente+valor) + `tarefas` (recorrencia) + `produtos` (custo+margemPct) — **S** (1h) ⚠️ Ask (db.js)
+  - Arquivos: `js/core/db.js` (schema + migration não-destrutiva)
+  - Critério de done: registros existentes intocados; novos campos com default `null`; versão de schema incrementada com migração automática
+  - Referência: REQ-006, REQ-008, REQ-009
+  - Depende de: Task 1.2
+
+- [ ] **Task 1.12** — Teste manual Sprint 1 — **XS** (30min)
+  - Critério de done: Lighthouse PWA ≥ 80; dashboards pessoal e negócio renderizam em mobile + desktop; offline funciona após 1ª carga; zero erros no console
+  - Referência: REQ-002, REQ-003, REQ-005
+  - Depende de: Tasks 1.3–1.10
 
 ---
 
-## SPRINT 2 — Design System + Navegação
+## Sprint 2 — Engajamento + Agenda Híbrida
 
 ### 🎲 BETTING TABLE — Sprint 2
 
 ```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🎲 Sprint 2 — Apostamos ~1 semana em:
-   Design System OBSIDIAN + Sidebar + Componentes + Command Palette
-Risco: CSS é iterativo — ajustes visuais podem estourar o tempo
-Mitigação: tokens.css como base rígida; ajustes finos ficam para Sprint 5
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎲 [BETTING TABLE — Sprint 2]
+Apostamos: ~12h de trabalho
+Em:        Agenda Híbrida + Hábitos/Streak/Push
+           + Tarefas Recorrentes + Notas Rápidas
+Risco:     Push Notifications (Task 2.6) tem suporte
+           limitado em iOS — degradação graciosa prevista.
+           Tasks 2.8 e 2.9 tocam em tarefas.js existente.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
-**Objetivo:** App visualmente OBSIDIAN, sidebar accordion funcional, componentes reutilizáveis.  
-**Dependências:** Sprint 1 concluída (index.html + estrutura de pastas)  
-**Critério de done da sprint:** Sidebar abre/fecha, paleta OBSIDIAN aplicada, Ctrl+K abre Command Palette
+**Objetivo:** Diferenciais de engajamento: agenda unificada ouro/safira, hábitos com streak e push local, tarefas recorrentes e notas rápidas.
+**Estimativa:** ~12h
+**Dependências:** Sprint 1 concluída (Task 1.11 schema migration desbloqueada)
 
 ---
 
-### Tasks
+### Tasks Sprint 2
 
-- [ ] **T2.1** — Criar `css/tokens.css` com paleta OBSIDIAN completa, espaçamento e variáveis de raio — [S]
-  - Arquivos alvo: `css/tokens.css`
-  - Critério de done: todas as variáveis do AGENTS.md §2.1 definidas; mudar `--color-gold` reflete no app inteiro
-  - Ref: AGENTS.md §2.1, DESIGN-BRIEF.md
+- [ ] **Task 2.1** — Criar `js/modules/agenda-hibrida.js` (base + filtros) — **M** (2h)
+  - Arquivos: `js/modules/agenda-hibrida.js` (novo)
+  - Critério de done: CRUD de eventos com campo `tipo`; filtro Todos/Pessoal/Serviço funcional; reutiliza `DB.getAgenda()` + `Repository.save('agenda', ...)`
+  - Referência: REQ-006, DEC-005
+  - Depende de: Task 1.11 (schema migration)
 
-- [ ] **T2.2** — Criar `css/typography.css` com escala tipográfica Fraunces + Switzer + JetBrains Mono — [S]
-  - Arquivos alvo: `css/typography.css`
-  - Critério de done: `font-family: var(--font-display)` renderiza Fraunces; `--font-mono` renderiza JetBrains Mono
+- [ ] **Task 2.2** — Agenda Híbrida — diferenciação visual ouro/safira — **S** (1h)
+  - Arquivos: `js/modules/agenda-hibrida.js`, `css/pages.css` (ou `negocio.css` para tokens safira)
+  - Critério de done: eventos pessoais com borda/badge ouro `#D4A574`; serviços com borda/badge safira `#6D8EA8`; usa tokens de `tokens.css` (sem hardcode)
+  - Referência: REQ-006
+  - Depende de: Task 2.1
 
-- [ ] **T2.3** — Criar `css/layout.css` com sidebar accordion CSS puro + bottom nav mobile — [M]
-  - Arquivos alvo: `css/layout.css`
-  - Critério de done: grupos da sidebar abrem/fecham com animação suave; bottom nav aparece em < 768px
-  - Ref: design.md DEC-003
+- [ ] **Task 2.3** — Agenda de Serviços — cards com cliente + valor — **S** (1h)
+  - Arquivos: `js/modules/agenda-hibrida.js`
+  - Critério de done: form de evento do tipo "serviço" mostra select de contatos + campo valor (R$); card listado exibe nome do cliente + valor formatado na linha
+  - Referência: REQ-006
+  - Depende de: Task 2.1
 
-- [ ] **T2.4** — Criar `css/components.css` com `.btn`, `.card`, `.badge`, `.input`, `.modal`, `.toast` — [M]
-  - Arquivos alvo: `css/components.css`
-  - Critério de done: componentes renderizam corretamente; `.btn-primary` usa `--color-gold`
+- [ ] **Task 2.4** — Criar `js/modules/habitos.js` (CRUD + streak counter) — **M** (2h)
+  - Arquivos: `js/modules/habitos.js` (novo)
+  - Critério de done: CRUD de hábitos (nome, horário, frequência); marcar como feito incrementa streak; perder um dia zera streak com mensagem motivacional; persiste em `Repository.save('habitos', ...)`
+  - Referência: REQ-007
+  - ‖ Paralelizável com Task 2.10
 
-- [ ] **T2.5** — Criar `css/themes.css` com variáveis do tema claro e toggle funcional — [S]
-  - Arquivos alvo: `css/themes.css`
-  - Critério de done: `document.body.classList.toggle('light')` alterna tema; contraste WCAG AA no tema claro
+- [ ] **Task 2.5** — Hábitos — UI streak visual + calendário de presença — **S** (1h)
+  - Arquivos: `js/modules/habitos.js`, `css/pages.css`
+  - Critério de done: streak exibido com contador numérico e animação CSS leve ao incrementar; calendário semanal de check-ins visível por hábito
+  - Referência: REQ-007
+  - Depende de: Task 2.4
 
-- [ ] **T2.6** — Criar `js/utils/command-palette.js` com Ctrl+K, navegação por teclado e filtro — [M]
-  - Arquivos alvo: `js/utils/command-palette.js`
-  - Critério de done: Ctrl+K abre; ESC fecha; ↑↓ navegam; Enter executa ação; busca filtra em tempo real
-  - Ref: requirements.md REQ-009, design.md COMP-005
+- [ ] **Task 2.6** — Push Notifications — Notification API + fluxo de permissão — **M** (2h)
+  - Arquivos: `js/modules/habitos.js` (ou `js/utils/notifications.js`)
+  - Critério de done: solicita permissão de notificação ao criar hábito com horário; agenda push local no horário; degradação graciosa se permissão negada ou API indisponível (sem erro, sem crash)
+  - Referência: REQ-007, DEC-003
+  - Depende de: Task 2.4
 
-- [ ] **T2.7** — Adicionar Modal e Toast como utils globais — [S]
-  - Arquivos alvo: `js/utils/utils.js` (adicionar Modal e Toast)
-  - Critério de done: `Toast.success('ok')` exibe notificação que some em 3s; `Modal.open(id)` abre modal
+- [ ] **Task 2.7** — Integrar push com hábitos (agendar por hábito) — **S** (1h)
+  - Arquivos: `js/modules/habitos.js`
+  - Critério de done: cada hábito com horário cadastrado dispara notificação no horário usando `setTimeout` calculado até próximo horário do dia; re-agenda após fechar e reabrir o app
+  - Referência: REQ-007
+  - Depende de: Tasks 2.4 + 2.6
 
-- [ ] **T2.8** — Vincular theme toggle ao botão na sidebar/header + salvar preferência — [XS]
-  - Arquivos alvo: `index.html`, `js/core/app.js`
-  - Critério de done: botão alterna tema; preferência persiste no F5 (via `mentor24h.config`)
-  - Ref: requirements.md REQ-010
+- [ ] **Task 2.8** — Campo `recorrencia` em `tarefas.js` + form — **S** (1h)
+  - Arquivos: `js/modules/tarefas.js` (existente)
+  - Critério de done: form de criação de tarefa inclui select de recorrência (Sem recorrência / Diário / Semanal / Mensal); campo salvo no registro
+  - Referência: REQ-008
+  - ‖ Paralelizável com Task 2.1 (schema já migrado em 1.11)
+
+- [ ] **Task 2.9** — Auto-geração de instância recorrente ao concluir tarefa — **S** (1h)
+  - Arquivos: `js/modules/tarefas.js`
+  - Critério de done: ao marcar tarefa com `recorrencia != null` como concluída, o sistema cria nova instância com status `pendente`, herdando todos os campos exceto `id` e `status`; data calculada conforme frequência
+  - Referência: REQ-008
+  - Depende de: Task 2.8
+
+- [ ] **Task 2.10** — Criar `js/modules/notas.js` (CRUD + pin + busca) — **M** (2h)
+  - Arquivos: `js/modules/notas.js` (novo)
+  - Critério de done: CRUD de notas (máx 280 chars); pin sobe nota para o topo; busca textual filtra em tempo real; persiste em `Repository.save('notas', ...)`
+  - Referência: REQ-008
+  - ‖ Paralelizável com Task 2.4
+
+- [ ] **Task 2.11** — Widget de notas no dashboard pessoal — **XS** (30min)
+  - Arquivos: `js/modules/dashboard-pessoal.js`
+  - Critério de done: widget `.nota-widget` exibe até 3 notas pinadas no dashboard pessoal; clique navega para notas
+  - Referência: REQ-008
+  - Depende de: Tasks 1.3 + 2.10
+
+- [ ] **Task 2.12** — Teste manual Sprint 2 — **XS** (30min)
+  - Critério de done: agenda híbrida cria eventos pessoal/serviço com diferenciação visual correta; streak incrementa e zera; push funciona no Chrome desktop; tarefas recorrentes geram próxima instância; notas CRUD completo; widget no dashboard exibe notas pinadas
 
 ---
 
-## SPRINT 3 — Dashboard + Chat AI
+## Sprint 3 — Profundidade de Negócio + Inteligência
 
 ### 🎲 BETTING TABLE — Sprint 3
 
 ```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🎲 Sprint 3 — Apostamos ~1 semana em:
-   Dashboard inteligente + Chat AI multi-provider
-Risco: LLM.js é a task mais complexa — APIs externas variáveis
-Mitigação: OpenRouter é o provider default; outros são fallback
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎲 [BETTING TABLE — Sprint 3]
+Apostamos: ~12h de trabalho
+Em:        Catálogo+Precificação + PDF + Analytics +
+           Assistente Proativo
+Risco:     Task 3.1 (auditoria) pode revelar que módulos
+           de negócio estão mais completos do que
+           esperado — reavaliar escopo das tasks 3.2–3.3.
+           SVG puro (Task 3.8) é estimativa conservadora
+           — pode ser feito em 1h se estrutura de dados
+           estiver bem definida.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
-**Objetivo:** Dashboard com cards dinâmicos. Chat AI funcional com OpenRouter.  
-**Dependências:** Sprint 1 (DB + Router) + Sprint 2 (componentes para Modal/Toast)  
-**Critério de done da sprint:** Dashboard exibe cards reais + Chat AI responde com OpenRouter configurado
+**Objetivo:** Profundidade de negócio para a revendedora: catálogo com precificação, PDF de nota/orçamento, analytics com gráfico SVG, e assistente proativo com insights locais.
+**Estimativa:** ~12h
+**Dependências:** Sprint 1 concluída; Sprint 2 parcialmente (Repository layer ativo)
 
 ---
 
-### Tasks
+### Tasks Sprint 3
 
-- [ ] **T3.1** — Criar `js/modules/dashboard.js` com saudação contextual — [S]
-  - Arquivos alvo: `js/modules/dashboard.js`
-  - Critério de done: "Bom dia/tarde/noite, Léo." aparece com horário correto
-  - Ref: requirements.md REQ-001
+- [ ] **Task 3.1** — Auditar `produtos.js`, `vendas.js`, `clientes.js` (o que existe vs. placeholder) — **XS** (30min)
+  - Arquivos: leitura de `js/modules/produtos.js`, `vendas.js`, `clientes.js`
+  - Critério de done: lista documentada do que já está implementado (CRUD, campos, eventos); confirmar quais campos do schema existem antes de estimar as tasks seguintes
+  - ⚡ Bloqueia Tasks 3.2 e 3.3 — não pular esta etapa
 
-- [ ] **T3.2** — Implementar `buildCards()` no dashboard — cards dinâmicos de medicamentos e agenda — [M]
-  - Arquivos alvo: `js/modules/dashboard.js`
-  - Critério de done: card de medicamentos aparece se há medicamentos hoje; desaparece se não há dados
-  - Ref: requirements.md REQ-001, design.md COMP-004
+- [ ] **Task 3.2** — Campos `custo` e `margemPct` em `produtos.js` + calculadora — **S** (1h)
+  - Arquivos: `js/modules/produtos.js` (existente)
+  - Critério de done: form de produto inclui campos "Preço de custo" e "Margem %"; campo read-only "Preço de venda" calculado em tempo real: `custo × (1 + margemPct/100)`; persiste no registro
+  - Referência: REQ-009
+  - Depende de: Tasks 1.11 + 3.1
 
-- [ ] **T3.3** — Implementar cards de tarefas e finanças no Dashboard — [S]
-  - Arquivos alvo: `js/modules/dashboard.js`
-  - Critério de done: card de tarefas mostra as de alta prioridade; card de finanças mostra saldo total
+- [ ] **Task 3.3** — View de catálogo público (modo leitura) — **M** (2h)
+  - Arquivos: `js/modules/produtos.js` (nova view interna)
+  - Critério de done: botão "Ver catálogo" ativa modo leitura (sem botões de edição/exclusão); exibe foto (via URL), nome, preço de venda; apta para screenshot e compartilhamento
+  - Referência: REQ-009
+  - Depende de: Task 3.2
 
-- [ ] **T3.4** — Criar `js/modules/llm.js` com estrutura base e UI de chat — [M]
-  - Arquivos alvo: `js/modules/llm.js`
-  - Critério de done: página Chat AI renderiza: sidebar de conversas + área de mensagens + input
-  - Ref: requirements.md REQ-002, design.md COMP-003
+- [ ] **Task 3.4** — Template `@media print` nota de venda — **M** (2h)
+  - Arquivos: `css/pages.css` (seção print) ou `css/print.css` (novo)
+  - Critério de done: template HTML de nota de venda com cliente, itens (qtd + preço unitário + subtotal), total, data, dados de contato; CSS `@media print` oculta sidebar/navbar/botões; `window.print()` acionado por botão
+  - Referência: REQ-010, DEC-004
 
-- [ ] **T3.5** — Implementar `callOpenRouter()` em llm.js — [M]
-  - Arquivos alvo: `js/modules/llm.js`
-  - Critério de done: com API key válida do OpenRouter, mensagem enviada retorna resposta da AI
-  - Ref: requirements.md REQ-002
+- [ ] **Task 3.5** — Template `@media print` orçamento — **S** (1h)
+  - Arquivos: `css/pages.css` (ou `print.css`)
+  - Critério de done: variante de orçamento com "válido por X dias"; sem "nota fiscal"; mesmo fluxo de `window.print()`; zero dependências externas
+  - Referência: REQ-010
+  - Depende de: Task 3.4 (reutiliza estrutura base)
 
-- [ ] **T3.6** — Implementar `callOpenAI()`, `callGemini()`, `callClaude()` em llm.js — [S]
-  - Arquivos alvo: `js/modules/llm.js`
-  - Critério de done: trocar provider na config e enviar mensagem usa o provider correto
+- [ ] **Task 3.6** — Criar `js/modules/relatorios.js` (base + relatório financeiro mensal) — **M** (2h)
+  - Arquivos: `js/modules/relatorios.js` (novo)
+  - Critério de done: receita, despesa, lucro do mês atual; delta vs. mês anterior (▲▼%); filtro de período (mês / trimestre / ano); persiste via `Repository.get('transacoes', ...)`
+  - Referência: REQ-011
+  - ‖ Paralelizável com Task 3.9
 
-- [ ] **T3.7** — Histórico de conversas no Chat AI (criar, listar, persistir) — [S]
-  - Arquivos alvo: `js/modules/llm.js`
-  - Critério de done: nova conversa cria entrada em `mentor24h.llm-conversas`; histórico carrega no F5
+- [ ] **Task 3.7** — Top 5 clientes e top 5 produtos — **S** (1h)
+  - Arquivos: `js/modules/relatorios.js`
+  - Critério de done: top 5 clientes ordenados por valor total de vendas; top 5 produtos por quantidade vendida; ambos com barra de progresso proporcional
+  - Referência: REQ-011
+  - Depende de: Task 3.6
 
-- [ ] **T3.8** — Criar `js/modules/config.js` com seção de configuração de LLM — [S]
-  - Arquivos alvo: `js/modules/config.js`
-  - Critério de done: usuário salva API key + provider + modelo em `mentor24h.llm-config`; sem revelar key em texto visível
+- [ ] **Task 3.8** — Gráfico de barras SVG (últimos 6 meses) — **M** (2h)
+  - Arquivos: `js/modules/relatorios.js`
+  - Critério de done: SVG gerado via template literals JS (sem Chart.js); barras mensais com receita dos últimos 6 meses; altura proporcional ao maior valor; rótulo de mês e valor no hover
+  - Referência: REQ-011, DEC-006
+  - Depende de: Task 3.6
 
----
+- [ ] **Task 3.9** — Criar `js/modules/assistente.js` (lógica de insights locais) — **M** (2h)
+  - Arquivos: `js/modules/assistente.js` (novo)
+  - Critério de done: pelo menos 5 tipos de insight implementados (conta vencendo, cliente inativo há 30 dias, meta ≥80% do limite, streak quebrado, próximo serviço em 24h); retorna array de insights; dismiss persiste 7 dias em `insights-dispensados`
+  - Referência: REQ-012
+  - ‖ Paralelizável com Task 3.6
 
-## SPRINT 4 — Módulos Pessoal
+- [ ] **Task 3.10** — UI insights no dashboard (máx 3 cards + botão Dispensar) — **S** (1h)
+  - Arquivos: `js/modules/dashboard-pessoal.js`, `js/modules/painel.js`
+  - Critério de done: até 3 cards de insight no dashboard; cada card tem texto, ação clicável e botão "Dispensar"; dismiss remove por 7 dias sem recarregar a página
+  - Referência: REQ-012
+  - Depende de: Tasks 1.3 + 3.9
 
-### 🎲 BETTING TABLE — Sprint 4
+- [ ] **Task 3.11** — Renomear "IA" → "Assistente" em toda a UI — **XS** (30min)
+  - Arquivos: `index.html`, `js/modules/*.js`, `css/pages.css` (busca por "IA", "AI" em labels/títulos)
+  - Critério de done: zero ocorrência de "IA" ou "AI" em textos de interface visíveis ao usuário; Chat AI pode manter o nome técnico internamente; conforme d013
+  - Referência: REQ-012
 
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🎲 Sprint 4 — Apostamos ~1 semana em:
-   4 módulos pessoais: Agenda, Medicamentos, Tarefas, Contatos
-Risco: 4 módulos em 1 sprint — ritmo alto
-Mitigação: todos seguem o mesmo padrão CRUD; templates reutilizáveis
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
-
-**Objetivo:** Todos os 4 módulos pessoais com CRUD completo.  
-**Dependências:** Sprint 1 (DB + Router) + Sprint 2 (Modal, Toast, componentes)  
-**Critério de done da sprint:** Criar, editar e deletar funciona nos 4 módulos; dados aparecem no Dashboard
-
----
-
-### Tasks
-
-- [ ] **T4.1** — Criar `js/modules/agenda.js` com CRUD de eventos — [S]
-  - Arquivos alvo: `js/modules/agenda.js`
-  - Critério de done: criar evento → aparece na lista; editar → atualiza; deletar → some com confirmação
-  - Ref: requirements.md REQ-004
-
-- [ ] **T4.2** — Integrar Agenda ao Dashboard (card de próximo evento hoje) — [XS]
-  - Arquivos alvo: `js/modules/dashboard.js`
-  - Critério de done: evento de hoje aparece no card do Dashboard
-
-- [ ] **T4.3** — Criar `js/modules/medicamentos.js` com CRUD e marcar como tomado — [S]
-  - Arquivos alvo: `js/modules/medicamentos.js`
-  - Critério de done: medicamento cadastrado → botão "Tomei" → registra dose com timestamp
-  - Ref: requirements.md REQ-005
-
-- [ ] **T4.4** — Integrar Medicamentos ao Dashboard (card com pendentes do dia) — [XS]
-  - Arquivos alvo: `js/modules/dashboard.js`
-  - Critério de done: medicamentos não tomados hoje aparecem no card; "Tudo em dia" quando todos tomados
-
-- [ ] **T4.5** — Criar `js/modules/tarefas.js` com CRUD, prioridade e status — [S]
-  - Arquivos alvo: `js/modules/tarefas.js`
-  - Critério de done: filtro por status funciona; ordenação por prioridade (alta primeiro)
-  - Ref: requirements.md REQ-006
-
-- [ ] **T4.6** — Criar `js/modules/contatos.js` com CRUD e busca por nome — [S]
-  - Arquivos alvo: `js/modules/contatos.js`
-  - Critério de done: busca filtra em tempo real conforme usuário digita
-  - Ref: requirements.md REQ-007
-
-- [ ] **T4.7** — Criar `css/pages.css` com estilos dos 4 módulos pessoais — [S]
-  - Arquivos alvo: `css/pages.css`
-  - Critério de done: listas, formulários e detalhes dos 4 módulos com visual OBSIDIAN consistente
-
-- [ ] **T4.8** — Registrar actions dos 4 módulos no Command Palette — [XS]
-  - Arquivos alvo: `js/utils/command-palette.js`, `js/core/app.js`
-  - Critério de done: Ctrl+K → "nova tarefa" → abre modal de nova tarefa
+- [ ] **Task 3.12** — Teste manual Sprint 3 + checklist sentinela — **S** (1h)
+  - Critério de done: catálogo público sem botões de edição; PDF gera corretamente (sem sidebar visível); relatório financeiro com delta correto; top clientes e gráfico SVG visíveis; assistente exibe insights corretos; dismiss funciona e persiste; zero "IA" na UI; Sentinela autoriza encerramento do ciclo
 
 ---
 
-## SPRINT 5 — Finanças + WhatsApp + Polish
-
-### 🎲 BETTING TABLE — Sprint 5
+## 🔗 Caminho Crítico (CPM)
 
 ```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🎲 Sprint 5 — Apostamos ~1 semana em:
-   Módulos de Finanças + WhatsApp CRM + Polish final
-Risco: WhatsApp tem layout mais complexo (3 colunas)
-Mitigação: Finanças primeiro (padrão CRUD já dominado); WhatsApp ao final
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
+🔗 [CPM — DEPENDÊNCIAS]
 
-**Objetivo:** Finanças funcionais + WhatsApp CRM completo + polish visual.  
-**Dependências:** Sprint 1 (DB) + Sprint 2 (componentes) + Sprint 4 (padrão CRUD consolidado)  
-**Critério de done da sprint:** MVP completo — todas as features do PRD funcionando
+BLOQUEADORES:
+• Task 1.1 "repository.js"      → bloqueia → Tasks 1.3, 1.5 (dashboards)
+• Task 1.3 "dashboard-pessoal"  → bloqueia → Task 1.7 (integrar timeline)
+• Task 1.9 "sw.js"              → bloqueia → Task 1.10 (registrar SW)
+• Task 1.11 "schema migration"  → bloqueia → Tasks 2.1, 2.8 (agenda-hibrida, recorrência)
+• Task 2.1 "agenda-hibrida"     → bloqueia → Tasks 2.2, 2.3 (cores, campos serviço)
+• Task 2.4 "habitos base"       → bloqueia → Tasks 2.5, 2.6, 2.7 (streak, push, integração)
+• Task 3.1 "auditoria módulos"  → bloqueia → Tasks 3.2, 3.3 (catálogo, precificação)
+• Task 3.6 "relatorios base"    → bloqueia → Tasks 3.7, 3.8 (top + SVG)
+• Task 3.9 "assistente"         → bloqueia → Task 3.10 (UI insights)
 
----
-
-### Tasks
-
-- [ ] **T5.1** — Criar `js/modules/contas.js` com CRUD de contas bancárias — [S]
-  - Arquivos alvo: `js/modules/contas.js`
-  - Critério de done: criar conta → saldo exibido; saldo negativo destacado em `--color-error`
-  - Ref: requirements.md REQ-008
-
-- [ ] **T5.2** — Criar `js/modules/transacoes.js` com CRUD e atualização de saldo — [M]
-  - Arquivos alvo: `js/modules/transacoes.js`
-  - Critério de done: nova transação (receita/despesa) → saldo da conta atualiza automaticamente
-  - Ref: requirements.md REQ-008
-
-- [ ] **T5.3** — Criar `js/modules/metas.js` com CRUD e barra de progresso — [S]
-  - Arquivos alvo: `js/modules/metas.js`
-  - Critério de done: meta com valor-alvo e valor atual exibe % de progresso; 80%+ usa `--color-warning`
-  - Ref: requirements.md REQ-008
-
-- [ ] **T5.4** — Criar `js/modules/kanban.js` com colunas de planejamento financeiro — [S]
-  - Arquivos alvo: `js/modules/kanban.js`
-  - Critério de done: cards movem entre colunas (A fazer / Em andamento / Concluído)
-
-- [ ] **T5.5** — Criar `js/modules/chat-wa.js` com lista de contatos e conversa simulada — [M]
-  - Arquivos alvo: `js/modules/chat-wa.js`
-  - Critério de done: lista de contatos CRM + clicar abre conversa + balões estilo WhatsApp
-  - Ref: requirements.md REQ-003
-
-- [ ] **T5.6** — Implementar CRM lateral e busca de contatos no chat-wa.js — [S]
-  - Arquivos alvo: `js/modules/chat-wa.js`
-  - Critério de done: painel CRM aparece ao lado da conversa (desktop); busca filtra contatos em tempo real
-  - Ref: requirements.md REQ-003
-
-- [ ] **T5.7** — Adicionar Export JSON em Config + aviso de uso do localStorage — [S]
-  - Arquivos alvo: `js/modules/config.js`
-  - Critério de done: botão "Exportar dados" faz download de `mentor24h-backup.json`; barra de uso exibe % usado
-  - Ref: CONSTITUTION.md SEC-5, requirements.md (Req. Não-Funcionais)
-
-- [ ] **T5.8** — Polish: microinterações, motion.css, revisão de contraste e responsividade mobile — [M]
-  - Arquivos alvo: `css/tokens.css` (motion vars), todos os `.css`
-  - Critério de done: Lighthouse ≥ 90 em Performance + Accessibility; app funcional em 375px
-  - Ref: DESIGN-BRIEF.md (microinterações), PRD.md §5 (critérios de sucesso)
-
----
-
-## Caminho Crítico (CPM)
-
-```
-🔗 [DEPENDÊNCIAS — MENTOR24H]
-
-BLOQUEADORES (task B não inicia sem task A):
-  T1.2 (DB) ──────────────────────────────→ todas as sprints 3, 4, 5
-  T1.3 (Router) ───────────────────────────→ T2.3, T2.6 (navegação)
-  T1.7 (index.html) ───────────────────────→ T2.1 (tokens.css precisa do HTML)
-  T2.1 (tokens.css) ───────────────────────→ T2.4 (components precisam dos tokens)
-  T2.4 (components) ───────────────────────→ T3.4 (LLM UI usa Modal/Toast)
-  T3.4 (LLM UI) ───────────────────────────→ T3.5 (call API depende da UI existir)
-
-PARALELIZÁVEIS (podem rodar ao mesmo tempo):
-  T2.1 ‖ T2.2  (tokens + typography — independentes entre si)
-  T4.1 ‖ T4.3 ‖ T4.5 ‖ T4.6  (4 módulos pessoais — mesmo padrão CRUD)
-  T5.1 ‖ T5.3 ‖ T5.4  (contas, metas, kanban — independentes)
+PARALELIZÁVEIS:
+• Task 1.3 (dashboard-pessoal) ‖ Task 1.5 (painel-negocio)   — após Task 1.1
+• Task 1.8 (manifest.json)     ‖ Task 1.9 (sw.js)
+• Task 1.5 (painel)            ‖ Task 1.6 (timeline)
+• Task 2.4 (habitos)           ‖ Task 2.10 (notas)
+• Task 2.8 (recorrência)       ‖ Task 2.1 (agenda-hibrida)
+• Task 3.6 (relatorios)        ‖ Task 3.9 (assistente)
+• Task 3.4 (nota PDF)          ‖ Task 3.6 (relatorios)
 
 SPRINT CRÍTICA: Sprint 1
-  → Maior densidade de bloqueadores
-  → DB e Router devem estar perfeitos antes de qualquer outra sprint
-
-CAMINHO CRÍTICO PRINCIPAL:
-T1.2 → T3.4 → T3.5 → T3.6 → T3.7
-(fundação → LLM UI → OpenRouter → outros providers → histórico)
+  — maior densidade de bloqueadores
+  — Tasks 1.1 e 1.11 bloqueiam ambas as sprints seguintes
+  — Tasks 1.2 e 1.10 requerem ⚠️ Ask (arquivos core)
 ```
 
 ---
 
-## Checklist de Done por Sprint
+## Resumo de Estimativas
 
-| Sprint | Critério de Aceite Global |
-|--------|--------------------------|
-| Sprint 1 | `Router.navigate()` funciona + DB persiste dados no F5 |
-| Sprint 2 | Paleta OBSIDIAN aplicada + Ctrl+K funcional |
-| Sprint 3 | Dashboard com cards reais + AI responde com OpenRouter |
-| Sprint 4 | 4 módulos pessoais com CRUD completo |
-| Sprint 5 | MVP completo + Lighthouse ≥ 90 + Export JSON funcional |
+| Sprint | Tasks | Estimativa | Entrega |
+|--------|-------|-----------|---------|
+| Sprint 1 — Fundação + Núcleo Dual | 12 | ~12h | Repository + Dashboards + PWA |
+| Sprint 2 — Engajamento | 12 | ~12h | Agenda Híbrida + Hábitos + Notas |
+| Sprint 3 — Negócio + Inteligência | 12 | ~12h | Catálogo + PDF + Analytics + Assistente |
+| **Total** | **36** | **~36h** | |
+
+> 36 tasks de 36h = dentro do appetite L (máx 76 tasks).
+> Todas as tasks ≤ 2h (atômicas).
+> 3 tasks requerem ⚠️ Ask: 1.2 (db.js), 1.10 (app.js), 1.11 (db.js).

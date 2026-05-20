@@ -152,7 +152,10 @@
       ],
       "appetite_impacto": "Libera ~40% do esforço que iria para infraestrutura de produto",
       "responsible": "Léo",
-      "status": "APPROVED",
+      "status": "SUPERSEDED",
+      "superseded_by": "d013",
+      "superseded_at": "2026-05-20",
+      "superseded_note": "Produto pivotou de uso pessoal (1 usuário) para SaaS comercial multi-usuário com autenticação e mensalidade. Ver d013.",
       "resolves_question": "q001"
     },
     {
@@ -183,6 +186,112 @@
       "alternativas_consideradas": ["Manter como placeholders no MVP", "Implementar apenas Produtos no MVP"],
       "appetite_impacto": "Economiza ~1.5 sprints. Reaproveitamento se Léo começar a vender (Fase 2).",
       "responsible": "Auditor + Léo (aprovação)",
+      "status": "SUPERSEDED",
+      "superseded_by": "d013",
+      "superseded_at": "2026-05-20",
+      "superseded_note": "Negócio voltou a ser central: ICP agora é a revendedora (Avon/Natura) e os módulos de negócio foram implementados. Ver d013."
+    },
+    {
+      "id": "d013",
+      "date": "2026-05-20",
+      "skill": "skill-consultor",
+      "fase": "Validação Estratégica v5.2 — Pivô de Produto",
+      "title": "Pivô: de ferramenta de uso pessoal para SaaS comercial multi-usuário",
+      "context": "Na evolução v5.2, Léo confirmou que o Mentor24h terá autenticação de usuários, mensalidade acessível (não será 100% grátis) e mira uma base ampla de usuários. Isso inverte d010 (uso pessoal, sem auth, sem billing) e revisa d012 (cortar negócio).",
+      "decision": "Reposicionar o Mentor24h como SaaS comercial para o mercado brasileiro de autônomos. ICP primário (Sprint 1): revendedora autônoma (Avon/Natura); secundário: autônomo de serviço. Modelo de negócio: assinatura freemium.",
+      "rationale": "O público de revendedora tem dores que mapeiam exatamente na promessa híbrida (pessoal + negócio), é numeroso, subatendido e networkado (potencial viral). Os módulos de negócio já foram implementados, contrariando d012 na prática.",
+      "alternativas_consideradas": [
+        "Manter como uso pessoal (d010) — descartado: Léo decidiu comercializar",
+        "Manter 5 públicos amplos — descartado: foco difuso mata adoção (risco R1)"
+      ],
+      "appetite_impacto": "Define o foco dos 3 sprints (appetite L) no núcleo dual + diferenciais para a revendedora",
+      "responsible": "Léo",
+      "status": "APPROVED",
+      "supersedes": ["d010"],
+      "revises": ["d012"]
+    },
+    {
+      "id": "d014",
+      "date": "2026-05-20",
+      "skill": "skill-consultor",
+      "fase": "Validação Estratégica v5.2 — Arquitetura de Dados",
+      "title": "Supabase + Auth depois do ciclo; camada de dados abstraída obrigatória no Sprint 1",
+      "context": "Léo confirmou que Supabase + autenticação entram DEPOIS destes 3 sprints. Construir as features sobre localStorage sem abstração causaria reescrita na migração.",
+      "decision": "O Sprint 1 deve entregar uma CAMADA DE DADOS ABSTRAÍDA (repository/adapter): nenhum módulo de UI acessa localStorage diretamente. A modelagem já prevê 'dono' (user_id) para o Auth futuro. Durante os 3 sprints a persistência segue em localStorage.",
+      "rationale": "Isolar a persistência atrás de um adapter torna a migração localStorage→Supabase uma troca de implementação, não uma reescrita dos 34+ módulos. Cumpre o migration_path já previsto em d004.",
+      "alternativas_consideradas": [
+        "Antecipar Supabase no MVP — descartado: quebra offline-first e adiciona dependência cedo demais",
+        "Construir direto em localStorage sem abstração — descartado: gera reescrita massiva na Fase 2"
+      ],
+      "appetite_impacto": "Task #1 do Sprint 1, bloqueia as demais; protege os 3 sprints de retrabalho",
+      "responsible": "Léo + Claude",
+      "status": "APPROVED",
+      "evolves": ["d004"]
+    },
+    {
+      "id": "d016",
+      "date": "2026-05-20",
+      "skill": "skill-planner",
+      "fase": "Planejamento v5.2 — Arquitetura",
+      "title": "Repository/Adapter pattern: módulos novos via repository.js, módulos existentes via DB.*",
+      "decision": "Criar js/core/repository.js como thin wrapper sobre DB.*. Módulos v5.2 usam Repository.*; módulos existentes (agenda.js, tarefas.js etc.) continuam usando DB.* sem alteração. Migração aditiva, zero regressão.",
+      "rationale": "d014 exige isolamento da persistência. Reescrever db.js para interface Supabase-compatible geraria risco alto de regressão nos 34+ módulos já funcionando. O adapter resolve o requisito com impacto mínimo.",
+      "alternativas_consideradas": [
+        "Refatorar db.js para interface Supabase-compatible (risco de regressão alto)",
+        "Não abstrair (gera reescrita massiva na migração Supabase)"
+      ],
+      "appetite_impacto": "+1.5 dias no Sprint 1 (Task 1.1 + 1.2); protege todos os sprints futuros",
+      "responsible": "skill-planner",
+      "status": "APPROVED",
+      "evolves": ["d014"]
+    },
+    {
+      "id": "d017",
+      "date": "2026-05-20",
+      "skill": "skill-planner",
+      "fase": "Planejamento v5.2 — Módulos",
+      "title": "Agenda Híbrida como módulo novo (agenda-hibrida.js), não reescrita de agenda.js",
+      "decision": "Criar js/modules/agenda-hibrida.js novo que reutiliza DB.getAgenda() e extende o schema com tipo/cliente/valor via migração não-destrutiva (Task 1.11). agenda.js existente permanece intocado.",
+      "rationale": "agenda.js está funcional e validado. Reescrevê-lo geraria risco de regressão numa feature já aprovada. O módulo híbrido é uma view unificada que agrega os mesmos dados com campos extras.",
+      "alternativas_consideradas": [
+        "Reescrever agenda.js (risco de regressão)",
+        "Schema separado para serviços (duplicidade de dados)"
+      ],
+      "appetite_impacto": "Sem impacto no appetite — dentro das 12 tasks do Sprint 2",
+      "responsible": "skill-planner",
+      "status": "APPROVED"
+    },
+    {
+      "id": "d018",
+      "date": "2026-05-20",
+      "skill": "skill-planner",
+      "fase": "Planejamento v5.2 — Analytics",
+      "title": "Charts via SVG puro em JS; PDF via window.print() — zero dependências externas",
+      "decision": "Gráfico de barras (relatorios.js) gerado com SVG via template literals JavaScript. PDF de nota/orçamento via CSS @media print + window.print().",
+      "rationale": "AGENTS.md veda libs externas não previstas no PRD. Chart.js (+60KB) e jsPDF são desnecessários para o escopo atual. SVG puro é acessível e controlável; window.print() não tem dependências.",
+      "alternativas_consideradas": [
+        "Chart.js: dependência externa, viola política de zero deps",
+        "jsPDF/html2canvas: pesado, sem fidelidade garantida"
+      ],
+      "appetite_impacto": "Zero — simplicidade reduz risco de Tasks 3.4 e 3.8",
+      "responsible": "skill-planner",
+      "status": "APPROVED"
+    },
+    {
+      "id": "d015",
+      "date": "2026-05-20",
+      "skill": "skill-consultor",
+      "fase": "Validação Estratégica v5.2 — Monetização",
+      "title": "Monetização freemium + Vitrine da Comunidade na Fase Escala",
+      "context": "Léo planeja propaganda em pontos estratégicos do app e ativação de geolocalização, contando com uma base ampla de usuários.",
+      "decision": "Modelo freemium: propaganda apenas no tier grátis, removida no tier pago. A propaganda será uma VITRINE DA COMUNIDADE (os próprios usuários divulgam, monetizada por destaque), não anúncios de terceiros. Geolocalização e vitrine ficam na FASE ESCALA (fora destes 3 sprints), com consentimento opt-in e conformidade LGPD.",
+      "rationale": "Anúncio em app pago contradiz o premium — freemium resolve (ad vira incentivo para assinar). Vitrine da comunidade gera network effect, alinha com o ICP e conecta com Catálogo (S3) + geo. Anúncio de terceiros exige escala que ainda não existe (hoje: localhost, 2 usuários).",
+      "alternativas_consideradas": [
+        "Anúncios de terceiros (AdSense) — adiado: exige escala e polui o premium",
+        "Incluir ads/geo nos 3 sprints — descartado: depende de Supabase+Auth+escala"
+      ],
+      "appetite_impacto": "Zero impacto nos 3 sprints atuais; é visão de Fase Escala",
+      "responsible": "Léo",
       "status": "APPROVED"
     }
   ],
@@ -216,9 +325,9 @@
   "metadata": {
     "created_at": "2026-05-11",
     "created_by": "skill-scaffolder v5.1",
-    "last_updated_at": "2026-05-12",
-    "last_updated_by": "skill-consultor v5.2",
-    "version": "1.1",
+    "last_updated_at": "2026-05-20",
+    "last_updated_by": "skill-planner v5.1",
+    "version": "1.3",
     "forge_version": "5.2"
   }
 }

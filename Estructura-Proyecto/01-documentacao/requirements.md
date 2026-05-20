@@ -1,6 +1,10 @@
-# requirements.md — Mentor24h
-**Forge v5.2** | Appetite: M (4-6 semanas) | Gerado por: skill-planner v5.1  
-**Data:** 2026-05-12 | **Status:** ✅ APROVADO
+# requirements.md — Mentor24h v5.2
+**Forge v5.2** | Appetite: L (3 sprints) | Gerado por: skill-planner v5.1
+**Data:** 2026-05-20 | **Supersede:** versão 2026-05-12 (appetite M, uso pessoal)
+**Input:** STRATEGIC-BRIEF.md (skill-consultor · 2026-05-20 · idea-20260520-mentor24h-evolucao-6901)
+
+> ⚠️ Esta versão reflete o pivô estratégico d013: Mentor24h é SaaS comercial com ICP = revendedora autônoma.
+> O PRD.md original (appetite M, uso pessoal) está desatualizado — atualização via skill-consultor recomendada.
 
 ---
 
@@ -9,240 +13,233 @@ Sintaxe: "QUANDO [evento], O [ator] DEVE [requisito] PARA [sistema/objetivo]"
 
 ---
 
-## REQ-001 — Dashboard Inteligente
+## REQ-001 — Camada de Dados Abstraída
 
-**User Story:** Como Léo, quero ver um resumo inteligente do meu dia ao abrir o app para tomar decisões rápidas sem navegar por várias telas.
+**User Story:** Como desenvolvedor do Mentor24h, quero que todos os módulos acessem dados por um repositório centralizado para que a migração para Supabase não exija reescrita dos 34+ módulos.
 
 **Requisitos EARS:**
-- QUANDO o usuário abre o app, O dashboard DEVE exibir uma saudação contextual com nome e horário ("Bom dia, Léo").
-- QUANDO há medicamentos programados para hoje, O dashboard DEVE exibir card de medicamentos com horários pendentes.
-- QUANDO há eventos na agenda hoje, O dashboard DEVE exibir card de agenda com o próximo evento.
-- QUANDO há tarefas pendentes, O dashboard DEVE exibir card de tarefas com as de alta prioridade primeiro.
-- QUANDO não há dados em uma categoria, O dashboard NÃO DEVE exibir o card daquela categoria (sem cards vazios).
+- QUANDO qualquer módulo precisa ler ou gravar dados, O sistema DEVE rotear essa operação por `repository.js` sem chamar `localStorage` diretamente.
+- QUANDO o repository grava um registro, O sistema DEVE incluir automaticamente `createdAt`, `updatedAt` e `user_id: 'local'` para compatibilidade futura com Auth.
+- QUANDO ocorre falha na operação de leitura, O repository DEVE retornar array vazio (nunca `null` ou `undefined`).
 
 **Critérios de Aceite:**
-- [ ] Saudação muda conforme horário (manhã/tarde/noite)
-- [ ] Cards aparecem somente quando têm conteúdo
-- [ ] Layout bento se adapta ao número de cards ativos
-- [ ] Carrega em menos de 500ms
+- [ ] Nenhum módulo novo chama `localStorage.getItem/setItem` diretamente — tudo via `Repository.*` ou `DB.*`
+- [ ] Todos os novos registros possuem `createdAt`, `updatedAt`, `user_id: 'local'`
+- [ ] Migração para Supabase = substituir implementação interna do repository sem tocar nos módulos
+- [ ] Módulos existentes não são quebrados (db.js continua funcional)
 
-**Fora do escopo (appetite M):**
-- Widgets customizáveis pelo usuário → Fase 2
-- Notificações push → Fase 2
+**Fora do escopo (appetite L):**
+- Auth/login real → entra após estes 3 sprints
+- Sincronização com Supabase → Fase Escala
 
 ---
 
-## REQ-002 — Chat AI Multi-Provider
+## REQ-002 — Dashboard Pessoal
 
-**User Story:** Como Léo, quero conversar com uma IA usando minha própria API key para ter acesso a modelos poderosos sem assinar mais um serviço.
+**User Story:** Como revendedora autônoma, quero ver meu dia de forma inteligente ao abrir o app para saber o que importa agora sem precisar navegar por páginas.
 
 **Requisitos EARS:**
-- QUANDO o usuário abre Chat AI sem API key configurada, O sistema DEVE exibir tela de setup com instruções claras.
-- QUANDO o usuário configura uma API key válida, O sistema DEVE salvar em localStorage (mentor24h.llm-config) e iniciar conversa.
-- QUANDO o usuário envia uma mensagem, O sistema DEVE exibir indicador de loading e a resposta em bubbles estilo chat.
-- QUANDO a API retorna erro, O sistema DEVE exibir mensagem de erro clara com opção de tentar novamente.
-- QUANDO o usuário cria uma nova conversa, O sistema DEVE salvar o histórico da conversa anterior em mentor24h.llm-conversas.
+- QUANDO o usuário abre o modo Pessoal, O `dashboard-pessoal.js` DEVE exibir cards dinâmicos com dados reais (tarefas do dia, medicamentos, saldo do mês, próximo evento, hábitos em destaque).
+- QUANDO não há dados em uma seção (ex: nenhuma tarefa hoje), O dashboard DEVE omitir o card correspondente — sem card vazio.
+- QUANDO o usuário clica em um card do dashboard, O sistema DEVE navegar para o módulo correspondente.
 
 **Critérios de Aceite:**
-- [ ] Suporte a 4 providers: OpenRouter, OpenAI, Gemini, Claude
-- [ ] Histórico de conversas persiste após recarregar página
-- [ ] Loading state visível durante chamada à API
-- [ ] Erro de CORS documentado e usuário orientado a usar OpenRouter
-- [ ] API key nunca aparece em texto visível na UI
+- [ ] Saudação dinâmica (Bom dia/tarde/noite) funciona nos 3 períodos
+- [ ] Cards aparecem apenas quando há conteúdo relevante
+- [ ] Clique nos cards navega para o módulo correto
+- [ ] Layout bento responsivo funciona em mobile (320px+)
+- [ ] CSS usa classes `.dp-*` definidas em `css/dashboard-pessoal.css`
 
-**Fora do escopo (appetite M):**
-- Streaming de resposta (token a token) → Fase 2
-- Upload de arquivos/imagens para AI → Fase 2
+**Fora do escopo:**
+- Sincronização com Google Calendar → Fase Escala
 
 ---
 
-## REQ-003 — WhatsApp CRM Simulado
+## REQ-003 — Painel de Negócio
 
-**User Story:** Como Léo, quero gerenciar contatos e conversas num CRM estilo WhatsApp para ter histórico e notas sobre cada pessoa.
+**User Story:** Como revendedora autônoma, quero ver os KPIs do meu negócio (receitas, clientes, temperatura, atividade recente) no painel para tomar decisões rápidas sem abrir relatórios.
 
 **Requisitos EARS:**
-- QUANDO o usuário abre WhatsApp CRM, O sistema DEVE exibir lista de contatos com última mensagem e badges de não lidas.
-- QUANDO o usuário clica em um contato, O sistema DEVE exibir conversa com balões estilo WhatsApp (eu = direita, contato = esquerda).
-- QUANDO o usuário clica em um contato (desktop), O sistema DEVE exibir painel CRM lateral com nome, telefone, tags e notas.
-- QUANDO o usuário adiciona uma nota, O sistema DEVE salvar em mentor24h.chat-contatos.
-- QUANDO há mensagens não lidas, O sistema DEVE exibir badge com contador na lista de contatos.
+- QUANDO o usuário entra em modo Negócio, O `painel.js` DEVE exibir 4 KPI cards com dados reais do mês atual.
+- QUANDO não há transações no mês, O KPI de receita DEVE exibir "R$ 0,00" com estado vazio descritivo.
+- QUANDO há clientes com temperatura "VIP" ou "Quente", O painel DEVE destacar esse dado visualmente em relação aos demais.
 
 **Critérios de Aceite:**
-- [ ] Layout 3 colunas (desktop) / lista→conversa (mobile)
-- [ ] Busca de contatos por nome
-- [ ] Tags editáveis por contato
-- [ ] Aviso visível: "Interface simulada — conecte WhatsApp Business API nas Configurações"
-- [ ] Dados persistem em localStorage
-
-**Fora do escopo (appetite M):**
-- WhatsApp Business API real → Fase 2
-- Envio real de mensagens → Fase 2
+- [ ] 4 KPIs reais: Receita do mês, Clientes ativos, Temperatura dominante, Atividade recente
+- [ ] Atividade recente exibe últimas 5 transações com valor formatado em R$
+- [ ] CSS usa classes `.pn-*` definidas em `css/painel-negocio.css`
+- [ ] Estado vazio elegante quando não há dados de negócio
 
 ---
 
-## REQ-004 — Agenda Pessoal
+## REQ-004 — Timeline do Dia
 
-**User Story:** Como Léo, quero registrar eventos com data, hora e descrição para não perder compromissos importantes.
+**User Story:** Como usuária do app, quero ver uma linha do tempo do meu dia no dashboard para saber o que acontece nas próximas horas sem precisar abrir a agenda.
 
 **Requisitos EARS:**
-- QUANDO o usuário cria um evento, O sistema DEVE salvar com id único, data, hora, título e descrição em mentor24h.agenda.
-- QUANDO há eventos hoje, O dashboard DEVE exibir o próximo evento com horário.
-- QUANDO o usuário edita um evento, O sistema DEVE atualizar updatedAt e refletir na lista imediatamente.
-- QUANDO o usuário deleta um evento, O sistema DEVE pedir confirmação antes de remover.
+- QUANDO o dashboard pessoal é renderizado, O `timeline.js` DEVE exibir somente os horários que têm eventos (agenda pessoal + serviços de negócio) das próximas 24h.
+- QUANDO não há eventos nas próximas 24h, O widget DEVE exibir mensagem "Dia livre" com estado vazio elegante.
+- QUANDO um evento é do tipo serviço, O timeline DEVE diferenciá-lo com cor safira (`#6D8EA8`); eventos pessoais usam ouro (`#D4A574`).
 
 **Critérios de Aceite:**
-- [ ] CRUD completo (criar, ler, editar, deletar)
-- [ ] Visualização de eventos por data
-- [ ] Eventos do dia aparecem no Dashboard
-- [ ] Confirmação antes de deletar
-
-**Fora do escopo (appetite M):**
-- Integração com Google Calendar → Fase 2
-- Notificações de evento → Fase 2
+- [ ] Widget aparece abaixo dos KPI cards no dashboard pessoal
+- [ ] Exibe apenas horários com eventos (sem linhas vazias)
+- [ ] Cor semântica: ouro pessoal, safira serviço
+- [ ] Clique no evento navega para a agenda
 
 ---
 
-## REQ-005 — Medicamentos
+## REQ-005 — PWA Instalável
 
-**User Story:** Como Léo, quero registrar medicamentos com horários para nunca esquecer de tomá-los.
+**User Story:** Como revendedora que usa principalmente o celular, quero instalar o Mentor24h na tela inicial para acessar sem abrir o browser.
 
 **Requisitos EARS:**
-- QUANDO o usuário cadastra um medicamento, O sistema DEVE salvar nome, horário e frequência em mentor24h.medicamentos.
-- QUANDO há medicamentos programados para hoje, O dashboard DEVE exibir card com os pendentes.
-- QUANDO o usuário marca um medicamento como tomado, O sistema DEVE registrar em mentor24h.med-doses com timestamp.
-- QUANDO todos os medicamentos do dia estão marcados, O card do dashboard DEVE indicar "Tudo em dia".
+- QUANDO o usuário acessa o app por um browser compatível, O sistema DEVE apresentar o prompt de instalação do PWA após interação com o app.
+- QUANDO o app está instalado como PWA, O sistema DEVE funcionar offline com o conteúdo cacheado da última sessão.
+- QUANDO o Service Worker detecta uma nova versão implantada, O sistema DEVE notificar com toast "Nova versão disponível — recarregue".
 
 **Critérios de Aceite:**
-- [ ] CRUD de medicamentos
-- [ ] Marcar como tomado com timestamp
-- [ ] Histórico de doses por dia
-- [ ] Card no Dashboard com status do dia
-
-**Fora do escopo (appetite M):**
-- Alarmes/notificações push → Fase 2
-- Integração com farmácia → Fase 3
+- [ ] `manifest.json` válido (ícones 192px + 512px, `theme_color`, `display: standalone`)
+- [ ] Service Worker registrado com cache-first para assets estáticos (`.html`, `.css`, `.js`)
+- [ ] App funciona offline após primeira carga conectada
+- [ ] Lighthouse PWA score ≥ 80
+- [ ] `apple-touch-icon` configurado para iOS
 
 ---
 
-## REQ-006 — Tarefas
+## REQ-006 — Agenda Híbrida
 
-**User Story:** Como Léo, quero gerenciar tarefas com prioridade e status para saber o que fazer primeiro.
+**User Story:** Como revendedora, quero ver meus compromissos pessoais e de serviço (com cliente e valor) numa agenda unificada para não perder nenhum encontro.
 
 **Requisitos EARS:**
-- QUANDO o usuário cria uma tarefa, O sistema DEVE salvar com título, descrição, prioridade (alta/média/baixa) e status (pendente) em mentor24h.tarefas.
-- QUANDO o usuário muda o status de uma tarefa, O sistema DEVE refletir a mudança imediatamente na lista.
-- QUANDO há tarefas de alta prioridade pendentes, O dashboard DEVE exibi-las no card de tarefas.
-- QUANDO o usuário filtra por status, O sistema DEVE mostrar apenas as tarefas do status selecionado.
+- QUANDO o usuário acessa a Agenda Híbrida, O sistema DEVE exibir eventos pessoais e de serviço com diferenciação visual por cor (ouro pessoal / safira serviço).
+- QUANDO o usuário cria um evento de serviço, O sistema DEVE solicitar campos adicionais: cliente (select de contatos) e valor (R$).
+- QUANDO o usuário aplica filtro por tipo, O sistema DEVE exibir apenas os eventos do tipo selecionado (Todos / Pessoal / Serviço).
+- QUANDO um card de serviço é listado, O sistema DEVE exibir nome do cliente e valor na linha do card.
 
 **Critérios de Aceite:**
-- [ ] CRUD completo com prioridade e status
-- [ ] Filtro por status (pendente / em andamento / concluído)
-- [ ] Tarefas urgentes aparecem no Dashboard
-- [ ] Ordenação por prioridade
-
-**Fora do escopo (appetite M):**
-- Subtarefas → Fase 2
-- Compartilhamento de tarefas → Fase 2
+- [ ] Dois tipos de evento: `pessoal` e `servico`
+- [ ] Cards de serviço mostram cliente + valor formatado
+- [ ] Filtro por tipo (Todos / Pessoal / Serviço) funcional
+- [ ] Cor semântica: ouro `#D4A574` pessoal, safira `#6D8EA8` serviço
+- [ ] Vista dia/semana/mês funciona com ambos os tipos
 
 ---
 
-## REQ-007 — Contatos
+## REQ-007 — Hábitos + Streak + Push Notifications
 
-**User Story:** Como Léo, quero manter uma agenda de contatos com informações de contexto para não depender do celular para lembrar quem é quem.
+**User Story:** Como usuária que quer criar rotinas, quero registrar hábitos diários e receber lembretes no horário certo para manter minha consistência.
 
 **Requisitos EARS:**
-- QUANDO o usuário adiciona um contato, O sistema DEVE salvar nome, telefone, email e tags em mentor24h.contatos.
-- QUANDO o usuário busca um contato, O sistema DEVE filtrar por nome em tempo real.
-- QUANDO o usuário edita um contato, O sistema DEVE atualizar updatedAt.
+- QUANDO o usuário cadastra um hábito com horário, O sistema DEVE solicitar permissão de notificação e agendar um push local via `Notification API`.
+- QUANDO o usuário marca um hábito como feito no dia, O sistema DEVE incrementar o streak e exibir feedback visual de celebração.
+- QUANDO o usuário perde um dia de streak, O streak DEVE ser zerado com mensagem motivacional (nunca punitiva).
+- QUANDO a Notification API não está disponível no browser, O sistema DEVE funcionar sem notificações (degradação graciosa).
 
 **Critérios de Aceite:**
-- [ ] CRUD completo
-- [ ] Busca por nome em tempo real
-- [ ] Tags customizáveis por contato
-- [ ] Exibição em lista com iniciais como avatar
-
-**Fora do escopo (appetite M):**
-- Sync com contatos do celular → Fase 2
-- Foto de perfil → Fase 2
+- [ ] CRUD de hábitos: nome, horário, frequência (diário / semanal)
+- [ ] Streak contador visível por hábito
+- [ ] Push local funciona no Chrome desktop
+- [ ] Widget de hábitos no dashboard pessoal (máx 3 hábitos em destaque)
+- [ ] Degradação graciosa em browsers sem Notification API (sem erro, sem crash)
 
 ---
 
-## REQ-008 — Finanças (Contas, Transações, Metas, Kanban)
+## REQ-008 — Tarefas Recorrentes + Notas Rápidas
 
-**User Story:** Como Léo, quero registrar minhas finanças pessoais para ter visão clara do saldo e gastos.
+**User Story:** Como revendedora, quero criar tarefas que se repetem automaticamente e anotar ideias rápidas sem sair da tela atual.
 
 **Requisitos EARS:**
-- QUANDO o usuário cria uma conta, O sistema DEVE salvar nome, banco, saldo inicial e tipo em mentor24h.contas.
-- QUANDO o usuário registra uma transação, O sistema DEVE atualizar o saldo da conta e salvar em mentor24h.transacoes.
-- QUANDO o saldo de uma conta fica negativo, O sistema DEVE destacar visualmente o valor em vermelho (--color-error).
-- QUANDO o usuário cria uma meta, O sistema DEVE salvar valor-alvo, valor atual e data-limite em mentor24h.metas.
-- QUANDO uma meta atinge 80% ou mais, O sistema DEVE destacar com cor de alerta (--color-warning).
+- QUANDO o usuário conclui uma tarefa com campo `recorrencia` preenchido, O sistema DEVE gerar automaticamente a próxima instância com status `pendente`.
+- QUANDO a próxima instância é gerada, O sistema DEVE herdar todos os campos da tarefa original exceto `status` e `id`.
+- QUANDO o usuário aciona o atalho de nota rápida, O sistema DEVE abrir um input flutuante sem navegar para outra página.
 
 **Critérios de Aceite:**
-- [ ] CRUD de contas com saldo atualizado a cada transação
-- [ ] Transações categorizada (alimentação, transporte, saúde, etc.)
-- [ ] Metas com barra de progresso
-- [ ] Kanban de planejamento financeiro
-- [ ] Saldo negativo destacado em vermelho
-
-**Fora do escopo (appetite M):**
-- Importação de extrato bancário (OFX/CSV) → Fase 2
-- Relatórios gráficos → Fase 2
+- [ ] Campo `recorrencia: null | 'daily' | 'weekly' | 'monthly'` em `tarefas.js`
+- [ ] Auto-geração da próxima instância ao concluir tarefa recorrente
+- [ ] Notas rápidas: CRUD com pin, busca e máx 280 caracteres por nota
+- [ ] Widget de notas no dashboard pessoal
 
 ---
 
-## REQ-009 — Command Palette (Ctrl+K)
+## REQ-009 — Catálogo Digital + Precificação
 
-**User Story:** Como Léo, quero acessar qualquer ação do app via teclado para ser mais produtivo sem usar o mouse.
+**User Story:** Como revendedora da Avon/Natura, quero ter meu catálogo de produtos com preço de custo e margem calculada para precificar corretamente e apresentar para clientes.
 
 **Requisitos EARS:**
-- QUANDO o usuário pressiona Ctrl+K (ou ⌘K no Mac), O sistema DEVE abrir o Command Palette imediatamente.
-- QUANDO o usuário digita no campo de busca, O sistema DEVE filtrar ações em tempo real (debounce 150ms).
-- QUANDO o usuário pressiona Enter em uma ação, O sistema DEVE executar a ação e fechar o palette.
-- QUANDO o usuário pressiona ESC, O sistema DEVE fechar o Command Palette.
-- QUANDO o Command Palette está aberto, O sistema DEVE interceptar navegação por teclado (↑↓ para navegar entre opções).
+- QUANDO o usuário define custo e margem percentual de um produto, O sistema DEVE calcular e exibir automaticamente o preço de venda sugerido.
+- QUANDO o usuário acessa a view de catálogo, O sistema DEVE exibir os produtos com foto (URL), nome e preço de venda — sem botões de edição (modo leitura).
 
 **Critérios de Aceite:**
-- [ ] Abre com Ctrl+K / ⌘K
-- [ ] Fecha com ESC e clique fora
-- [ ] Navegação por teclado (↑↓ + Enter)
-- [ ] Filtro em tempo real nas ações
-- [ ] Ações: navegar para qualquer página + criar novo (evento, medicamento, tarefa, contato, transação)
-
-**Fora do escopo (appetite M):**
-- Comandos customizáveis pelo usuário → Fase 2
-- Busca em conteúdo (pesquisa em todas as tarefas) → Fase 2
+- [ ] Produtos ganham campos `custo` e `margemPct` (migração não-destrutiva — existentes não afetados)
+- [ ] Fórmula: `precoVenda = custo × (1 + margemPct / 100)`
+- [ ] View de catálogo público ativável por botão "Ver catálogo"
+- [ ] Foto via URL (sem upload de arquivo no MVP)
 
 ---
 
-## REQ-010 — Theme Toggle (dark/light)
+## REQ-010 — Nota de Venda + Orçamento PDF
 
-**User Story:** Como Léo, quero alternar entre tema escuro e claro para usar o app em qualquer ambiente de iluminação.
+**User Story:** Como revendedora, quero gerar um documento de venda ou orçamento para compartilhar pelo WhatsApp sem precisar de sistema externo.
 
 **Requisitos EARS:**
-- QUANDO o usuário clica no botão de tema, O sistema DEVE alternar entre dark (OBSIDIAN) e light imediatamente.
-- QUANDO o tema é alterado, O sistema DEVE salvar a preferência em localStorage (mentor24h.config).
-- QUANDO o usuário abre o app novamente, O sistema DEVE restaurar o tema salvo anteriormente.
+- QUANDO o usuário solicita gerar PDF de uma venda, O sistema DEVE renderizar um template HTML com CSS `@media print` e acionar `window.print()`.
+- QUANDO o PDF é gerado, O documento DEVE incluir: nome do cliente, itens (quantidade + preço), total, data e dados de contato do negócio.
+- QUANDO a impressão é acionada, O sistema DEVE ocultar todos os elementos do app (sidebar, navbar, botões) e exibir apenas o documento formatado.
 
 **Critérios de Aceite:**
-- [ ] Alternância instantânea sem reload
-- [ ] Preferência persiste entre sessões
-- [ ] Tema claro legível com contraste mínimo WCAG AA
+- [ ] Template de nota de venda com `@media print` funcional
+- [ ] Template de orçamento (com "válido por X dias", sem "nota fiscal")
+- [ ] CSS print oculta sidebar, navbar e botões do app
+- [ ] Totais calculados corretamente (subtotal + total)
+- [ ] Zero dependências externas (sem jsPDF ou html2canvas)
 
-**Fora do escopo (appetite M):**
-- Temas customizados → Fase 3
-- Sync com preferência do sistema operacional → Fase 2
+---
+
+## REQ-011 — Analytics e Relatórios
+
+**User Story:** Como revendedora, quero ver relatórios de vendas, top clientes e gráfico de desempenho para entender meu negócio e tomar decisões.
+
+**Requisitos EARS:**
+- QUANDO o usuário acessa Relatórios, O sistema DEVE exibir resumo financeiro do mês: receita, despesa, lucro e comparação com mês anterior.
+- QUANDO o sistema lista top clientes, O sistema DEVE ordenar por valor total comprado e exibir os 5 primeiros.
+- QUANDO o gráfico de vendas é exibido, O sistema DEVE usar SVG gerado em JavaScript puro (sem bibliotecas externas) com barras mensais dos últimos 6 meses.
+
+**Critérios de Aceite:**
+- [ ] Relatório financeiro: receita / despesa / lucro do mês + delta vs. mês anterior (▲▼%)
+- [ ] Top 5 clientes por valor total de vendas
+- [ ] Top 5 produtos por quantidade vendida
+- [ ] Gráfico de barras SVG gerado em JS puro (sem Chart.js ou similar)
+- [ ] Filtro de período: mês atual, trimestre, ano
+
+---
+
+## REQ-012 — Assistente Proativo
+
+**User Story:** Como usuária, quero que o app me mostre insights relevantes automaticamente para perceber padrões que eu não veria sozinha.
+
+**Requisitos EARS:**
+- QUANDO o app é carregado e há dados de uso (≥7 dias), O assistente DEVE exibir até 3 insights no dashboard como cards não-intrusivos.
+- QUANDO o assistente detecta um padrão relevante, O sistema DEVE gerar um insight com ação sugerida clicável (ex: "conta vence amanhã → Ver contas").
+- QUANDO o usuário dispensa um insight, O sistema DEVE não exibi-lo novamente por 7 dias.
+
+**Critérios de Aceite:**
+- [ ] Máx 3 insights simultâneos no dashboard
+- [ ] Pelo menos 5 tipos implementados: conta vencendo, cliente inativo, meta no limite, streak quebrado, próximo serviço
+- [ ] Botão "Dispensar" por insight (sumir por 7 dias via localStorage)
+- [ ] Rebatizado de "IA" → "Assistente" em toda a UI (conforme d013)
+- [ ] Funciona 100% offline (lógica local em `assistente.js`, sem chamada LLM)
 
 ---
 
 ## Requisitos Não-Funcionais
 
 | Requisito | Meta | Critério de Aceite |
-|-----------|------|--------------------|
-| Performance | Carregamento inicial < 1.5s | Lighthouse Performance > 90 |
-| Acessibilidade | WCAG AA mínimo | Contraste mínimo 4.5:1 em todos os textos |
-| Segurança | XSS prevenido | escapeHtml() em todo conteúdo dinâmico |
-| Disponibilidade | Funciona offline | App carrega sem internet (assets locais) |
-| Compatibilidade | Browsers modernos | Chrome 90+, Firefox 90+, Safari 14+ |
-| Responsividade | Mobile-first | Layout funcional em 375px+ |
-| Dados | Export manual | Botão "Exportar JSON" em Configurações |
+|---|---|---|
+| Performance | Carregamento inicial < 1.5s | Lighthouse Performance ≥ 85 |
+| PWA | Instalável + offline | Lighthouse PWA ≥ 80 |
+| Acessibilidade | WCAG AA mínimo | Sem erros críticos no axe-core |
+| Segurança | SEC-1 a SEC-5 (Constitution) | Sentinela aprova antes de marcar done |
+| Offline-first | App funciona sem internet | Cache-first SW ativo |
+| Responsividade | 320px a 1440px+ | Sem layout quebrado em nenhum breakpoint |
+| Escalabilidade de dados | Supabase-ready | Todos os registros têm `user_id` + timestamps |
