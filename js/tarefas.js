@@ -49,6 +49,15 @@ const Tarefas = (() => {
             <input id="trf-f-data" type="date">
           </div>
         </div>
+        <div class="field">
+          <label class="field-label">Recorrência</label>
+          <select id="trf-f-recorrencia">
+            <option value="">Sem recorrência</option>
+            <option value="diario">Diário</option>
+            <option value="semanal">Semanal</option>
+            <option value="mensal">Mensal</option>
+          </select>
+        </div>
         <div style="display:flex;gap:var(--s-3);justify-content:flex-end">
           <button class="btn btn-ghost" id="trf-cancel-btn">Cancelar</button>
           <button class="btn btn-primary" id="trf-save-btn">
@@ -99,7 +108,9 @@ const Tarefas = (() => {
       btn.addEventListener('click', () => {
         const t = DB.getTarefas().find(t => t.id === btn.dataset.trfToggle);
         if (!t) return;
-        DB.saveTarefa({ id: t.id, status: t.status === 'concluida' ? 'pendente' : 'concluida' });
+        const novoStatus = t.status === 'concluida' ? 'pendente' : 'concluida';
+        DB.saveTarefa({ id: t.id, status: novoStatus });
+        if (novoStatus === 'concluida' && t.recorrencia) _gerarProxima(t);
         renderLista();
         Icons.render(el);
       });
@@ -122,6 +133,7 @@ const Tarefas = (() => {
     const done = t.status === 'concluida';
     const priColors = { alta: 'badge-red', media: 'badge-amber', baixa: 'badge-green' };
     const priLabels = { alta: 'Alta', media: 'Média', baixa: 'Baixa' };
+    const recLabels = { diario: '↻ Diário', semanal: '↻ Semanal', mensal: '↻ Mensal' };
     return `
       <div class="trf-item${done ? ' done' : ''}">
         <button class="trf-check" data-trf-toggle="${esc(t.id)}" title="${done ? 'Reabrir' : 'Concluir'}">
@@ -132,6 +144,7 @@ const Tarefas = (() => {
           ${t.descricao ? `<div class="trf-desc">${esc(t.descricao)}</div>` : ''}
           ${t.data ? `<div class="trf-data"><span data-icon="calendar" data-size="10"></span> ${t.data.split('-').reverse().join('/')}</div>` : ''}
         </div>
+        ${t.recorrencia ? `<span class="trf-rec-badge badge-green">${esc(recLabels[t.recorrencia] || t.recorrencia)}</span>` : ''}
         <span class="trf-pri-badge ${priColors[t.prioridade] || 'badge-amber'}">${priLabels[t.prioridade] || 'Média'}</span>
         <button class="trf-del" data-del-trf="${esc(t.id)}" title="Remover">
           <span data-icon="x" data-size="14"></span>
@@ -174,9 +187,10 @@ const Tarefas = (() => {
 
     DB.saveTarefa({
       titulo,
-      descricao: document.getElementById('trf-f-desc')?.value.trim() || '',
-      prioridade: document.getElementById('trf-f-pri')?.value || 'media',
-      data:       document.getElementById('trf-f-data')?.value || null,
+      descricao:   document.getElementById('trf-f-desc')?.value.trim() || '',
+      prioridade:  document.getElementById('trf-f-pri')?.value || 'media',
+      data:        document.getElementById('trf-f-data')?.value || null,
+      recorrencia: document.getElementById('trf-f-recorrencia')?.value || null,
       status: 'pendente',
     });
 
@@ -187,6 +201,20 @@ const Tarefas = (() => {
     Toast.success('Tarefa criada', titulo);
     renderLista();
     Icons.render(document.getElementById('trf-lista'));
+  }
+
+  function _gerarProxima(t) {
+    const { id, status, createdAt, updatedAt, recorrencia, data, ...campos } = t;
+    const novaData = _calcularProximaData(data, recorrencia);
+    DB.saveTarefa({ ...campos, recorrencia, data: novaData, status: 'pendente' });
+  }
+
+  function _calcularProximaData(dataBase, recorrencia) {
+    const d = dataBase ? new Date(dataBase + 'T00:00:00') : new Date();
+    if (recorrencia === 'diario')   d.setDate(d.getDate() + 1);
+    else if (recorrencia === 'semanal')  d.setDate(d.getDate() + 7);
+    else if (recorrencia === 'mensal')   d.setMonth(d.getMonth() + 1);
+    return d.toISOString().slice(0, 10);
   }
 
   return { render };

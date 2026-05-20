@@ -1,0 +1,17 @@
+{
+  "task": "2.8",
+  "sprint": 2,
+  "timestamp": "2026-05-20T15:50:00.000Z",
+  "tipo": "after",
+  "status": "concluida",
+  "arquivos_alterados": [
+    {
+      "caminho": "js/tarefas.js",
+      "linhas_depois": 221,
+      "delta": "+28 linhas"
+    }
+  ],
+  "testes_passando": true,
+  "leis_aplicadas": ["SEC-05", "SEC-07"],
+  "nota": "Tasks 2.8+2.9 juntas: form com select recorrencia (Sem/Diario/Semanal/Mensal), campo salvo no registro, badge exibido no card. _gerarProxima() chamada ao concluir tarefa com recorrencia: clona campos, calcula proxima data, salva nova instancia com status=pendente."
+}

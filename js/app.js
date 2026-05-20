@@ -332,8 +332,11 @@ const App = (() => {
     Router.register('contatos',   () => Contatos.render());
     Router.register('produtos',   () => Produtos.render());
     Router.register('vendas',     () => Vendas.render());
-    Router.register('estoque',    () => Estoque.render());
-    Router.register('clientes',   () => Clientes.render());
+    Router.register('estoque',         () => Estoque.render());
+    Router.register('clientes',        () => Clientes.render());
+    Router.register('agenda-hibrida',  () => AgendaHibrida.render());
+    Router.register('habitos',         () => Habitos.render());
+    Router.register('notas',           () => Notas.render());
     Router.init();
   }
 

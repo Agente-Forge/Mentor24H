@@ -1,0 +1,8 @@
+{
+  "task": "2.3",
+  "sprint": 2,
+  "timestamp": "2026-05-20T15:21:00.000Z",
+  "tipo": "after",
+  "status": "concluida_sem_modificacao",
+  "nota": "Campos clienteId, clienteNome e valor ja implementados em agenda-hibrida.js (Task 2.1). Select de contatos carrega DB.getContatos() filtrado por contexto=cliente. Valor formatado como R$ X,XX no card. Nenhuma alteracao necessaria."
+}

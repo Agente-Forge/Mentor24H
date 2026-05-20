@@ -1,0 +1,13 @@
+{
+  "task": "2.10",
+  "sprint": 2,
+  "timestamp": "2026-05-20T16:00:00.000Z",
+  "tipo": "after",
+  "status": "concluida",
+  "arquivos_alterados": [
+    {"caminho": "js/modules/notas.js", "linhas_depois": 179, "delta": "+179 linhas (novo arquivo)"}
+  ],
+  "testes_passando": true,
+  "leis_aplicadas": ["SEC-05", "SEC-07"],
+  "nota": "CRUD via Repository.save/get/remove. Pin sobe notas para o topo. Busca textual em tempo real. Max 280 chars com contador. Ctrl+Enter salva. widget(limit) exposta para dashboard (Task 2.11). CSS em pages.css (Task 2.2)."
+}

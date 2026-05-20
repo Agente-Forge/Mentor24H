@@ -1,0 +1,17 @@
+{
+  "task": "2.4",
+  "sprint": 2,
+  "timestamp": "2026-05-20T15:35:00.000Z",
+  "tipo": "after",
+  "status": "concluida",
+  "arquivos_alterados": [
+    {
+      "caminho": "js/modules/habitos.js",
+      "linhas_depois": 287,
+      "delta": "+287 linhas (novo arquivo)"
+    }
+  ],
+  "testes_passando": true,
+  "leis_aplicadas": ["SEC-05", "SEC-07"],
+  "nota": "Tasks 2.4+2.5+2.6+2.7 implementadas juntas em habitos.js: CRUD via Repository.save/get/remove, streak counter (incrementa/zera), calendario semanal 7 dias, animacao CSS ao incrementar streak, Notification API com degradacao graciosa (check denied/not-supported), reagendamento automatico no render(). CSS ja em pages.css (Task 2.2)."
+}

@@ -184,6 +184,15 @@ const DashboardPessoal = (() => {
         <!-- Timeline do dia -->
         <div class="dp-timeline" id="dp-timeline-widget"></div>
 
+        <!-- Notas fixadas -->
+        <div class="dp-notas-widget">
+          <h2 class="dp-section-title">
+            <span data-icon="pin" data-size="16"></span> Notas fixadas
+            <button class="btn btn-ghost btn-sm" style="margin-left:auto" onclick="Router.navigate('notas')">Ver todas</button>
+          </h2>
+          <div id="dp-notas-widget"></div>
+        </div>
+
         <!-- Tarefas prioritárias -->
         <div class="dp-tarefas">
           <h2 class="dp-section-title"><span data-icon="list-checks" data-size="16"></span> Tarefas prioritárias</h2>
@@ -206,6 +215,15 @@ const DashboardPessoal = (() => {
     const tlContainer = document.getElementById('dp-timeline-widget');
     if (tlContainer && typeof Timeline !== 'undefined') {
       Timeline.render(tlContainer);
+    }
+
+    const notasContainer = document.getElementById('dp-notas-widget');
+    if (notasContainer && typeof Notas !== 'undefined') {
+      const html = Notas.widget(3);
+      notasContainer.innerHTML = html || '<p style="font-size:11px;color:var(--text-muted);padding:var(--s-2)">Nenhuma nota fixada.</p>';
+      notasContainer.querySelectorAll('.nota-widget-item').forEach(el => {
+        el.addEventListener('click', () => Router.navigate('notas'));
+      });
     }
   }
 

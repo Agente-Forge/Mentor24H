@@ -1,0 +1,17 @@
+{
+  "task": "2.2",
+  "sprint": 2,
+  "timestamp": "2026-05-20T15:20:00.000Z",
+  "tipo": "after",
+  "status": "concluida",
+  "arquivos_alterados": [
+    {
+      "caminho": "css/pages.css",
+      "linhas_depois": 5248,
+      "delta": "+237 linhas"
+    }
+  ],
+  "testes_passando": true,
+  "leis_aplicadas": ["SEC-05"],
+  "nota": "Adicionado CSS: AgendaHibrida (.ah-*), Habitos (.hab-*), Notas (.nota-*). Zero hardcode hex — tudo via var(--color-gold), var(--info), var(--error). CSS de habitos e notas incluido antecipadamente para evitar re-edicao do pages.css."
+}

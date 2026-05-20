@@ -1,0 +1,13 @@
+{
+  "task": "2.11",
+  "sprint": 2,
+  "timestamp": "2026-05-20T16:08:00.000Z",
+  "tipo": "after",
+  "status": "concluida",
+  "arquivos_alterados": [
+    {"caminho": "js/modules/dashboard-pessoal.js", "linhas_depois": 231, "delta": "+18 linhas"}
+  ],
+  "testes_passando": true,
+  "leis_aplicadas": ["SEC-05"],
+  "nota": "Widget .nota-widget-item: ate 3 notas pinadas via Notas.widget(3). Clique navega para Router.navigate('notas'). Estado vazio com mensagem. Degradacao graciosa se Notas nao existir (typeof check)."
+}

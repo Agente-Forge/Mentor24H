@@ -1,0 +1,1 @@
+{"task":"2.7","sprint":2,"timestamp":"2026-05-20T15:35:00.000Z","tipo":"after","status":"concluida_sem_modificacao","nota":"_reagendarTodos() chamado no render() — ao reabrir o app todos os habitos com hora ativa disparam novo setTimeout calculado ate proximo horario do dia. Integrado em habitos.js (Task 2.4)."}

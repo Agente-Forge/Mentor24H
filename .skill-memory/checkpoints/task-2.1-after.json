@@ -1,0 +1,17 @@
+{
+  "task": "2.1",
+  "sprint": 2,
+  "timestamp": "2026-05-20T15:10:00.000Z",
+  "tipo": "after",
+  "status": "concluida",
+  "arquivos_alterados": [
+    {
+      "caminho": "js/modules/agenda-hibrida.js",
+      "linhas_depois": 228,
+      "delta": "+228 linhas (novo arquivo)"
+    }
+  ],
+  "testes_passando": true,
+  "leis_aplicadas": ["SEC-05", "SEC-07"],
+  "nota": "CRUD agenda com filtros Todos/Pessoal/Servico. Leitura via DB.getAgenda(), escrita via Repository.save('agenda'). Campos servico (clienteId, clienteNome, valor) ocultos quando tipo=pessoal. CSS classes .ah-item--pessoal/.ah-item--servico aguardam Task 2.2."
+}

@@ -1,0 +1,10 @@
+{
+  "task": "2.11",
+  "sprint": 2,
+  "timestamp": "2026-05-20T16:02:00.000Z",
+  "tipo": "before",
+  "arquivos_que_serao_alterados": [
+    {"caminho": "js/modules/dashboard-pessoal.js", "linhas_antes": 213}
+  ],
+  "working_memory_snapshot": {"task_atual": "2.11", "sprint_numero": 2}
+}

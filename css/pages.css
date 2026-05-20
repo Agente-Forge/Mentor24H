@@ -5009,3 +5009,240 @@
   color: var(--color-gold);
   transform: translateY(-1px);
 }
+
+/* ═══════════════════════════════════════════════════════════
+   AGENDA HÍBRIDA — Sprint 2
+═══════════════════════════════════════════════════════════ */
+
+.ah-item {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-4);
+  background: var(--bg-secondary);
+  border-radius: var(--radius);
+  border-left: 3px solid transparent;
+  margin-bottom: var(--s-3);
+  transition: border-color var(--d-fast), background var(--d-fast);
+}
+.ah-item:hover { background: var(--bg-tertiary, var(--bg-secondary)); }
+
+.ah-item--pessoal { border-left-color: var(--color-gold); }
+.ah-item--servico { border-left-color: var(--info); }
+
+.ah-badge {
+  flex-shrink: 0;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+.ah-badge--pessoal {
+  background: color-mix(in srgb, var(--color-gold) 15%, transparent);
+  color: var(--color-gold);
+}
+.ah-badge--servico {
+  background: color-mix(in srgb, var(--info) 15%, transparent);
+  color: var(--info);
+}
+
+.ah-item-body { flex: 1; min-width: 0; }
+.ah-item-titulo {
+  font-size: var(--t-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ah-item-meta {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.ah-del {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  padding: var(--s-1);
+  border-radius: var(--radius-sm);
+  opacity: 0;
+  transition: opacity var(--d-fast), color var(--d-fast);
+}
+.ah-item:hover .ah-del { opacity: 1; }
+.ah-del:hover { color: var(--error); }
+
+/* ═══════════════════════════════════════════════════════════
+   HÁBITOS — Sprint 2
+═══════════════════════════════════════════════════════════ */
+
+.hab-item {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-4);
+  background: var(--bg-secondary);
+  border-radius: var(--radius);
+  margin-bottom: var(--s-3);
+  transition: background var(--d-fast);
+}
+.hab-item:hover { background: var(--bg-tertiary, var(--bg-secondary)); }
+
+.hab-check-btn {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid var(--color-gold);
+  background: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-gold);
+  transition: background var(--d-fast), color var(--d-fast);
+}
+.hab-check-btn.feito {
+  background: var(--color-gold);
+  color: var(--bg-primary);
+}
+
+.hab-body { flex: 1; min-width: 0; }
+.hab-nome {
+  font-size: var(--t-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.hab-meta {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.hab-streak {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+}
+.hab-streak-num {
+  font-size: var(--t-lg);
+  font-weight: 700;
+  color: var(--color-gold);
+  line-height: 1;
+}
+.hab-streak-label {
+  font-size: 9px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+@keyframes hab-streak-pulse {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.3); }
+  100% { transform: scale(1); }
+}
+.hab-streak-num.animar { animation: hab-streak-pulse 0.4s ease; }
+
+.hab-del {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  padding: var(--s-1);
+  border-radius: var(--radius-sm);
+  opacity: 0;
+  transition: opacity var(--d-fast), color var(--d-fast);
+}
+.hab-item:hover .hab-del { opacity: 1; }
+.hab-del:hover { color: var(--error); }
+
+/* Calendário semanal de check-ins */
+.hab-cal {
+  display: flex;
+  gap: 4px;
+  margin-top: var(--s-2);
+}
+.hab-cal-day {
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  background: var(--bg-tertiary, rgba(255,255,255,0.05));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+.hab-cal-day.feito {
+  background: color-mix(in srgb, var(--color-gold) 25%, transparent);
+  color: var(--color-gold);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   NOTAS RÁPIDAS — Sprint 2
+═══════════════════════════════════════════════════════════ */
+
+.nota-item {
+  padding: var(--s-4);
+  background: var(--bg-secondary);
+  border-radius: var(--radius);
+  margin-bottom: var(--s-3);
+  position: relative;
+  border-left: 3px solid transparent;
+  transition: border-color var(--d-fast), background var(--d-fast);
+}
+.nota-item:hover { background: var(--bg-tertiary, var(--bg-secondary)); }
+.nota-item.pinada { border-left-color: var(--color-gold); }
+
+.nota-texto {
+  font-size: var(--t-sm);
+  color: var(--text-primary);
+  line-height: 1.5;
+  word-break: break-word;
+}
+.nota-meta {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: var(--s-2);
+  display: flex;
+  gap: var(--s-3);
+  align-items: center;
+}
+.nota-pin-btn, .nota-del-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px;
+  color: var(--text-muted);
+  border-radius: 4px;
+  transition: color var(--d-fast);
+}
+.nota-pin-btn:hover { color: var(--color-gold); }
+.nota-del-btn:hover { color: var(--error); }
+.nota-pin-btn.ativa { color: var(--color-gold); }
+
+/* Widget de notas no dashboard pessoal */
+.nota-widget-item {
+  padding: var(--s-3);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--s-2);
+  font-size: var(--t-sm);
+  color: var(--text-secondary);
+  border-left: 2px solid var(--color-gold);
+  cursor: pointer;
+  transition: background var(--d-fast);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.nota-widget-item:hover { background: var(--bg-tertiary, var(--bg-secondary)); }
