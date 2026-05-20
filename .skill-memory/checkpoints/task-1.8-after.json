@@ -1,0 +1,1 @@
+{"task":"1.8","sprint":1,"timestamp":"2026-05-20T00:00:00.000Z","tipo":"after","status":"concluida","arquivos_alterados":[{"caminho":"manifest.json","linhas_depois":35,"delta":"+35"},{"caminho":"index.html","delta":"+4 linhas (manifest link + apple-touch + repository.js + timeline.js)"}],"testes_passando":true,"leis_aplicadas":["SEC-05"]}

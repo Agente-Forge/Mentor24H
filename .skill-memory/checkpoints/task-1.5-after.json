@@ -1,0 +1,13 @@
+{
+  "task": "1.5",
+  "sprint": 1,
+  "timestamp": "2026-05-20T00:00:00.000Z",
+  "tipo": "after",
+  "status": "concluida_sem_modificacao",
+  "nota": "painel.js ja estava completo e funcional. Criterio de done 100% atingido sem reescrever. Divergencia do PAE prompt (dizia placeholder) vs realidade (codigo completo).",
+  "criterio_verificado": {
+    "4_kpis_reais": true,
+    "ultimas_5_transacoes": true,
+    "estado_vazio_elegante": true
+  }
+}

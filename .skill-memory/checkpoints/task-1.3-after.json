@@ -1,0 +1,23 @@
+{
+  "task": "1.3",
+  "sprint": 1,
+  "timestamp": "2026-05-20T00:00:00.000Z",
+  "tipo": "after",
+  "status": "concluida",
+  "arquivos_alterados": [
+    {
+      "caminho": "js/modules/dashboard-pessoal.js",
+      "hash_depois": "bugs_corrigidos",
+      "linhas_depois": 206,
+      "delta": "-1 linha (saude simplificado)",
+      "bugs_corrigidos": [
+        "DB.getEventos -> DB.getAgenda",
+        "DB.getSaude -> null (Sprint 2)",
+        "DB.updateTarefa -> DB.saveTarefa"
+      ]
+    }
+  ],
+  "testes_passando": true,
+  "security_pre_check": "executado",
+  "leis_aplicadas": ["SEC-05", "SEC-07"]
+}

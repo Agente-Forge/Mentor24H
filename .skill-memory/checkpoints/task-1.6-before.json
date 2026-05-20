@@ -1,0 +1,13 @@
+{
+  "task": "1.6",
+  "sprint": 1,
+  "timestamp": "2026-05-20T00:00:00.000Z",
+  "tipo": "before",
+  "arquivos_que_serao_alterados": [
+    {
+      "caminho": "js/modules/timeline.js",
+      "hash_antes": "NAO_EXISTE",
+      "linhas_antes": 0
+    }
+  ]
+}

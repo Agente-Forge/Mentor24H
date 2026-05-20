@@ -1,0 +1,1 @@
+{"task":"1.9","sprint":1,"timestamp":"2026-05-20T00:00:00.000Z","tipo":"after","status":"concluida","arquivos_alterados":[{"caminho":"sw.js","linhas_depois":98,"delta":"+98"}],"testes_passando":true,"leis_aplicadas":["SEC-05"],"nota":"Agnostico para Supabase: hook push definido sem logica acoplada"}

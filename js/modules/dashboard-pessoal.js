@@ -31,7 +31,7 @@ const DashboardPessoal = (() => {
   /* ─── Widget: Agenda ─── */
   function buildWidgetAgenda() {
     let eventos = [];
-    try { eventos = (DB.getEventos ? DB.getEventos() : []) || []; } catch (_) {}
+    try { eventos = (DB.getAgenda ? DB.getAgenda() : []) || []; } catch (_) {}
     const hoje = new Date().toISOString().slice(0, 10);
     const hoje_eventos = eventos.filter(e => (e.data || e.inicio || '').slice(0, 10) === hoje);
     const proxEvent = hoje_eventos[0];
@@ -48,8 +48,7 @@ const DashboardPessoal = (() => {
 
   /* ─── Widget: Saúde ─── */
   function buildWidgetSaude() {
-    let saude = null;
-    try { saude = DB.getSaude ? DB.getSaude() : null; } catch (_) {}
+    const saude = null; /* saúde integrada no Sprint 2 */
     if (saude && saude.passos) {
       const perc = Math.min(100, Math.round((saude.passos / (saude.meta || 10000)) * 100));
       return `
@@ -139,9 +138,9 @@ const DashboardPessoal = (() => {
 
   function concluirTarefa(checkbox) {
     const id = checkbox.dataset.id;
-    if (!id || !DB.updateTarefa) return;
+    if (!id || !DB.saveTarefa) return;
     try {
-      DB.updateTarefa(id, { status: 'concluida' });
+      DB.saveTarefa({ id, status: 'concluida' });
       const item = checkbox.closest('.dp-tarefa-item');
       if (item) item.classList.add('dp-tarefa--concluida');
     } catch (_) {}
@@ -182,6 +181,9 @@ const DashboardPessoal = (() => {
           ${buildWidgetContatos()}
         </div>
 
+        <!-- Timeline do dia -->
+        <div class="dp-timeline" id="dp-timeline-widget"></div>
+
         <!-- Tarefas prioritárias -->
         <div class="dp-tarefas">
           <h2 class="dp-section-title"><span data-icon="list-checks" data-size="16"></span> Tarefas prioritárias</h2>
@@ -200,6 +202,11 @@ const DashboardPessoal = (() => {
 
     Icons.render();
     bindNota();
+
+    const tlContainer = document.getElementById('dp-timeline-widget');
+    if (tlContainer && typeof Timeline !== 'undefined') {
+      Timeline.render(tlContainer);
+    }
   }
 
   return { render, concluirTarefa };

@@ -24,6 +24,7 @@ const DB = (() => {
     chatMsgs:     'mentor24h.chat-msgs',
     llmConfig:    'mentor24h.llm-config',
     llmConversas: 'mentor24h.llm-conversas',
+    schemaVersion:'mentor24h.schema-version',
   };
 
   function read(k, def = []) {
@@ -839,6 +840,70 @@ const DB = (() => {
   }
   function deleteLlmConversa(id) { write(KEY.llmConversas, read(KEY.llmConversas, []).filter(c => c.id !== id)); }
 
+  /* ═══ SCHEMA MIGRATIONS ═══ */
+  function runMigrations() {
+    const v = parseInt(localStorage.getItem(KEY.schemaVersion) || '1', 10);
+
+    if (v < 2) {
+      /* v1 → v2: agenda ganha tipo/clienteId/valor;
+                  tarefas ganha recorrencia;
+                  produtos ganha custo/margemPct */
+      const agenda = read(KEY.agenda, []);
+      if (agenda.length) {
+        write(KEY.agenda, agenda.map(ev =>
+          Object.assign({ tipo: null, clienteId: null, valor: null }, ev)
+        ));
+      }
+
+      const tarefas = read(KEY.tarefas, []);
+      if (tarefas.length) {
+        write(KEY.tarefas, tarefas.map(t =>
+          Object.assign({ recorrencia: null }, t)
+        ));
+      }
+
+      const produtos = read(KEY.produtos, []);
+      if (produtos.length) {
+        write(KEY.produtos, produtos.map(p =>
+          Object.assign({ custo: null, margemPct: null }, p)
+        ));
+      }
+
+      localStorage.setItem(KEY.schemaVersion, '2');
+    }
+  }
+
+  /* Rodar migrations na carga do módulo */
+  runMigrations();
+
+  /* ═══ GENERIC CRUD (usado pelo Repository) ═══ */
+  function getAll(collection) {
+    const k = KEY[collection] || ('mentor24h.' + collection);
+    return read(k, []);
+  }
+
+  function getById(collection, id) {
+    return getAll(collection).find(x => x.id === id) || null;
+  }
+
+  function save(collection, item) {
+    const k = KEY[collection] || ('mentor24h.' + collection);
+    const arr = read(k, []);
+    const idx = arr.findIndex(x => x.id === item.id);
+    if (idx >= 0) {
+      arr[idx] = item;
+    } else {
+      arr.push(item);
+    }
+    write(k, arr);
+    return item;
+  }
+
+  function remove(collection, id) {
+    const k = KEY[collection] || ('mentor24h.' + collection);
+    write(k, read(k, []).filter(x => x.id !== id));
+  }
+
   return {
     getConfig, saveConfig,
     getCategorias, getCategoria, saveCategoria, deleteCategoria,
@@ -862,5 +927,7 @@ const DB = (() => {
     getLlmConversas, saveLlmConversa, deleteLlmConversa,
     exportAll, importAll, clearAll,
     seed, isSeeded,
+    getAll, getById, save, remove,
+    runMigrations,
   };
 })();

@@ -1,0 +1,18 @@
+{
+  "task": "1.1",
+  "sprint": 1,
+  "timestamp": "2026-05-20T00:00:00.000Z",
+  "tipo": "after",
+  "status": "concluida",
+  "arquivos_alterados": [
+    {
+      "caminho": "js/repository.js",
+      "hash_depois": "CRIADO",
+      "linhas_depois": 45,
+      "delta": "+45 linhas"
+    }
+  ],
+  "testes_passando": true,
+  "security_pre_check": "executado",
+  "leis_aplicadas": ["SEC-05"]
+}

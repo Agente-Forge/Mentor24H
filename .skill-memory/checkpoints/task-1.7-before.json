@@ -1,0 +1,13 @@
+{
+  "task": "1.7",
+  "sprint": 1,
+  "timestamp": "2026-05-20T00:00:00.000Z",
+  "tipo": "before",
+  "arquivos_que_serao_alterados": [
+    {
+      "caminho": "js/modules/dashboard-pessoal.js",
+      "hash_antes": "versao_pos_task_1.3",
+      "linhas_antes": 206
+    }
+  ]
+}

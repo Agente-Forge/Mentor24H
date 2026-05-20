@@ -1,0 +1,17 @@
+{
+  "task": "1.3",
+  "sprint": 1,
+  "timestamp": "2026-05-20T00:00:00.000Z",
+  "tipo": "before",
+  "arquivos_que_serao_alterados": [
+    {
+      "caminho": "js/modules/dashboard-pessoal.js",
+      "hash_antes": "linha_33_DB.getEventos_linha_52_DB.getSaude_linha_142_DB.updateTarefa",
+      "linhas_antes": 207
+    }
+  ],
+  "working_memory_snapshot": {
+    "task_atual": "1.3",
+    "sprint_numero": 1
+  }
+}
