@@ -19,7 +19,7 @@ const App = (() => {
     Icons.render();
 
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js')
+      navigator.serviceWorker.register('./sw.js')
         .then(reg => {
           reg.addEventListener('updatefound', () => {
             Toast.info('Nova versão disponível!', 'Atualize a página para aplicar.');
