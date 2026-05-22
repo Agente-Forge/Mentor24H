@@ -337,16 +337,34 @@
 .med-timeline {
   display: flex;
   flex-direction: column;
-  gap: 0;
 }
 .med-tl-item {
   display: flex;
   gap: var(--s-3);
   align-items: flex-start;
-  padding: var(--s-3) 0;
-  transition: opacity var(--d-fast);
+  margin-bottom: var(--s-3);
 }
-.med-tl-item.tl-done { opacity: .55; }
+.med-tl-item:last-child { margin-bottom: 0; }
+
+/* Card elevado */
+.med-tl-card {
+  flex: 1;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-2);
+  background: var(--surface-2);
+  border: 1px solid var(--line-2);
+  border-radius: 10px;
+  box-shadow: 0 4px 14px rgba(0,0,0,.28);
+  padding: var(--s-3) var(--s-4);
+  transition: box-shadow var(--d-fast), transform var(--d-fast);
+  min-width: 0;
+}
+.med-tl-card:hover {
+  box-shadow: 0 6px 22px rgba(0,0,0,.38);
+  transform: translateY(-1px);
+}
+.med-tl-item.tl-done .med-tl-card { opacity: .6; }
 .med-tl-item.tl-done .med-tl-title { text-decoration: line-through; }
 .med-tl-item.tl-done .med-tl-sub   { text-decoration: line-through; }
 .med-tl-item.tl-late .med-tl-title { color: var(--amber); }
@@ -358,6 +376,7 @@
   align-items: center;
   width: 46px;
   flex-shrink: 0;
+  align-self: stretch;
 }
 .med-tl-hora {
   font-family: var(--font-mono);
@@ -366,14 +385,15 @@
   color: var(--text-3);
   line-height: 1;
   white-space: nowrap;
+  padding-top: var(--s-3);
 }
 .med-tl-line {
   width: 1px;
   flex: 1;
-  min-height: 20px;
+  min-height: 16px;
   background: var(--line-2);
   margin-top: 6px;
-  margin-bottom: -8px;
+  margin-bottom: calc(-1 * var(--s-3));
 }
 
 /* Dot */
@@ -452,7 +472,64 @@
   font-size: var(--t-xs);
   color: var(--color-gold);
   white-space: nowrap;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 3px 7px;
+  border-radius: var(--r-xs);
+  transition: background var(--d-fast);
 }
+.tl-done-badge:hover {
+  background: rgba(212,165,116,.12);
+}
+
+/* ─── MODAL DESMARCAR ────────────────────────────────────── */
+.med-desmarcar-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(8,8,15,.75);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--s-5);
+  animation: fadeIn 150ms ease;
+}
+.med-desmarcar-modal {
+  background: var(--surface-2);
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-lg);
+  padding: var(--s-7) var(--s-6);
+  max-width: 340px;
+  width: 100%;
+  box-shadow: 0 20px 60px rgba(0,0,0,.6);
+  animation: modal-in 200ms cubic-bezier(.34,1.56,.64,1);
+  text-align: center;
+}
+@keyframes modal-in {
+  from { transform: scale(.92); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+.med-desmarcar-icone  { font-size: 40px; margin-bottom: var(--s-3); line-height: 1; }
+.med-desmarcar-titulo {
+  font-family: var(--font-display);
+  font-size: var(--t-lg);
+  font-weight: 700;
+  color: var(--text-1);
+  margin: 0 0 var(--s-3);
+}
+.med-desmarcar-info {
+  font-size: var(--t-sm);
+  color: var(--text-3);
+  line-height: 1.6;
+  margin-bottom: var(--s-6);
+}
+.med-desmarcar-btns {
+  display: flex;
+  gap: var(--s-3);
+}
+.med-desmarcar-btns .btn { flex: 1; }
 
 /* Del button */
 .med-del-btn {
@@ -468,7 +545,7 @@
   align-items: center;
   justify-content: center;
 }
-.med-tl-item:hover .med-del-btn { opacity: 1; }
+.med-tl-card:hover .med-del-btn { opacity: 1; }
 .med-del-btn:hover { color: var(--red); background: var(--red-bg); }
 
 /* Consulta timeline styling */

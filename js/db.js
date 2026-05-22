@@ -614,6 +614,10 @@ const DB = (() => {
     const d = doseIdx ?? 0;
     return read(KEY.medDoses, []).some(x => x.medId === medId && x.data === data && (x.doseIdx ?? 0) === d);
   }
+  function desmarcarDose(medId, data, doseIdx) {
+    const d = doseIdx ?? 0;
+    write(KEY.medDoses, read(KEY.medDoses, []).filter(x => !(x.medId === medId && x.data === data && (x.doseIdx ?? 0) === d)));
+  }
 
   /* ═══ CONSULTAS ═══ */
   function getConsultas() { return read(KEY.consultas, []); }
@@ -936,7 +940,7 @@ const DB = (() => {
     getKanban, getKanbanCard, saveKanbanCard, moveKanbanCard, deleteKanbanCard,
     getStats,
     getAgenda, saveEvento, deleteEvento,
-    getMedicamentos, saveMedicamento, deleteMedicamento, registrarDose, getDoses, isDoseTomada,
+    getMedicamentos, saveMedicamento, deleteMedicamento, registrarDose, getDoses, isDoseTomada, desmarcarDose,
     getConsultas, saveConsulta, deleteConsulta, updateConsulta,
     getTarefas, saveTarefa, deleteTarefa,
     getContatos, saveContato, deleteContato,

@@ -617,28 +617,32 @@ const Medicamentos = (() => {
           <span class="med-tl-hora">${esc(dose.hora)}</span>
           ${!isLast ? '<div class="med-tl-line"></div>' : ''}
         </div>
-        <div class="med-tl-dot ${dotCls}">${state === 'tomado' ? '✓' : ''}</div>
-        <div class="med-tl-right">
-          <div class="med-tl-main">
-            <span class="med-tl-icon">${tipo.icon}</span>
-            <div class="med-tl-info">
-              <span class="med-tl-title">${esc(med.nome)}</span>
-              <span class="med-tl-sub">
-                ${dose.quantidade} ${_doseUnit(dose.quantidade, med.tipo)}
-                ${med.estoque !== undefined ? `· <span class="${estoqueAlert ? 'tl-stock-alert' : ''}">${estoqueAlert ? '⚠️ ' : ''}${_estoqueLabel(med.estoque, med.tipo)}</span>` : ''}
-              </span>
-            </div>
-            <div class="med-tl-actions">
-              ${state !== 'tomado' ? `
-                <button class="btn btn-primary btn-sm tl-btn" data-marcar-med="${esc(med.id)}" data-marcar-idx="${doseIdx}">
-                  <span data-icon="check" data-size="12"></span> Marcar
+        <div class="med-tl-card">
+          <div class="med-tl-dot ${dotCls}">${state === 'tomado' ? '✓' : ''}</div>
+          <div class="med-tl-right">
+            <div class="med-tl-main">
+              <span class="med-tl-icon">${tipo.icon}</span>
+              <div class="med-tl-info">
+                <span class="med-tl-title">${esc(med.nome)}</span>
+                <span class="med-tl-sub">
+                  ${dose.quantidade} ${_doseUnit(dose.quantidade, med.tipo)}
+                  ${med.estoque !== undefined ? `· <span class="${estoqueAlert ? 'tl-stock-alert' : ''}">${estoqueAlert ? '⚠️ ' : ''}${_estoqueLabel(med.estoque, med.tipo)}</span>` : ''}
+                </span>
+              </div>
+              <div class="med-tl-actions">
+                ${state !== 'tomado' ? `
+                  <button class="btn btn-primary btn-sm tl-btn" data-marcar-med="${esc(med.id)}" data-marcar-idx="${doseIdx}">
+                    <span data-icon="check" data-size="12"></span> Marcar
+                  </button>
+                ` : `
+                  <button class="tl-done-badge" data-desmarcar-med="${esc(med.id)}" data-desmarcar-idx="${doseIdx}" title="Clique para desmarcar">
+                    <span data-icon="check-circle" data-size="13"></span> Tomado
+                  </button>
+                `}
+                <button class="med-del-btn" data-del-med="${esc(med.id)}" title="Remover medicamento">
+                  <span data-icon="trash-2" data-size="12"></span>
                 </button>
-              ` : `
-                <span class="tl-done-badge"><span data-icon="check-circle" data-size="13"></span> Tomado</span>
-              `}
-              <button class="med-del-btn" data-del-med="${esc(med.id)}" title="Remover medicamento">
-                <span data-icon="trash-2" data-size="12"></span>
-              </button>
+              </div>
             </div>
           </div>
         </div>
@@ -657,23 +661,25 @@ const Medicamentos = (() => {
           <span class="med-tl-hora">${esc(consulta.hora || '—')}</span>
           ${!isLast ? '<div class="med-tl-line"></div>' : ''}
         </div>
-        <div class="med-tl-dot tl-dot-con">${realizada ? '✓' : '🏥'}</div>
-        <div class="med-tl-right">
-          <div class="med-tl-main">
-            <div class="med-tl-info">
-              <span class="med-tl-title">${esc(consulta.especialidade || '—')}</span>
-              <span class="med-tl-sub">${consulta.medico ? esc(consulta.medico) + ' · ' : ''}${label}</span>
-              ${consulta.nota ? `<span class="med-tl-nota">📝 ${esc(consulta.nota)}</span>` : ''}
-            </div>
-            <div class="med-tl-actions">
-              ${!realizada ? `
-                <button class="btn btn-ghost btn-sm tl-btn" data-marcar-con="${esc(consulta.id)}">Realizada</button>
-              ` : `
-                <span class="tl-done-badge"><span data-icon="check-circle" data-size="13"></span> Realizada</span>
-              `}
-              <button class="med-del-btn" data-del-con="${esc(consulta.id)}" title="Remover consulta">
-                <span data-icon="trash-2" data-size="12"></span>
-              </button>
+        <div class="med-tl-card">
+          <div class="med-tl-dot tl-dot-con">${realizada ? '✓' : '🏥'}</div>
+          <div class="med-tl-right">
+            <div class="med-tl-main">
+              <div class="med-tl-info">
+                <span class="med-tl-title">${esc(consulta.especialidade || '—')}</span>
+                <span class="med-tl-sub">${consulta.medico ? esc(consulta.medico) + ' · ' : ''}${label}</span>
+                ${consulta.nota ? `<span class="med-tl-nota">📝 ${esc(consulta.nota)}</span>` : ''}
+              </div>
+              <div class="med-tl-actions">
+                ${!realizada ? `
+                  <button class="btn btn-ghost btn-sm tl-btn" data-marcar-con="${esc(consulta.id)}">Realizada</button>
+                ` : `
+                  <span class="tl-done-badge"><span data-icon="check-circle" data-size="13"></span> Realizada</span>
+                `}
+                <button class="med-del-btn" data-del-con="${esc(consulta.id)}" title="Remover consulta">
+                  <span data-icon="trash-2" data-size="12"></span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -690,21 +696,23 @@ const Medicamentos = (() => {
           <span class="med-tl-hora">—</span>
           ${!isLast ? '<div class="med-tl-line"></div>' : ''}
         </div>
-        <div class="med-tl-dot tl-dot-ended">↻</div>
-        <div class="med-tl-right">
-          <div class="med-tl-main">
-            <span class="med-tl-icon">${tipo.icon}</span>
-            <div class="med-tl-info">
-              <span class="med-tl-title">${esc(med.nome)}</span>
-              <span class="med-tl-sub">Tratamento encerrado</span>
-            </div>
-            <div class="med-tl-actions">
-              <button class="btn btn-ghost btn-sm tl-btn" data-renovar-med="${esc(med.id)}">
-                <span data-icon="refresh-cw" data-size="12"></span> Renovar
-              </button>
-              <button class="med-del-btn" data-del-med="${esc(med.id)}" title="Remover medicamento">
-                <span data-icon="trash-2" data-size="12"></span>
-              </button>
+        <div class="med-tl-card">
+          <div class="med-tl-dot tl-dot-ended">↻</div>
+          <div class="med-tl-right">
+            <div class="med-tl-main">
+              <span class="med-tl-icon">${tipo.icon}</span>
+              <div class="med-tl-info">
+                <span class="med-tl-title">${esc(med.nome)}</span>
+                <span class="med-tl-sub">Tratamento encerrado</span>
+              </div>
+              <div class="med-tl-actions">
+                <button class="btn btn-ghost btn-sm tl-btn" data-renovar-med="${esc(med.id)}">
+                  <span data-icon="refresh-cw" data-size="12"></span> Renovar
+                </button>
+                <button class="med-del-btn" data-del-med="${esc(med.id)}" title="Remover medicamento">
+                  <span data-icon="trash-2" data-size="12"></span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -721,6 +729,40 @@ const Medicamentos = (() => {
         <p class="med-empty-sub">Adicione medicamentos ou consultas usando o botão Novo.</p>
       </div>
     `;
+  }
+
+  // ─── MODAL DESMARCAR ──────────────────────────────────────
+  function _showDesmarcaModal(medId, doseIdx, medNome, hora, qty, tipoId) {
+    const overlay = document.createElement('div');
+    overlay.className = 'med-desmarcar-overlay';
+    overlay.innerHTML = `
+      <div class="med-desmarcar-modal">
+        <div class="med-desmarcar-icone">⚠️</div>
+        <h3 class="med-desmarcar-titulo">Desmarcar dose?</h3>
+        <div class="med-desmarcar-info">
+          <strong>${esc(medNome)}</strong> · ${hora}<br>
+          Irá restaurar <strong>${qty} ${_doseUnit(qty, tipoId)}</strong> no estoque.
+        </div>
+        <div class="med-desmarcar-btns">
+          <button class="btn btn-ghost" id="dsmk-cancel">Cancelar</button>
+          <button class="btn btn-primary" id="dsmk-confirm">Desmarcar</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+
+    overlay.querySelector('#dsmk-cancel').addEventListener('click', () => overlay.remove());
+    overlay.querySelector('#dsmk-confirm').addEventListener('click', () => {
+      const med = DB.getMedicamentos().find(m => m.id === medId);
+      if (med) {
+        DB.desmarcarDose(medId, s.date, doseIdx);
+        DB.saveMedicamento({ id: medId, estoque: (med.estoque || 0) + qty });
+        Toast.success('Dose desmarcada', `${medNome} · estoque restaurado`);
+      }
+      overlay.remove();
+      render();
+    });
+    overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
   }
 
   // ─── RING ─────────────────────────────────────────────────
@@ -804,6 +846,19 @@ const Medicamentos = (() => {
         DB.updateConsulta(btn.dataset.marcarCon, { status: 'realizada' });
         Toast.success('Consulta realizada', '✓');
         render();
+      });
+    });
+
+    // Desmarcar dose
+    container.querySelectorAll('[data-desmarcar-med]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const medId   = btn.dataset.desmarcarMed;
+        const doseIdx = parseInt(btn.dataset.desmarcarIdx, 10);
+        const med     = _norm(DB.getMedicamentos().find(m => m.id === medId));
+        if (!med) return;
+        const dose = med.doses[doseIdx];
+        const qty  = dose?.quantidade || 1;
+        _showDesmarcaModal(medId, doseIdx, med.nome, dose?.hora || '', qty, med.tipo);
       });
     });
 
