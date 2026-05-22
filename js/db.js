@@ -15,6 +15,7 @@ const DB = (() => {
     agenda:       'mentor24h.agenda',
     medicamentos: 'mentor24h.medicamentos',
     medDoses:     'mentor24h.med-doses',
+    consultas:    'mentor24h.consultas',
     tarefas:      'mentor24h.tarefas',
     contatos:     'mentor24h.contatos',
     produtos:     'mentor24h.produtos',
@@ -600,14 +601,34 @@ const DB = (() => {
     arr.push(novo); write(KEY.medicamentos, arr); return novo;
   }
   function deleteMedicamento(id) { write(KEY.medicamentos, read(KEY.medicamentos, []).filter(m => m.id !== id)); }
-  function registrarDose(medId, data) {
+  function registrarDose(medId, data, doseIdx) {
     const doses = read(KEY.medDoses, []);
-    doses.push({ id: Utils.uid(), medId, data: data || todayISO(), hora: new Date().toTimeString().slice(0, 5) });
+    doses.push({ id: Utils.uid(), medId, data: data || todayISO(), hora: new Date().toTimeString().slice(0, 5), doseIdx: doseIdx ?? 0 });
     write(KEY.medDoses, doses);
   }
   function getDoses(medId, data) {
     const doses = read(KEY.medDoses, []);
     return doses.filter(d => (!medId || d.medId === medId) && (!data || d.data === data));
+  }
+  function isDoseTomada(medId, data, doseIdx) {
+    const d = doseIdx ?? 0;
+    return read(KEY.medDoses, []).some(x => x.medId === medId && x.data === data && (x.doseIdx ?? 0) === d);
+  }
+
+  /* ═══ CONSULTAS ═══ */
+  function getConsultas() { return read(KEY.consultas, []); }
+  function saveConsulta(data) {
+    const arr = read(KEY.consultas, []);
+    const novo = Object.assign({ id: Utils.uid(), criadoEm: new Date().toISOString(), status: 'agendada' }, data);
+    arr.push(novo);
+    write(KEY.consultas, arr);
+    return novo;
+  }
+  function deleteConsulta(id) { write(KEY.consultas, read(KEY.consultas, []).filter(c => c.id !== id)); }
+  function updateConsulta(id, patch) {
+    const arr = read(KEY.consultas, []);
+    const idx = arr.findIndex(c => c.id === id);
+    if (idx >= 0) { arr[idx] = Object.assign({}, arr[idx], patch); write(KEY.consultas, arr); }
   }
 
   /* ═══ TAREFAS ═══ */
@@ -915,7 +936,8 @@ const DB = (() => {
     getKanban, getKanbanCard, saveKanbanCard, moveKanbanCard, deleteKanbanCard,
     getStats,
     getAgenda, saveEvento, deleteEvento,
-    getMedicamentos, saveMedicamento, deleteMedicamento, registrarDose, getDoses,
+    getMedicamentos, saveMedicamento, deleteMedicamento, registrarDose, getDoses, isDoseTomada,
+    getConsultas, saveConsulta, deleteConsulta, updateConsulta,
     getTarefas, saveTarefa, deleteTarefa,
     getContatos, saveContato, deleteContato,
     getProdutos, saveProduto, deleteProduto,
