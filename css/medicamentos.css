@@ -15,11 +15,11 @@
 /* ─── RING ────────────────────────────────────────────────── */
 .med-ring-area {
   position: relative;
-  width: 80px;
-  height: 80px;
+  width: 96px;
+  height: 96px;
   flex-shrink: 0;
 }
-.med-ring-svg   { width: 80px; height: 80px; display: block; }
+.med-ring-svg   { width: 96px; height: 96px; display: block; }
 .med-ring-bg    { fill: none; stroke: var(--surface-4); stroke-width: 6; }
 .med-ring-fill  {
   fill: none;
@@ -698,7 +698,7 @@ textarea.wiz-input { resize: vertical; }
 
 /* ─── RESPONSIVE ──────────────────────────────────────────── */
 @media (max-width: 768px) {
-  .med-ring-area, .med-ring-svg { width: 64px; height: 64px; }
+  .med-ring-area, .med-ring-svg { width: 76px; height: 76px; }
   .wiz-tipos { grid-template-columns: repeat(2, 1fr); }
   .med-choose-grid { grid-template-columns: 1fr; }
   .med-tl-actions { flex-direction: column; align-items: flex-end; gap: var(--s-1); }

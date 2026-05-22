@@ -195,7 +195,6 @@ const Medicamentos = (() => {
                 <div class="med-ring-sep"></div>
                 <span class="med-ring-den">${total}</span>
               </div>
-              <span class="med-ring-sub">${isToday ? 'hoje' : _fmtShort(s.date)}</span>
             </div>
           </div>
           <div>
