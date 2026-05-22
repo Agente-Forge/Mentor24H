@@ -14,10 +14,17 @@ const Medicamentos = (() => {
   ];
 
   const DURACOES = [
-    { id: '7',  label: '7 dias'   },
-    { id: '14', label: '14 dias'  },
-    { id: '30', label: '30 dias'  },
-    { id: '0',  label: 'Contínuo' },
+    { id: '1',      label: '1 dia'        },
+    { id: '2',      label: '2 dias'       },
+    { id: '3',      label: '3 dias'       },
+    { id: '5',      label: '5 dias'       },
+    { id: '7',      label: '7 dias'       },
+    { id: '10',     label: '10 dias'      },
+    { id: '14',     label: '14 dias'      },
+    { id: '21',     label: '21 dias'      },
+    { id: '30',     label: '30 dias'      },
+    { id: '0',      label: 'Contínuo'     },
+    { id: 'custom', label: 'Personalizado'},
   ];
 
   const HRS = [
@@ -35,7 +42,7 @@ const Medicamentos = (() => {
       wizard:     null,   // null | 'choose' | 'med' | 'consulta'
       step:       1,
       // Med wizard
-      nome: '', tipo: 'capsula', dataInicio: todayISO(), duracao: '0',
+      nome: '', tipo: 'capsula', dataInicio: todayISO(), duracao: '0', duracaoCustom: '',
       vezesPorDia: 1, doses: [{ hora: '08:00', quantidade: 1 }],
       estoque: 30, estoqueMinimo: 5,
       // Consulta wizard
@@ -65,6 +72,38 @@ const Medicamentos = (() => {
     return new Date(iso + 'T00:00:00').toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', '');
   }
 
+  // ─── ACTIVE-ON-DATE ───────────────────────────────────────
+  function _isActiveOnDate(med, date) {
+    if (!med.dataInicio) return true;
+    if (date < med.dataInicio) return false;
+    const dur = parseInt(med.duracao, 10);
+    if (isNaN(dur) || dur <= 0) return true;
+    return date <= _addDays(med.dataInicio, dur - 1);
+  }
+
+  function _isEndedOnDate(med, date) {
+    if (!med.dataInicio) return false;
+    const dur = parseInt(med.duracao, 10);
+    if (isNaN(dur) || dur <= 0) return false;
+    return date >= med.dataInicio && date > _addDays(med.dataInicio, dur - 1);
+  }
+
+  // ─── UNIDADE / ESTOQUE LABEL ──────────────────────────────
+  function _doseUnit(qtd, tipoId) {
+    const q = Number(qtd);
+    if (tipoId === 'liquido')    return 'mL';
+    if (tipoId === 'injecao')    return q === 1 ? 'aplicação'  : 'aplicações';
+    if (tipoId === 'comprimido') return q === 1 ? 'comprimido' : 'comprimidos';
+    if (tipoId === 'capsula')    return q === 1 ? 'cápsula'    : 'cápsulas';
+    return q === 1 ? 'unidade' : 'unidades';
+  }
+
+  function _estoqueLabel(qtd, tipoId) {
+    const q = Number(qtd);
+    if (isNaN(q) || q <= 0) return '';
+    return `${q} ${_doseUnit(q, tipoId)} restante${q === 1 ? '' : 's'}`;
+  }
+
   function _relDate(data, hora) {
     const today    = todayISO();
     const tomorrow = _addDays(today, 1);
@@ -85,6 +124,15 @@ const Medicamentos = (() => {
     const items     = [];
 
     meds.forEach(med => {
+      // E3: sem estoque — não aparece
+      if (med.estoque !== undefined && med.estoque !== null && med.estoque <= 0) return;
+      // B2: ainda não começou — não aparece
+      if (med.dataInicio && date < med.dataInicio) return;
+      // E4: tratamento encerrado — item renovar
+      if (_isEndedOnDate(med, date)) {
+        items.push({ type: 'renovar', hora: '00:00', med });
+        return;
+      }
       med.doses.forEach((dose, doseIdx) => {
         const tomado = DB.isDoseTomada(med.id, date, doseIdx);
         const state  = tomado ? 'tomado' : _slotState(dose.hora, date);
@@ -108,10 +156,15 @@ const Medicamentos = (() => {
 
   function _ringStats(meds, date) {
     let total = 0, taken = 0;
-    meds.forEach(m => m.doses.forEach((_, i) => {
-      total++;
-      if (DB.isDoseTomada(m.id, date, i)) taken++;
-    }));
+    meds.forEach(m => {
+      if (!_isActiveOnDate(m, date)) return;
+      if (m.estoque !== undefined && m.estoque !== null && m.estoque <= 0) return;
+      m.doses.forEach((dose, i) => {
+        const qty = dose.quantidade || 1;
+        total += qty;
+        if (DB.isDoseTomada(m.id, date, i)) taken += qty;
+      });
+    });
     return { total, taken };
   }
 
@@ -123,7 +176,9 @@ const Medicamentos = (() => {
       const d = new Date(today);
       d.setDate(d.getDate() - i);
       const iso = d.toISOString().slice(0, 10);
-      const allTaken = meds.every(m => m.doses.every((_, idx) => DB.isDoseTomada(m.id, iso, idx)));
+      const activeMeds = meds.filter(m => _isActiveOnDate(m, iso));
+      if (!activeMeds.length) break;
+      const allTaken = activeMeds.every(m => m.doses.every((_, idx) => DB.isDoseTomada(m.id, iso, idx)));
       if (!allTaken) break;
       streak++;
     }
@@ -131,11 +186,19 @@ const Medicamentos = (() => {
   }
 
   function _dayDots(dateISO, meds) {
-    const consultas = DB.getConsultas();
+    const consultas  = DB.getConsultas();
+    const activeMeds = meds.filter(m => {
+      if (m.estoque !== undefined && m.estoque !== null && m.estoque <= 0) return false;
+      return _isActiveOnDate(m, dateISO);
+    });
     let gold = false, amber = false;
-    if (meds.length) {
+    if (activeMeds.length) {
       let total = 0, taken = 0;
-      meds.forEach(m => m.doses.forEach((_, i) => { total++; if (DB.isDoseTomada(m.id, dateISO, i)) taken++; }));
+      activeMeds.forEach(m => m.doses.forEach((dose, i) => {
+        const qty = dose.quantidade || 1;
+        total += qty;
+        if (DB.isDoseTomada(m.id, dateISO, i)) taken += qty;
+      }));
       if (total > 0) { if (taken === total) gold = true; else if (taken > 0) amber = true; }
     }
     return { gold, amber, blue: consultas.some(c => c.data === dateISO) };
@@ -214,10 +277,13 @@ const Medicamentos = (() => {
         </div>
 
         <div class="med-timeline">
-          ${items.length ? items.map((item, i) => item.type === 'med'
-              ? _renderMedItem(item, i === items.length - 1)
-              : _renderConItem(item, i === items.length - 1)
-            ).join('') : _renderEmpty()}
+          ${items.length ? items.map((item, i) => {
+              const last = i === items.length - 1;
+              if (item.type === 'med')     return _renderMedItem(item, last);
+              if (item.type === 'consulta') return _renderConItem(item, last);
+              if (item.type === 'renovar') return _renderRenovarItem(item, last);
+              return '';
+            }).join('') : _renderEmpty()}
         </div>
       </div>
     `;
@@ -412,6 +478,13 @@ const Medicamentos = (() => {
               <button class="wiz-chip${s.duracao === d.id ? ' active' : ''}" data-dur="${d.id}">${d.label}</button>
             `).join('')}
           </div>
+          ${s.duracao === 'custom' ? `
+            <div style="margin-top:var(--s-3)">
+              <label class="wiz-label">Quantos dias?</label>
+              <input class="wiz-input" id="wiz-duracao-custom" type="number" min="1" placeholder="Ex: 45"
+                     value="${esc(s.duracaoCustom)}" style="width:auto">
+            </div>
+          ` : ''}
         </div>
       `;
       case 3: return `
@@ -468,7 +541,9 @@ const Medicamentos = (() => {
       `;
       case 6: {
         const inicio   = s.dataInicio ? new Date(s.dataInicio + 'T00:00:00').toLocaleDateString('pt-BR') : '—';
-        const dur      = DURACOES.find(d => d.id === s.duracao)?.label || 'Contínuo';
+        const dur      = s.duracao === 'custom'
+          ? (s.duracaoCustom ? `${s.duracaoCustom} dias` : 'Personalizado')
+          : DURACOES.find(d => d.id === s.duracao)?.label || 'Contínuo';
         const dosesStr = s.doses.map((d, i) => `Dose ${i+1}: ${d.hora} · ${d.quantidade} ${tipo.unit}`).join('<br>');
         return `
           <div class="wiz-confirm">
@@ -551,8 +626,8 @@ const Medicamentos = (() => {
             <div class="med-tl-info">
               <span class="med-tl-title">${esc(med.nome)}</span>
               <span class="med-tl-sub">
-                ${dose.quantidade} ${tipo.unit}
-                ${estoqueAlert ? `<span class="tl-stock-alert">· ⚠️ ${med.estoque} und.</span>` : `· ${med.estoque} und.`}
+                ${dose.quantidade} ${_doseUnit(dose.quantidade, med.tipo)}
+                ${med.estoque !== undefined ? `· <span class="${estoqueAlert ? 'tl-stock-alert' : ''}">${estoqueAlert ? '⚠️ ' : ''}${_estoqueLabel(med.estoque, med.tipo)}</span>` : ''}
               </span>
             </div>
             <div class="med-tl-actions">
@@ -599,6 +674,37 @@ const Medicamentos = (() => {
                 <span class="tl-done-badge"><span data-icon="check-circle" data-size="13"></span> Realizada</span>
               `}
               <button class="med-del-btn" data-del-con="${esc(consulta.id)}" title="Remover consulta">
+                <span data-icon="trash-2" data-size="12"></span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function _renderRenovarItem(item, isLast) {
+    const { med } = item;
+    const tipo = TIPOS.find(t => t.id === med.tipo) || TIPOS[0];
+    return `
+      <div class="med-tl-item med-tl-renovar">
+        <div class="med-tl-left">
+          <span class="med-tl-hora">—</span>
+          ${!isLast ? '<div class="med-tl-line"></div>' : ''}
+        </div>
+        <div class="med-tl-dot tl-dot-ended">↻</div>
+        <div class="med-tl-right">
+          <div class="med-tl-main">
+            <span class="med-tl-icon">${tipo.icon}</span>
+            <div class="med-tl-info">
+              <span class="med-tl-title">${esc(med.nome)}</span>
+              <span class="med-tl-sub">Tratamento encerrado</span>
+            </div>
+            <div class="med-tl-actions">
+              <button class="btn btn-ghost btn-sm tl-btn" data-renovar-med="${esc(med.id)}">
+                <span data-icon="refresh-cw" data-size="12"></span> Renovar
+              </button>
+              <button class="med-del-btn" data-del-med="${esc(med.id)}" title="Remover medicamento">
                 <span data-icon="trash-2" data-size="12"></span>
               </button>
             </div>
@@ -701,6 +807,17 @@ const Medicamentos = (() => {
       });
     });
 
+    // Renovar ciclo
+    container.querySelectorAll('[data-renovar-med]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const med = DB.getMedicamentos().find(m => m.id === btn.dataset.renovarMed);
+        if (!med) return;
+        DB.saveMedicamento({ id: med.id, dataInicio: todayISO() });
+        Toast.success('Ciclo renovado', `${med.nome} · iniciando hoje`);
+        render();
+      });
+    });
+
     // Deletar med
     container.querySelectorAll('[data-del-med]').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -732,8 +849,16 @@ const Medicamentos = (() => {
     // Duração chips
     container.querySelectorAll('[data-dur]').forEach(btn => {
       btn.addEventListener('click', () => {
+        const prev = s.duracao;
         s.duracao = btn.dataset.dur;
-        container.querySelectorAll('[data-dur]').forEach(b => b.classList.toggle('active', b.dataset.dur === s.duracao));
+        // se mudou de/para 'custom', re-renderiza o step para mostrar/esconder o input
+        if ((prev === 'custom') !== (s.duracao === 'custom')) {
+          const dateEl = document.getElementById('wiz-data-inicio');
+          if (dateEl) s.dataInicio = dateEl.value;
+          _refreshStep();
+        } else {
+          container.querySelectorAll('[data-dur]').forEach(b => b.classList.toggle('active', b.dataset.dur === s.duracao));
+        }
       });
     });
     // Vezes por dia
@@ -793,7 +918,10 @@ const Medicamentos = (() => {
   function _captureStep() {
     if (s.wizard === 'med') {
       if (s.step === 1) s.nome = document.getElementById('wiz-nome')?.value.trim() || s.nome;
-      if (s.step === 2) s.dataInicio = document.getElementById('wiz-data-inicio')?.value || s.dataInicio;
+      if (s.step === 2) {
+        s.dataInicio = document.getElementById('wiz-data-inicio')?.value || s.dataInicio;
+        if (s.duracao === 'custom') s.duracaoCustom = document.getElementById('wiz-duracao-custom')?.value || s.duracaoCustom;
+      }
     }
     if (s.wizard === 'consulta') {
       if (s.step === 1) { s.cEsp = document.getElementById('con-esp')?.value.trim() || s.cEsp; s.cMed = document.getElementById('con-med')?.value.trim() || s.cMed; }
@@ -832,10 +960,11 @@ const Medicamentos = (() => {
   }
 
   function _saveMed() {
-    const nome = s.nome;
+    const nome    = s.nome;
+    const duracao = s.duracao === 'custom' ? parseInt(s.duracaoCustom, 10) || 0 : parseInt(s.duracao, 10);
     DB.saveMedicamento({
       nome, tipo: s.tipo, dosagem: '',
-      dataInicio: s.dataInicio, duracao: parseInt(s.duracao, 10),
+      dataInicio: s.dataInicio, duracao,
       vezesPorDia: s.vezesPorDia, doses: s.doses.slice(),
       estoque: s.estoque, estoqueMinimo: s.estoqueMinimo,
     });

@@ -347,6 +347,8 @@
   transition: opacity var(--d-fast);
 }
 .med-tl-item.tl-done { opacity: .55; }
+.med-tl-item.tl-done .med-tl-title { text-decoration: line-through; }
+.med-tl-item.tl-done .med-tl-sub   { text-decoration: line-through; }
 .med-tl-item.tl-late .med-tl-title { color: var(--amber); }
 
 /* Left column — hora + vertical line */
@@ -387,11 +389,13 @@
   font-weight: 700;
   margin-top: 1px;
 }
-.tl-dot-pend { background: var(--surface-4); border: 2px solid var(--line-3); color: transparent; }
-.tl-dot-done { background: var(--color-gold); border: 2px solid var(--color-gold); color: #08080F; }
-.tl-dot-late { background: var(--amber-glow); border: 2px solid var(--amber); color: var(--amber); }
-.tl-dot-con  { background: rgba(123,182,255,.15); border: 2px solid #7BB6FF; color: transparent; font-size: 12px; }
+.tl-dot-pend   { background: var(--surface-4); border: 2px solid var(--line-3); color: transparent; }
+.tl-dot-done   { background: var(--color-gold); border: 2px solid var(--color-gold); color: #08080F; }
+.tl-dot-late   { background: var(--amber-glow); border: 2px solid var(--amber); color: var(--amber); }
+.tl-dot-con    { background: rgba(123,182,255,.15); border: 2px solid #7BB6FF; color: transparent; font-size: 12px; }
+.tl-dot-ended  { background: var(--surface-3); border: 2px solid var(--line-2); color: var(--text-4); font-size: 14px; }
 .med-tl-consulta .tl-dot-con { color: transparent; }
+.med-tl-renovar .med-tl-title { color: var(--text-3); font-style: italic; }
 
 /* Right content */
 .med-tl-right { flex: 1; min-width: 0; padding-bottom: var(--s-2); }
