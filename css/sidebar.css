@@ -570,6 +570,52 @@ html[data-mode="negocio"] .sidebar-inner .sidebar-zona-nav .nav-group-header:foc
 }
 
 /* ─────────────────────────────────────────────────────────
+   7B. SEÇÕES SEMPRE ABERTAS (Modo Pessoal — Apple style)
+   Substitui accordion para grupos Organização e Produtividade.
+───────────────────────────────────────────────────────────  */
+
+.nav-section-block {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.nav-section-label {
+  padding: var(--s-4) var(--s-3) var(--s-1) calc(var(--s-3) + 2px);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: var(--tracking-wider);
+  text-transform: uppercase;
+  color: var(--text-4);
+  white-space: nowrap;
+  overflow: hidden;
+  user-select: none;
+  transition:
+    opacity var(--sb-d-base) var(--ease-out),
+    max-height var(--sb-d-base) var(--ease-out),
+    padding var(--sb-d-base) var(--ease-out);
+}
+
+/* Rail mode: esconde o label da seção */
+body.sidebar-colapsada .sidebar-inner .nav-section-label {
+  opacity: 0;
+  max-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  pointer-events: none;
+}
+
+/* Mobile drawer aberto: restaura label */
+@media (max-width: 768px) {
+  #sidebar.mobile-open .sidebar-inner .nav-section-label {
+    opacity: 1;
+    max-height: 40px;
+    padding: var(--s-4) var(--s-3) var(--s-1) calc(var(--s-3) + 2px);
+    pointer-events: auto;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────
    8. SIDEBAR TOGGLE — pill na borda, sempre visível
    Posicionado FORA do .sidebar-inner — não é clipado.
 ───────────────────────────────────────────────────────────  */

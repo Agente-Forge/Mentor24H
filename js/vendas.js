@@ -148,6 +148,12 @@ const Vendas = (() => {
           <span class="venda-data">${dataFmt}</span>
           <span class="venda-cliente">${esc(v.clienteNome || 'Avulso')}</span>
           <span class="venda-total">R$ ${fmt(v.total || 0)}</span>
+          <button class="btn btn-ghost btn-sm" data-print-nota="${esc(v.id)}" title="Imprimir nota" style="padding:4px 8px">
+            <span data-icon="printer" data-size="13"></span>
+          </button>
+          <button class="btn btn-ghost btn-sm" data-print-orc="${esc(v.id)}" title="Imprimir orçamento" style="padding:4px 8px">
+            <span data-icon="file-text" data-size="13"></span>
+          </button>
           <button class="venda-del-btn" data-del-venda="${esc(v.id)}" title="Remover">
             <span data-icon="trash-2" data-size="13"></span>
           </button>
@@ -159,6 +165,116 @@ const Vendas = (() => {
         </div>
       </div>
     `;
+  }
+
+  /* ─── Task 3.4 — Nota de venda ─── */
+  function _imprimirNota(v) {
+    _abrirOverlay(_buildDocHTML(v, 'nota'));
+  }
+
+  /* ─── Task 3.5 — Orçamento ─── */
+  function _imprimirOrcamento(v) {
+    _abrirOverlay(_buildDocHTML(v, 'orcamento'));
+  }
+
+  function _buildDocHTML(v, tipo) {
+    const config   = DB.getConfig();
+    const nomeNeg  = esc(config.nomeUsuario || 'Negócio');
+    const dataFmt  = (v.data || todayISO()).split('-').reverse().join('/');
+    const pagLabels = { dinheiro: 'Dinheiro', pix: 'PIX', cartao_credito: 'Crédito', cartao_debito: 'Débito', fiado: 'Fiado', transferencia: 'Transferência' };
+    const pagLabel = pagLabels[v.formaPagamento] || v.formaPagamento || '—';
+
+    const itens = (v.itens && v.itens.length)
+      ? v.itens
+      : [{ produto: v.descricao || '—', qtd: 1, preco: v.total || 0 }];
+
+    const linhasItens = itens.map(it => `
+      <tr>
+        <td>${esc(it.produto || '—')}</td>
+        <td class="right">${it.qtd || 1}</td>
+        <td class="right">R$ ${fmt(it.preco || 0)}</td>
+        <td class="right">R$ ${fmt((it.qtd || 1) * (it.preco || 0))}</td>
+      </tr>
+    `).join('');
+
+    const isOrc    = tipo === 'orcamento';
+    const titulo   = isOrc ? 'Orçamento' : 'Nota de Venda';
+    const badge    = isOrc ? 'ORÇAMENTO' : 'NOTA DE VENDA';
+    const validade = isOrc ? `<div class="print-validade">Válido por 7 dias a partir de ${dataFmt}</div>` : '';
+
+    return `
+      <div class="print-doc">
+        <div class="print-header">
+          <div>
+            <div class="print-title">${nomeNeg}</div>
+            <div style="font-size:12px;color:#555;margin-top:2px">${dataFmt}</div>
+          </div>
+          <div class="print-badge">${badge}</div>
+        </div>
+
+        <div class="print-meta">
+          <div>
+            <div class="print-meta-label">Cliente</div>
+            <div class="print-meta-value">${esc(v.clienteNome || 'Avulso')}</div>
+          </div>
+          <div>
+            <div class="print-meta-label">Pagamento</div>
+            <div class="print-meta-value">${esc(pagLabel)}</div>
+          </div>
+        </div>
+
+        <table class="print-table">
+          <thead>
+            <tr>
+              <th>Descrição</th>
+              <th style="width:60px">Qtd</th>
+              <th style="width:90px">Unitário</th>
+              <th style="width:90px">Subtotal</th>
+            </tr>
+          </thead>
+          <tbody>${linhasItens}</tbody>
+        </table>
+
+        <div class="print-totals">
+          <div class="print-total-row final">
+            <span>Total</span>
+            <span>R$ ${fmt(v.total || 0)}</span>
+          </div>
+        </div>
+
+        <div class="print-footer">
+          <div>Obrigado pela preferência!</div>
+          ${validade}
+        </div>
+      </div>
+    `;
+  }
+
+  function _abrirOverlay(htmlConteudo) {
+    let overlay = document.getElementById('print-overlay');
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.id = 'print-overlay';
+      document.body.appendChild(overlay);
+    }
+    overlay.innerHTML = htmlConteudo;
+
+    const actions = document.createElement('div');
+    actions.className = 'print-actions';
+    actions.innerHTML = `
+      <button class="btn btn-ghost" id="print-fechar-btn">Fechar</button>
+      <button class="btn btn-primary" id="print-imprimir-btn">
+        <span data-icon="printer" data-size="14"></span> Imprimir / PDF
+      </button>
+    `;
+    overlay.appendChild(actions);
+    Icons.render(actions);
+
+    overlay.style.display = 'block';
+    document.getElementById('print-fechar-btn')?.addEventListener('click', () => {
+      overlay.style.display = 'none';
+    });
+    document.getElementById('print-imprimir-btn')?.addEventListener('click', () => window.print());
   }
 
   function bindEvents(container) {
@@ -179,6 +295,20 @@ const Vendas = (() => {
         renderLista();
         Icons.render(document.getElementById('venda-lista'));
       });
+    });
+
+    // delegação para botões de impressão na lista
+    container.querySelector('#venda-lista')?.addEventListener('click', e => {
+      const btnNota = e.target.closest('[data-print-nota]');
+      const btnOrc  = e.target.closest('[data-print-orc]');
+      if (btnNota) {
+        const v = DB.getVendas().find(x => x.id === btnNota.dataset.printNota);
+        if (v) _imprimirNota(v);
+      }
+      if (btnOrc) {
+        const v = DB.getVendas().find(x => x.id === btnOrc.dataset.printOrc);
+        if (v) _imprimirOrcamento(v);
+      }
     });
   }
 

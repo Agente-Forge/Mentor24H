@@ -6,11 +6,12 @@ const CommandPalette = (() => {
   const COMMANDS = [
     /* Navegação */
     { id: 'nav-dash',    label: 'Dashboard',         group: 'Navegar', icon: 'layout-dashboard', action: () => Router.navigate('dashboard') },
-    { id: 'nav-chat-ai', label: 'Chat AI',            group: 'Navegar', icon: 'bot',             action: () => Router.navigate('chat-ai') },
+    { id: 'nav-chat-ai', label: 'Chat Assistente',     group: 'Navegar', icon: 'bot',             action: () => Router.navigate('chat-ai') },
     { id: 'nav-chat-wa', label: 'Chat WhatsApp',      group: 'Navegar', icon: 'message-circle',  action: () => Router.navigate('chat-wa') },
     { id: 'nav-prod',    label: 'Produtos',           group: 'Navegar', icon: 'package',         action: () => Router.navigate('produtos') },
     { id: 'nav-vend',    label: 'Vendas',             group: 'Navegar', icon: 'shopping-cart',   action: () => Router.navigate('vendas') },
     { id: 'nav-estq',    label: 'Estoque',            group: 'Navegar', icon: 'archive',         action: () => Router.navigate('estoque') },
+    { id: 'nav-rel',     label: 'Relatórios',         group: 'Navegar', icon: 'bar-chart-2',     action: () => Router.navigate('relatorios') },
     { id: 'nav-cli',     label: 'Clientes',           group: 'Navegar', icon: 'users',           action: () => Router.navigate('clientes') },
     { id: 'nav-cont',    label: 'Contas a Pagar',     group: 'Navegar', icon: 'receipt',         action: () => Router.navigate('contas') },
     { id: 'nav-tx',      label: 'Transações',         group: 'Navegar', icon: 'arrow-left-right',action: () => Router.navigate('transacoes') },

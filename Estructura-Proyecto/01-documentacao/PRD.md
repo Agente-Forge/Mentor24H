@@ -1,10 +1,12 @@
 # 📄 PRD — Mentor24h
 
-**Versão:** 1.0  
-**Data:** 2026-05-12  
+**Versão:** 1.1  
+**Data:** 2026-05-12 | **Atualizado:** 2026-05-21  
 **Autor:** Board Executivo (skill-consultor v5.2)  
 **Aprovado por:** Léo  
 **Status:** ✅ ATIVO
+
+> **v1.1 — Mudanças:** Adicionados itens 11, 12 e 13 (Rotinas, Estudos, Datas Importantes) aprovados por Léo em 2026-05-21. Planejados para Sprint 4+.
 
 ---
 
@@ -114,6 +116,21 @@ Léo gerencia múltiplas dimensões da vida (finanças pessoais, agenda, medicam
 10. **Theme Toggle (dark/light)**
     - Tema escuro OBSIDIAN (default)
     - Tema claro alternativo
+
+11. **Rotinas** *(Sprint 4+ — aprovado v1.1)*
+    - Sequência de atividades com horário fixo (ex: rotina manhã, rotina noite)
+    - Diferente de Hábitos: é uma sequência ordenada, não rastreamento individual
+    - Marcação rápida de etapas concluídas
+
+12. **Estudos** *(Sprint 4+ — aprovado v1.1)*
+    - Plano de estudos com metas de aprendizagem
+    - Agendamento de revisões e provas
+    - Acompanhamento de progresso por matéria/tema
+
+13. **Datas Importantes** *(Sprint 4+ — aprovado v1.1)*
+    - Aniversários, casamentos, festas e datas comemorativas pessoais
+    - Lembrete automático X dias antes
+    - Integração futura com módulo de Contatos
 
 ---
 

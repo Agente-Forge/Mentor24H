@@ -432,10 +432,65 @@ const Painel = (() => {
 
         ${buildQuickActions()}
 
+        <!-- Assistente — insights proativos (Task 3.10) -->
+        <div class="pn-section">
+          <div id="pn-insights-wrapper"></div>
+        </div>
+
       </div>`;
 
     Icons.render();
     initBarAnimations(container);
+    _renderInsights(container);
+  }
+
+  /* ─── Task 3.10 — Insights do Assistente ─── */
+  function _renderInsights(container) {
+    const wrapper = container.querySelector('#pn-insights-wrapper');
+    if (!wrapper) return;
+    if (typeof Assistente === 'undefined') return;
+
+    const insights = Assistente.getInsights().slice(0, 3);
+    if (!insights.length) { wrapper.innerHTML = ''; return; }
+
+    wrapper.innerHTML = `
+      <h2 class="pn-section-title" style="margin-bottom:var(--s-3)">
+        <span data-icon="zap" data-size="16"></span> Assistente
+      </h2>
+      <div id="pn-insights-lista">${insights.map(_insightCard).join('')}</div>
+    `;
+    Icons.render(wrapper);
+
+    wrapper.querySelectorAll('[data-dispensar]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        Assistente.dispensar(btn.dataset.dispensar);
+        btn.closest('.pn-insight-card')?.remove();
+      });
+    });
+
+    wrapper.querySelectorAll('[data-insight-pagina]').forEach(btn => {
+      btn.addEventListener('click', () => Router.navigate(btn.dataset.insightPagina));
+    });
+  }
+
+  function _insightCard(ins) {
+    const icones = { alerta: 'alert-triangle', dica: 'lightbulb', conquista: 'trophy', lembrete: 'bell' };
+    const cores  = { alerta: 'var(--warning)', dica: 'var(--info)', conquista: 'var(--success)', lembrete: 'var(--color-gold)' };
+    const icone  = icones[ins.tipo] || 'zap';
+    const cor    = cores[ins.tipo]  || 'var(--info)';
+
+    return `
+      <div class="pn-insight-card bento-card" style="display:flex;align-items:flex-start;gap:var(--s-3);padding:var(--s-4);margin-bottom:var(--s-3)">
+        <span data-icon="${icone}" data-size="18" style="color:${cor};flex-shrink:0;margin-top:2px"></span>
+        <div style="flex:1">
+          <p style="font-size:13px;color:var(--text-1);margin:0 0 var(--s-2)">${ins.texto}</p>
+          ${ins.acao ? `<button class="btn btn-ghost btn-sm" data-insight-pagina="${esc(ins.acao.pagina)}">${esc(ins.acao.label)}</button>` : ''}
+        </div>
+        <button class="btn btn-ghost btn-sm" data-dispensar="${esc(ins.id)}" title="Dispensar" style="padding:4px;flex-shrink:0">
+          <span data-icon="x" data-size="14"></span>
+        </button>
+      </div>
+    `;
   }
 
   return { render };

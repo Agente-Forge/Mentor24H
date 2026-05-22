@@ -140,7 +140,7 @@ const LLM = (() => {
     return `
       <div class="llm-welcome">
         <div class="llm-welcome-icon"><span data-icon="bot" data-size="48"></span></div>
-        <h2 class="llm-welcome-title">Mentor AI</h2>
+        <h2 class="llm-welcome-title">Chat Assistente</h2>
         <p class="llm-welcome-sub">Seu assistente conhece seu app.<br>Conectado via <strong>${esc(provider ? provider.name : cfg.provider)}</strong> · ${esc(cfg.model)}</p>
         <div class="llm-suggestions">
           ${sugestoes.map(s => `<button class="llm-suggestion-chip" data-pergunta="${esc(s)}">${esc(s)}</button>`).join('')}
@@ -157,8 +157,8 @@ const LLM = (() => {
     return `
       <div class="llm-setup">
         <div class="llm-setup-icon"><span data-icon="key" data-size="40"></span></div>
-        <h2>Configure seu provedor de IA</h2>
-        <p>Para usar o Chat AI, você precisa de uma chave de API. <strong>Recomendamos o OpenRouter</strong> — ele dá acesso a Claude, GPT-4 e Gemini com uma única chave.</p>
+        <h2>Configure seu provedor</h2>
+        <p>Para usar o Chat Assistente, você precisa de uma chave de API. <strong>Recomendamos o OpenRouter</strong> — ele dá acesso a Claude, GPT-4 e Gemini com uma única chave.</p>
         <a href="https://openrouter.ai/keys" target="_blank" rel="noopener" class="btn btn-primary">
           <span data-icon="external-link" data-size="14"></span>
           Obter chave no OpenRouter (gratuito)
@@ -179,7 +179,7 @@ const LLM = (() => {
     const bubblesHtml = msgs.map(m => `
       <div class="chat-bubble-wrap ${m.role === 'user' ? 'from-me' : 'from-ai'}">
         <div class="chat-bubble">${formatMsgContent(m.content)}</div>
-        <div class="chat-meta">${m.role === 'user' ? 'Você' : 'AI'}</div>
+        <div class="chat-meta">${m.role === 'user' ? 'Você' : 'Assistente'}</div>
       </div>
     `).join('');
 
@@ -1344,7 +1344,7 @@ const LLM = (() => {
       <div class="config-section">
         <div class="config-section-head">
           <div class="card-pill violet"><span data-icon="bot" data-size="16"></span></div>
-          <h3>Chat AI — Provedor de IA</h3>
+          <h3>Chat Assistente — Provedor</h3>
         </div>
 
         <div class="field-row">

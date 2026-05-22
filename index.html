@@ -25,6 +25,7 @@
   <link rel="stylesheet" href="css/sidebar.css?v=4">
   <link rel="stylesheet" href="css/dashboard-pessoal.css?v=1">
   <link rel="stylesheet" href="css/painel-negocio.css?v=2">
+  <link rel="stylesheet" href="css/print.css">
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='32' fill='%230B0D0F'/%3E%3Ctext x='50%25' y='56%25' dominant-baseline='middle' text-anchor='middle' font-family='serif' font-size='120' font-weight='bold' fill='%23D4A574'%3EM%3C/text%3E%3C/svg%3E">
 </head>
@@ -79,58 +80,66 @@
         <span class="nav-label">Dashboard</span>
       </div>
 
-      <!-- Grupo: Pessoal (Agenda, Tarefas, Medicamentos, Contatos, Finanças) -->
-      <div class="nav-group" id="group-pessoal" data-context="pessoal">
-        <div class="nav-group-header" data-group="pessoal" data-tooltip="Vida Pessoal">
-          <span data-icon="user-circle"></span>
-          <span class="nav-label">Vida Pessoal</span>
-          <span class="nav-group-arrow" data-icon="chevron-right" data-size="14"></span>
+      <!-- Seção: Organização (sempre aberta) -->
+      <div class="nav-section-block" id="group-organizacao" data-context="pessoal">
+        <p class="nav-section-label">Organização</p>
+        <div class="nav-item nav-sub" data-nav="contatos" data-tooltip="Contatos">
+          <span data-icon="address-book" data-size="14"></span>
+          <span class="nav-label">Contatos</span>
         </div>
-        <div class="nav-group-items">
-          <div class="nav-item nav-sub" data-nav="agenda" data-tooltip="Agenda">
-            <span data-icon="calendar" data-size="14"></span>
-            <span class="nav-label">Agenda</span>
-          </div>
-          <div class="nav-item nav-sub" data-nav="tarefas" data-tooltip="Tarefas">
-            <span data-icon="check-square" data-size="14"></span>
-            <span class="nav-label">Tarefas</span>
-          </div>
-          <div class="nav-item nav-sub" data-nav="medicamentos" data-tooltip="Saúde & Hábitos">
-            <span data-icon="pill" data-size="14"></span>
-            <span class="nav-label">Saúde & Hábitos</span>
-          </div>
-          <div class="nav-item nav-sub" data-nav="contatos" data-tooltip="Contatos">
-            <span data-icon="address-book" data-size="14"></span>
-            <span class="nav-label">Contatos</span>
-          </div>
-          <div class="nav-item nav-sub" data-nav="chat-ai" data-tooltip="Chat IA">
-            <span data-icon="message-circle" data-size="14"></span>
-            <span class="nav-label">Chat IA</span>
-          </div>
+        <div class="nav-item nav-sub" data-nav="contas" data-tooltip="Finanças">
+          <span data-icon="wallet" data-size="14"></span>
+          <span class="nav-label">Finanças</span>
+          <span class="nav-badge" id="nav-badge-contas"></span>
+        </div>
+        <div class="nav-item nav-sub" data-nav="transacoes" data-tooltip="Transações">
+          <span data-icon="arrow-left-right" data-size="14"></span>
+          <span class="nav-label">Transações</span>
+        </div>
+        <div class="nav-item nav-sub" data-nav="agenda-hibrida" data-tooltip="Agenda">
+          <span data-icon="calendar" data-size="14"></span>
+          <span class="nav-label">Agenda</span>
+        </div>
+        <div class="nav-item nav-sub" data-nav="chat-ai" data-tooltip="Assistente">
+          <span data-icon="message-circle" data-size="14"></span>
+          <span class="nav-label">Assistente</span>
+        </div>
+        <div class="nav-item nav-sub" data-nav="medicamentos" data-tooltip="Saúde">
+          <span data-icon="heart-pulse" data-size="14"></span>
+          <span class="nav-label">Saúde</span>
+        </div>
+        <div class="nav-item nav-sub" data-nav="datas-importantes" data-tooltip="Datas Importantes">
+          <span data-icon="cake" data-size="14"></span>
+          <span class="nav-label">Datas Importantes</span>
         </div>
       </div>
 
-      <!-- Grupo: Finanças (Contas, Transações, Metas) -->
-      <div class="nav-group" id="group-financas" data-context="pessoal">
-        <div class="nav-group-header" data-group="financas" data-tooltip="Finanças">
-          <span data-icon="wallet"></span>
-          <span class="nav-label">Finanças</span>
-          <span class="nav-group-arrow" data-icon="chevron-right" data-size="14"></span>
+      <!-- Seção: Produtividade (sempre aberta) -->
+      <div class="nav-section-block" id="group-produtividade" data-context="pessoal">
+        <p class="nav-section-label">Produtividade</p>
+        <div class="nav-item nav-sub" data-nav="tarefas" data-tooltip="Tarefas">
+          <span data-icon="check-square" data-size="14"></span>
+          <span class="nav-label">Tarefas</span>
         </div>
-        <div class="nav-group-items">
-          <div class="nav-item nav-sub" data-nav="contas" data-tooltip="Contas">
-            <span data-icon="receipt" data-size="14"></span>
-            <span class="nav-label">Contas</span>
-            <span class="nav-badge" id="nav-badge-contas"></span>
-          </div>
-          <div class="nav-item nav-sub" data-nav="transacoes" data-tooltip="Transações">
-            <span data-icon="arrow-left-right" data-size="14"></span>
-            <span class="nav-label">Transações</span>
-          </div>
-          <div class="nav-item nav-sub" data-nav="metas" data-tooltip="Metas">
-            <span data-icon="target" data-size="14"></span>
-            <span class="nav-label">Metas</span>
-          </div>
+        <div class="nav-item nav-sub" data-nav="notas" data-tooltip="Notas">
+          <span data-icon="file-text" data-size="14"></span>
+          <span class="nav-label">Notas</span>
+        </div>
+        <div class="nav-item nav-sub" data-nav="habitos" data-tooltip="Hábitos">
+          <span data-icon="flame" data-size="14"></span>
+          <span class="nav-label">Hábitos</span>
+        </div>
+        <div class="nav-item nav-sub" data-nav="rotinas" data-tooltip="Rotinas">
+          <span data-icon="sunrise" data-size="14"></span>
+          <span class="nav-label">Rotinas</span>
+        </div>
+        <div class="nav-item nav-sub" data-nav="estudos" data-tooltip="Estudos">
+          <span data-icon="graduation-cap" data-size="14"></span>
+          <span class="nav-label">Estudos</span>
+        </div>
+        <div class="nav-item nav-sub" data-nav="metas" data-tooltip="Metas">
+          <span data-icon="target" data-size="14"></span>
+          <span class="nav-label">Metas</span>
         </div>
       </div>
 
@@ -157,6 +166,10 @@
           <div class="nav-item nav-sub" data-nav="estoque" data-tooltip="Estoque">
             <span data-icon="archive" data-size="14"></span>
             <span class="nav-label">Estoque</span>
+          </div>
+          <div class="nav-item nav-sub" data-nav="relatorios" data-tooltip="Relatórios">
+            <span data-icon="bar-chart-2" data-size="14"></span>
+            <span class="nav-label">Relatórios</span>
           </div>
 
           <!-- Timer Rápido -->
@@ -274,6 +287,11 @@
     <!-- ─── PAINEL NEGÓCIO ─── -->
     <section class="page" data-page="painel">
       <div id="painel-negocio-content"></div>
+    </section>
+
+    <!-- ─── RELATÓRIOS ─── -->
+    <section class="page" data-page="relatorios">
+      <div id="relatorios-content"></div>
     </section>
 
     <!-- ─── CHAT AI ─── -->
@@ -412,6 +430,21 @@
     <!-- ─── NOTAS ─── -->
     <section class="page" data-page="notas">
       <div id="notas-content"></div>
+    </section>
+
+    <!-- ─── DATAS IMPORTANTES ─── -->
+    <section class="page" data-page="datas-importantes">
+      <div id="datas-importantes-content"></div>
+    </section>
+
+    <!-- ─── ROTINAS ─── -->
+    <section class="page" data-page="rotinas">
+      <div id="rotinas-content"></div>
+    </section>
+
+    <!-- ─── ESTUDOS ─── -->
+    <section class="page" data-page="estudos">
+      <div id="estudos-content"></div>
     </section>
 
     <!-- ─── KANBAN ─── -->
@@ -700,7 +733,12 @@
 <script src="js/modules/agenda-hibrida.js?v=1"></script>
 <script src="js/modules/habitos.js?v=1"></script>
 <script src="js/modules/notas.js?v=1"></script>
-<script src="js/modules/dashboard-pessoal.js?v=1"></script>
+<script src="js/modules/datas-importantes.js?v=1"></script>
+<script src="js/modules/rotinas.js?v=1"></script>
+<script src="js/modules/estudos.js?v=1"></script>
+<script src="js/modules/dashboard-pessoal.js?v=2"></script>
+<script src="js/modules/relatorios.js?v=1"></script>
+<script src="js/modules/assistente.js?v=1"></script>
 <script src="js/dashboard.js?v=8"></script>
 <script src="js/contas.js?v=8"></script>
 <script src="js/transacoes.js?v=8"></script>

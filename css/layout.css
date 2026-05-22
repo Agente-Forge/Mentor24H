@@ -314,7 +314,7 @@
   will-change: max-height;
 }
 
-.nav-group.open .nav-group-items { max-height: 320px; }
+.nav-group.open .nav-group-items { max-height: 400px; }
 
 .nav-sub {
   padding-left: calc(var(--s-3) + 26px) !important;

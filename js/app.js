@@ -156,8 +156,10 @@ const App = (() => {
     const openGroupFor = (page) => {
       const groupMap = {
         'produtos': 'group-negocio', 'vendas': 'group-negocio', 'estoque': 'group-negocio', 'clientes': 'group-negocio',
-        'contas': 'group-financas', 'transacoes': 'group-financas', 'metas': 'group-financas',
-        'agenda': 'group-pessoal', 'medicamentos': 'group-pessoal', 'tarefas': 'group-pessoal', 'contatos': 'group-pessoal',
+        'contatos': 'group-organizacao', 'contas': 'group-organizacao', 'transacoes': 'group-organizacao',
+        'agenda-hibrida': 'group-organizacao', 'chat-ai': 'group-organizacao', 'medicamentos': 'group-organizacao', 'datas-importantes': 'group-organizacao',
+        'tarefas': 'group-produtividade', 'notas': 'group-produtividade', 'habitos': 'group-produtividade',
+        'rotinas': 'group-produtividade', 'estudos': 'group-produtividade', 'metas': 'group-produtividade',
       };
       const groupId = groupMap[page];
       if (groupId) {
@@ -337,6 +339,10 @@ const App = (() => {
     Router.register('agenda-hibrida',  () => AgendaHibrida.render());
     Router.register('habitos',         () => Habitos.render());
     Router.register('notas',           () => Notas.render());
+    Router.register('relatorios',      () => Relatorios.render());
+    Router.register('datas-importantes', () => DatasImportantes.render());
+    Router.register('rotinas',           () => Rotinas.render());
+    Router.register('estudos',           () => Estudos.render());
     Router.init();
   }
 

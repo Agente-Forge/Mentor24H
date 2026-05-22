@@ -1,0 +1,172 @@
+/* ═══════════════════════════════════════════════════════════
+   PRINT — Templates de impressão: nota de venda e orçamento
+   Sem dependências externas. Usa window.print() via JS.
+═══════════════════════════════════════════════════════════ */
+
+/* Esconde toda a UI do app ao imprimir */
+@media print {
+  body > *:not(#print-overlay) {
+    display: none !important;
+  }
+
+  #print-overlay {
+    display: block !important;
+    position: static !important;
+    background: white !important;
+    color: #111 !important;
+    font-family: 'Geist', Arial, sans-serif;
+    font-size: 13px;
+    line-height: 1.5;
+    padding: 0;
+    margin: 0;
+  }
+}
+
+/* ─── Container do documento imprimível ─── */
+#print-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: white;
+  color: #111;
+  overflow: auto;
+  font-family: 'Geist', Arial, sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+#print-overlay .print-doc {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 32px 24px;
+}
+
+/* ─── Cabeçalho do documento ─── */
+.print-doc .print-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 2px solid #111;
+  padding-bottom: 12px;
+  margin-bottom: 20px;
+}
+
+.print-doc .print-title {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.print-doc .print-badge {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border: 1.5px solid #111;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+/* ─── Bloco de metadados (cliente, data, validade) ─── */
+.print-doc .print-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 24px;
+  margin-bottom: 20px;
+  font-size: 12px;
+}
+
+.print-doc .print-meta-label {
+  color: #666;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.print-doc .print-meta-value {
+  font-weight: 600;
+}
+
+/* ─── Tabela de itens ─── */
+.print-doc .print-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 16px;
+}
+
+.print-doc .print-table th {
+  background: #f4f4f4;
+  text-align: left;
+  padding: 7px 10px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border: 1px solid #ddd;
+}
+
+.print-doc .print-table td {
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  vertical-align: top;
+}
+
+.print-doc .print-table td.right {
+  text-align: right;
+  font-family: monospace;
+}
+
+/* ─── Totais ─── */
+.print-doc .print-totals {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  margin-bottom: 24px;
+}
+
+.print-doc .print-total-row {
+  display: flex;
+  gap: 24px;
+  font-size: 12px;
+}
+
+.print-doc .print-total-row.final {
+  font-size: 16px;
+  font-weight: 700;
+  border-top: 2px solid #111;
+  padding-top: 6px;
+  margin-top: 4px;
+}
+
+/* ─── Rodapé do documento ─── */
+.print-doc .print-footer {
+  border-top: 1px solid #ddd;
+  padding-top: 12px;
+  font-size: 11px;
+  color: #666;
+}
+
+.print-doc .print-validade {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 4px 10px;
+  border: 1px solid #999;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* ─── Botões de ação (visíveis na tela, ocultos na impressão) ─── */
+.print-actions {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  display: flex;
+  gap: 10px;
+  z-index: 10000;
+}
+
+@media print {
+  .print-actions { display: none !important; }
+}
