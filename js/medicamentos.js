@@ -190,8 +190,11 @@ const Medicamentos = (() => {
                 transform="rotate(-90 40 40)"/>
             </svg>
             <div class="med-ring-label">
-              <span class="med-ring-num">${taken}</span>
-              <span class="med-ring-den">/${total}</span>
+              <div class="med-ring-fraction">
+                <span class="med-ring-num">${taken}</span>
+                <div class="med-ring-sep"></div>
+                <span class="med-ring-den">${total}</span>
+              </div>
               <span class="med-ring-sub">${isToday ? 'hoje' : _fmtShort(s.date)}</span>
             </div>
           </div>
