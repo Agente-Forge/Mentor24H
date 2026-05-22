@@ -78,12 +78,12 @@ const Medicamentos = (() => {
     const [sh, sm] = scheduled.split(':').map(Number);
     const [ah, am] = actual.split(':').map(Number);
     const diff = (ah * 60 + am) - (sh * 60 + sm);
-    if (diff <= 4) return null; // até 4 min = no horário
-    const h = Math.floor(diff / 60);
-    const m = diff % 60;
-    if (h > 0 && m > 0) return `${h}h${m}min depois`;
-    if (h > 0)          return `${h}h depois`;
-    return `${m}min depois`;
+    if (Math.abs(diff) <= 4) return null; // ±4 min = no horário
+    const abs  = Math.abs(diff);
+    const h    = Math.floor(abs / 60);
+    const m    = abs % 60;
+    const txt  = h > 0 && m > 0 ? `${h}h${m}min` : h > 0 ? `${h}h` : `${m}min`;
+    return diff > 0 ? `${txt} depois` : `${txt} antes`;
   }
 
   // ─── ACTIVE-ON-DATE ───────────────────────────────────────
