@@ -72,6 +72,20 @@ const Medicamentos = (() => {
     return new Date(iso + 'T00:00:00').toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', '');
   }
 
+  // ─── DELAY HELPER ────────────────────────────────────────
+  function _calcDelay(scheduled, actual) {
+    if (!scheduled || !actual) return null;
+    const [sh, sm] = scheduled.split(':').map(Number);
+    const [ah, am] = actual.split(':').map(Number);
+    const diff = (ah * 60 + am) - (sh * 60 + sm);
+    if (diff <= 4) return null; // até 4 min = no horário
+    const h = Math.floor(diff / 60);
+    const m = diff % 60;
+    if (h > 0 && m > 0) return `${h}h${m}min depois`;
+    if (h > 0)          return `${h}h depois`;
+    return `${m}min depois`;
+  }
+
   // ─── ACTIVE-ON-DATE ───────────────────────────────────────
   function _isActiveOnDate(med, date) {
     if (!med.dataInicio) return true;
@@ -611,6 +625,17 @@ const Medicamentos = (() => {
     const estoqueAlert = med.estoque <= med.estoqueMinimo;
     const dotCls       = state === 'tomado' ? 'tl-dot-done' : state === 'atrasado' ? 'tl-dot-late' : 'tl-dot-pend';
 
+    let takenLabel = '';
+    if (state === 'tomado') {
+      const rec = DB.getDoses(med.id, s.date).find(d => (d.doseIdx ?? 0) === doseIdx);
+      if (rec?.hora) {
+        const delay = _calcDelay(dose.hora, rec.hora);
+        takenLabel = `<span class="med-tl-taken">✓ Tomado às ${rec.hora}${
+          delay ? ` · <span class="med-tl-taken-delay">${delay}</span>` : ' · no horário'
+        }</span>`;
+      }
+    }
+
     return `
       <div class="med-tl-item${state === 'tomado' ? ' tl-done' : ''}${state === 'atrasado' ? ' tl-late' : ''}">
         <div class="med-tl-left">
@@ -628,6 +653,7 @@ const Medicamentos = (() => {
                   ${dose.quantidade} ${_doseUnit(dose.quantidade, med.tipo)}
                   ${med.estoque !== undefined ? `· <span class="${estoqueAlert ? 'tl-stock-alert' : ''}">${estoqueAlert ? '⚠️ ' : ''}${_estoqueLabel(med.estoque, med.tipo)}</span>` : ''}
                 </span>
+                ${takenLabel}
               </div>
               <div class="med-tl-actions">
                 ${state !== 'tomado' ? `

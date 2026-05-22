@@ -364,9 +364,10 @@
   box-shadow: 0 6px 22px rgba(0,0,0,.38);
   transform: translateY(-1px);
 }
-.med-tl-item.tl-done .med-tl-card { opacity: .6; }
-.med-tl-item.tl-done .med-tl-title { text-decoration: line-through; }
-.med-tl-item.tl-done .med-tl-sub   { text-decoration: line-through; }
+.med-tl-item.tl-done .med-tl-card {
+  border-left: 3px solid var(--color-gold);
+  background: linear-gradient(rgba(212,165,116,.05), rgba(212,165,116,.05)), var(--surface-2);
+}
 .med-tl-item.tl-late .med-tl-title { color: var(--amber); }
 
 /* Left column — hora + vertical line */
@@ -456,6 +457,14 @@
   text-overflow: ellipsis;
 }
 .tl-stock-alert { color: var(--amber); }
+.med-tl-taken {
+  display: block;
+  font-size: var(--t-xs);
+  color: var(--color-gold);
+  margin-top: 4px;
+  font-weight: 500;
+}
+.med-tl-taken-delay { color: var(--amber); font-weight: 600; }
 
 .med-tl-actions {
   display: flex;
