@@ -159,10 +159,9 @@ const Medicamentos = (() => {
     meds.forEach(m => {
       if (!_isActiveOnDate(m, date)) return;
       if (m.estoque !== undefined && m.estoque !== null && m.estoque <= 0) return;
-      m.doses.forEach((dose, i) => {
-        const qty = dose.quantidade || 1;
-        total += qty;
-        if (DB.isDoseTomada(m.id, date, i)) taken += qty;
+      m.doses.forEach((_, i) => {
+        total++;
+        if (DB.isDoseTomada(m.id, date, i)) taken++;
       });
     });
     return { total, taken };
@@ -194,10 +193,9 @@ const Medicamentos = (() => {
     let gold = false, amber = false;
     if (activeMeds.length) {
       let total = 0, taken = 0;
-      activeMeds.forEach(m => m.doses.forEach((dose, i) => {
-        const qty = dose.quantidade || 1;
-        total += qty;
-        if (DB.isDoseTomada(m.id, dateISO, i)) taken += qty;
+      activeMeds.forEach(m => m.doses.forEach((_, i) => {
+        total++;
+        if (DB.isDoseTomada(m.id, dateISO, i)) taken++;
       }));
       if (total > 0) { if (taken === total) gold = true; else if (taken > 0) amber = true; }
     }
@@ -791,7 +789,9 @@ const Medicamentos = (() => {
         const med     = DB.getMedicamentos().find(m => m.id === medId);
         if (!med) return;
         if (DB.isDoseTomada(medId, s.date, doseIdx)) { Toast.info('Já registrado', 'Esta dose já foi marcada.'); return; }
-        if (med.estoque > 0) DB.saveMedicamento({ id: medId, estoque: med.estoque - 1 });
+        const medNorm = _norm(med);
+        const qty     = medNorm.doses[doseIdx]?.quantidade || 1;
+        if (med.estoque > 0) DB.saveMedicamento({ id: medId, estoque: Math.max(0, med.estoque - qty) });
         DB.registrarDose(medId, s.date, doseIdx);
         Toast.success('Dose registrada', `${med.nome} ✓`);
         render();
