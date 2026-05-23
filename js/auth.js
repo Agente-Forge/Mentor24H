@@ -1,27 +1,56 @@
 /* ═══════════════════════════════════════════════════════════
-   AUTH — Login/cadastro por email e senha (Supabase Auth)
+   AUTH — Login/cadastro/recuperação por email e senha (Supabase Auth)
    Mentor24h
 ═══════════════════════════════════════════════════════════ */
 
 const Auth = (() => {
   let _resolveLogin = null;
-  let _mode = 'login';   // 'login' | 'signup'
+  let _mode = 'login';   // 'login' | 'signup' | 'reset' | 'new-password'
+  let _listenersSet = false;
 
   function _el(id) { return document.getElementById(id); }
 
   function _setMode(mode) {
     _mode = mode;
     const isSignup = mode === 'signup';
-    _el('auth-nome-wrap').style.display = isSignup ? 'block' : 'none';
-    _el('auth-title').textContent = isSignup ? 'Criar conta' : 'Entrar';
-    _el('auth-submit').textContent = isSignup ? 'Criar conta' : 'Entrar';
-    _el('auth-toggle-text').innerHTML = isSignup
-      ? 'Já tem conta? <a id="auth-toggle-link" href="#">Entrar</a>'
-      : 'Não tem conta? <a id="auth-toggle-link" href="#">Criar agora</a>';
-    _el('auth-toggle-link').addEventListener('click', e => {
-      e.preventDefault();
-      _setMode(isSignup ? 'login' : 'signup');
-    });
+    const isReset  = mode === 'reset';
+    const isNewPwd = mode === 'new-password';
+    const isLogin  = mode === 'login';
+
+    _el('auth-nome-wrap').style.display   = isSignup ? 'block' : 'none';
+    _el('auth-email-wrap').style.display  = isNewPwd ? 'none'  : 'block';
+    _el('auth-senha-wrap').style.display  = isReset  ? 'none'  : 'block';
+    _el('auth-forgot-wrap').style.display = isLogin  ? 'block' : 'none';
+    _el('auth-toggle-text').style.display = isNewPwd ? 'none'  : 'block';
+
+    if (isNewPwd) {
+      _el('auth-title').textContent = 'Nova senha';
+      _el('auth-submit').textContent = 'Salvar';
+      _el('auth-senha').placeholder = 'Nova senha';
+      _el('auth-senha').setAttribute('autocomplete', 'new-password');
+    } else {
+      _el('auth-senha').placeholder = 'Sua senha';
+      _el('auth-senha').setAttribute('autocomplete', 'current-password');
+    }
+
+    if (isReset) {
+      _el('auth-title').textContent = 'Recuperar senha';
+      _el('auth-submit').textContent = 'Enviar link';
+      _el('auth-toggle-text').innerHTML =
+        'Lembrou? <a id="auth-toggle-link" href="#" style="color:var(--color-gold);text-decoration:none;">Entrar</a>';
+    } else if (!isNewPwd) {
+      _el('auth-title').textContent = isSignup ? 'Criar conta' : 'Entrar';
+      _el('auth-submit').textContent = isSignup ? 'Criar conta' : 'Entrar';
+      _el('auth-toggle-text').innerHTML = isSignup
+        ? 'Já tem conta? <a id="auth-toggle-link" href="#" style="color:var(--color-gold);text-decoration:none;">Entrar</a>'
+        : 'Não tem conta? <a id="auth-toggle-link" href="#" style="color:var(--color-gold);text-decoration:none;">Criar agora</a>';
+    }
+
+    const toggleLink = _el('auth-toggle-link');
+    if (toggleLink) {
+      const next = (isSignup || isReset) ? 'login' : 'signup';
+      toggleLink.addEventListener('click', e => { e.preventDefault(); _setMode(next); });
+    }
     _msg('');
   }
 
@@ -51,6 +80,41 @@ const Auth = (() => {
   }
 
   async function _submit() {
+    /* ── Enviar link de recuperação ── */
+    if (_mode === 'reset') {
+      const email = (_el('auth-email').value || '').trim();
+      if (!email) { _msg('Digite seu email.'); return; }
+      _busy(true);
+      try {
+        const { error } = await Cloud.db().auth.resetPasswordForEmail(email, {
+          redirectTo: window.location.origin + window.location.pathname,
+        });
+        if (error) throw error;
+        _msg('Link enviado! Verifique seu email.', false);
+      } catch (e) {
+        _msg(_traduzErro(e.message || ''));
+      }
+      _busy(false);
+      return;
+    }
+
+    /* ── Salvar nova senha (retorno do link de email) ── */
+    if (_mode === 'new-password') {
+      const senha = _el('auth-senha').value || '';
+      if (senha.length < 6) { _msg('A senha precisa ter pelo menos 6 caracteres.'); return; }
+      _busy(true);
+      try {
+        const { error } = await Cloud.db().auth.updateUser({ password: senha });
+        if (error) throw error;
+        _finish();
+      } catch (e) {
+        _msg(_traduzErro(e.message || ''));
+        _busy(false);
+      }
+      return;
+    }
+
+    /* ── Login / Cadastro ── */
     const email = (_el('auth-email').value || '').trim();
     const senha = _el('auth-senha').value || '';
     const nome  = (_el('auth-nome').value || '').trim();
@@ -71,13 +135,11 @@ const Auth = (() => {
         if (error) throw error;
 
         if (data.session) {
-          // Confirmação desligada → loga na hora. Conta nova começa limpa.
           Cloud.setUserId(data.user.id);
           if (window.DB && DB.clearAll)  DB.clearAll();
           if (window.DB && DB.saveConfig) DB.saveConfig({ nomeUsuario: nome });
           _finish();
         } else {
-          // Confirmação ligada → precisa confirmar o email
           _msg('Conta criada! Confirme o link enviado para ' + email + ' e depois faça login.', false);
           _setMode('login');
         }
@@ -85,9 +147,8 @@ const Auth = (() => {
         const { data, error } = await Cloud.db().auth.signInWithPassword({ email, password: senha });
         if (error) throw error;
         Cloud.setUserId(data.user.id);
-        if (window.DB && DB.clearAll) DB.clearAll();   // limpa dados de usuário anterior neste navegador
-        await Cloud.loadUserData();                      // carrega os dados desta conta
-        // Se o nome ainda não está no config, puxa do cadastro
+        if (window.DB && DB.clearAll) DB.clearAll();
+        await Cloud.loadUserData();
         const metaNome = data.user.user_metadata?.nome;
         if (metaNome && window.DB && DB.saveConfig) {
           const cfg = DB.getConfig();
@@ -117,29 +178,52 @@ const Auth = (() => {
     if (_resolveLogin) { _resolveLogin(); _resolveLogin = null; }
   }
 
-  /* Mostra a tela e resolve a Promise quando o usuário loga com sucesso */
+  function _setupListeners() {
+    if (_listenersSet) return;
+    _listenersSet = true;
+    _el('auth-submit').addEventListener('click', _submit);
+    _el('auth-eye-btn').addEventListener('click', _togglePassword);
+    _el('auth-senha').addEventListener('keydown', e => { if (e.key === 'Enter') _submit(); });
+    _el('auth-email').addEventListener('keydown', e => { if (e.key === 'Enter') _submit(); });
+    const forgotLink = _el('auth-forgot-link');
+    if (forgotLink) {
+      forgotLink.addEventListener('click', e => { e.preventDefault(); _setMode('reset'); });
+    }
+  }
+
+  /* Mostra a tela de login e resolve a Promise quando o usuário autentica */
   function requireLogin() {
     return new Promise(resolve => {
       _resolveLogin = resolve;
       const overlay = _el('auth-overlay');
       if (!overlay) { resolve(); return; }
       overlay.style.display = 'flex';
-
       _setMode('login');
-      _el('auth-submit').addEventListener('click', _submit);
-      _el('auth-eye-btn').addEventListener('click', _togglePassword);
-      _el('auth-senha').addEventListener('keydown', e => { if (e.key === 'Enter') _submit(); });
-      _el('auth-email').addEventListener('keydown', e => { if (e.key === 'Enter') _submit(); });
+      _setupListeners();
       setTimeout(() => _el('auth-email').focus(), 100);
       if (window.Icons) Icons.render(overlay);
     });
   }
 
+  /* Mostra o formulário de nova senha (retorno do link de recuperação por email) */
+  function showRecoveryForm() {
+    return new Promise(resolve => {
+      _resolveLogin = resolve;
+      const overlay = _el('auth-overlay');
+      if (!overlay) { resolve(); return; }
+      overlay.style.display = 'flex';
+      _setMode('new-password');
+      _setupListeners();
+      setTimeout(() => _el('auth-senha').focus(), 100);
+      if (window.Icons) Icons.render(overlay);
+    });
+  }
+
   async function logout() {
-    if (window.DB && DB.clearAll) DB.clearAll();   // não deixa dados pro próximo login
+    if (window.DB && DB.clearAll) DB.clearAll();
     try { await Cloud.db().auth.signOut(); } catch (_) {}
     location.reload();
   }
 
-  return { requireLogin, logout };
+  return { requireLogin, showRecoveryForm, logout };
 })();

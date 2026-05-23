@@ -751,10 +751,12 @@
         style="width:100%; box-sizing:border-box; padding:14px 16px; background:var(--surface-3); border:1px solid var(--line-3); border-radius:var(--r-md); color:var(--text-1); font-family:var(--font-body); font-size:var(--t-base); outline:none; margin-bottom:12px;">
     </div>
 
-    <input id="auth-email" type="email" placeholder="Seu email" autocomplete="email" inputmode="email"
-      style="width:100%; box-sizing:border-box; padding:14px 16px; background:var(--surface-3); border:1px solid var(--line-3); border-radius:var(--r-md); color:var(--text-1); font-family:var(--font-body); font-size:var(--t-base); outline:none; margin-bottom:12px;">
+    <div id="auth-email-wrap">
+      <input id="auth-email" type="email" placeholder="Seu email" autocomplete="email" inputmode="email"
+        style="width:100%; box-sizing:border-box; padding:14px 16px; background:var(--surface-3); border:1px solid var(--line-3); border-radius:var(--r-md); color:var(--text-1); font-family:var(--font-body); font-size:var(--t-base); outline:none; margin-bottom:12px;">
+    </div>
 
-    <div style="position:relative; margin-bottom:12px;">
+    <div id="auth-senha-wrap" style="position:relative; margin-bottom:12px;">
       <input id="auth-senha" type="password" placeholder="Sua senha" autocomplete="current-password"
         style="width:100%; box-sizing:border-box; padding:14px 46px 14px 16px; background:var(--surface-3); border:1px solid var(--line-3); border-radius:var(--r-md); color:var(--text-1); font-family:var(--font-body); font-size:var(--t-base); outline:none;">
       <button id="auth-eye-btn" type="button" aria-label="Mostrar senha"
@@ -770,7 +772,8 @@
 
     <p id="auth-msg" style="color:#ef4444; font-size:var(--t-xs); min-height:18px; margin:0 0 8px; line-height:1.4;"></p>
     <p id="auth-toggle-text" style="color:var(--text-3); font-size:var(--t-sm); margin:0;">Não tem conta? <a id="auth-toggle-link" href="#" style="color:var(--color-gold); text-decoration:none;">Criar agora</a></p>
-    <p style="color:var(--text-4); font-size:11px; margin:20px 0 0; opacity:.7;">Mentor24h v15</p>
+    <p id="auth-forgot-wrap" style="margin:8px 0 0;"><a id="auth-forgot-link" href="#" style="color:var(--text-3); font-size:var(--t-sm); text-decoration:none;">Esqueci minha senha</a></p>
+    <p style="color:var(--text-4); font-size:11px; margin:20px 0 0; opacity:.7;">Mentor24h v16</p>
   </div>
 </div>
 
@@ -785,7 +788,7 @@
 <!-- ═══ SCRIPTS (ordem importa) ═══ -->
 <script src="js/supabase.min.js"></script>
 <script src="js/cloud.js?v=15"></script>
-<script src="js/auth.js?v=15"></script>
+<script src="js/auth.js?v=16"></script>
 <script src="js/icons.js?v=15"></script>
 <script src="js/utils.js"></script>
 <script src="js/avatars.js"></script>
@@ -828,7 +831,7 @@
 <script src="js/command-palette.js?v=8"></script>
 <script src="js/leo-data.js?v=8"></script>
 <script src="js/notifications.js?v=15"></script>
-<script src="js/app.js?v=15"></script>
+<script src="js/app.js?v=16"></script>
 
 <!-- Sidebar dot indicator — carrega após app.js ter definido o item ativo -->
 <script src="js/sidebar-dot.js"></script>

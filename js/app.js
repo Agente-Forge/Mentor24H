@@ -553,11 +553,22 @@ const Alarm = (() => {
 })();
 
 document.addEventListener('DOMContentLoaded', async () => {
+  /* Fluxo de recuperação de senha: Supabase redireciona de volta com #type=recovery */
+  if (window.location.hash.includes('type=recovery')) {
+    history.replaceState(null, '', window.location.pathname + window.location.search);
+    await Cloud.init();                 // processa o token do hash, cria sessão
+    await Auth.showRecoveryForm();      // mostra formulário de nova senha
+    await Cloud.loadUserData();
+    App.init();
+    Cloud.syncAll();
+    return;
+  }
+
   const loggedIn = await Cloud.init();
   if (loggedIn) {
     await Cloud.loadUserData();
   } else {
-    await Auth.requireLogin();   // exibe tela de login; resolve após autenticar
+    await Auth.requireLogin();          // exibe tela de login; resolve após autenticar
   }
   App.init();
   Cloud.syncAll();
