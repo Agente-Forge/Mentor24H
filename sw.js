@@ -6,7 +6,7 @@
    (GitHub Pages /controle-financeiro-v2/ ou Live Server /)
 ═══════════════════════════════════════════════════════════ */
 
-const CACHE_NAME = 'mentor24h-v14';
+const CACHE_NAME = 'mentor24h-v15';
 
 const ASSETS = [
   './',
@@ -28,6 +28,7 @@ const ASSETS = [
   /* JS — core */
   './js/supabase.min.js',
   './js/cloud.js',
+  './js/auth.js',
   './js/icons.js',
   './js/utils.js',
   './js/avatars.js',

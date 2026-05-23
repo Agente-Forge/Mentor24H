@@ -553,7 +553,12 @@ const Alarm = (() => {
 })();
 
 document.addEventListener('DOMContentLoaded', async () => {
-  await Cloud.init();
+  const loggedIn = await Cloud.init();
+  if (loggedIn) {
+    await Cloud.loadUserData();
+  } else {
+    await Auth.requireLogin();   // exibe tela de login; resolve após autenticar
+  }
   App.init();
   Cloud.syncAll();
 });

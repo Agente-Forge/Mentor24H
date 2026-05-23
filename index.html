@@ -670,6 +670,24 @@
           </div>
         </div>
 
+        <!-- SEÇÃO: Conta -->
+        <div class="cfg-card">
+          <div class="cfg-card-head">
+            <span class="cfg-card-icon cfg-icon-blue" data-icon="user" data-size="16"></span>
+            <h3 class="cfg-card-title">Conta</h3>
+          </div>
+          <div class="cfg-card-body">
+            <button class="cfg-action-row" onclick="Auth.logout()">
+              <span class="cfg-action-icon cfg-icon-amber" data-icon="log-out" data-size="16"></span>
+              <div class="cfg-action-info">
+                <span class="cfg-action-label">Sair da conta</span>
+                <span class="cfg-action-sub">Encerrar sessão neste dispositivo</span>
+              </div>
+              <span data-icon="chevron-right" data-size="14" class="cfg-action-arrow"></span>
+            </button>
+          </div>
+        </div>
+
       </div><!-- /.cfg-stack -->
     </section>
 
@@ -721,22 +739,38 @@
   </div>
 </div>
 
-<!-- ═══ CLOUD SETUP — Tela de boas-vindas (primeiro acesso) ═══ -->
-<div id="cloud-setup-overlay" style="display:none; position:fixed; inset:0; background:var(--bg-base); z-index:9999; align-items:center; justify-content:center; flex-direction:column;">
-  <div style="text-align:center; max-width:340px; width:100%; padding:0 24px; box-sizing:border-box;">
-    <div style="font-size:52px; margin-bottom:20px; line-height:1;">👋</div>
-    <h2 style="font-family:var(--font-display); font-size:var(--t-2xl); color:var(--text-1); margin:0 0 8px; font-weight:500;">Bem-vindo ao Mentor24h</h2>
-    <p style="color:var(--text-3); font-size:var(--t-sm); margin:0 0 28px; line-height:1.5;">Como você quer ser chamado?</p>
-    <input id="cloud-setup-nome" type="text" placeholder="Seu nome" autocomplete="off"
-      style="width:100%; box-sizing:border-box; padding:14px 16px; background:var(--surface-3); border:1px solid var(--line-3); border-radius:var(--r-md); color:var(--text-1); font-family:var(--font-body); font-size:var(--t-base); outline:none; margin-bottom:12px; transition:border-color 150ms;"
-      onfocus="this.style.borderColor='var(--color-gold)'"
-      onblur="this.style.borderColor='var(--line-3)'">
-    <button id="cloud-setup-btn"
-      style="width:100%; padding:14px; background:var(--color-gold); border:none; border-radius:var(--r-md); color:#000; font-family:var(--font-body); font-weight:700; font-size:var(--t-base); cursor:pointer; margin-bottom:8px;">
+<!-- ═══ AUTH — Tela de login / cadastro ═══ -->
+<div id="auth-overlay" style="display:none; position:fixed; inset:0; background:var(--bg-base); z-index:9999; align-items:center; justify-content:center; flex-direction:column;">
+  <div style="text-align:center; max-width:360px; width:100%; padding:0 24px; box-sizing:border-box;">
+    <div style="font-size:52px; margin-bottom:16px; line-height:1;">🔐</div>
+    <h2 id="auth-title" style="font-family:var(--font-display); font-size:var(--t-2xl); color:var(--text-1); margin:0 0 6px; font-weight:500;">Entrar</h2>
+    <p style="color:var(--text-3); font-size:var(--t-sm); margin:0 0 24px; line-height:1.5;">Mentor24h — sua conta na nuvem</p>
+
+    <div id="auth-nome-wrap" style="display:none;">
+      <input id="auth-nome" type="text" placeholder="Seu nome" autocomplete="name"
+        style="width:100%; box-sizing:border-box; padding:14px 16px; background:var(--surface-3); border:1px solid var(--line-3); border-radius:var(--r-md); color:var(--text-1); font-family:var(--font-body); font-size:var(--t-base); outline:none; margin-bottom:12px;">
+    </div>
+
+    <input id="auth-email" type="email" placeholder="Seu email" autocomplete="email" inputmode="email"
+      style="width:100%; box-sizing:border-box; padding:14px 16px; background:var(--surface-3); border:1px solid var(--line-3); border-radius:var(--r-md); color:var(--text-1); font-family:var(--font-body); font-size:var(--t-base); outline:none; margin-bottom:12px;">
+
+    <div style="position:relative; margin-bottom:12px;">
+      <input id="auth-senha" type="password" placeholder="Sua senha" autocomplete="current-password"
+        style="width:100%; box-sizing:border-box; padding:14px 46px 14px 16px; background:var(--surface-3); border:1px solid var(--line-3); border-radius:var(--r-md); color:var(--text-1); font-family:var(--font-body); font-size:var(--t-base); outline:none;">
+      <button id="auth-eye-btn" type="button" aria-label="Mostrar senha"
+        style="position:absolute; right:8px; top:50%; transform:translateY(-50%); background:none; border:none; padding:8px; cursor:pointer; color:var(--text-3); display:flex; align-items:center;">
+        <span id="auth-eye" data-icon="eye" data-size="18"></span>
+      </button>
+    </div>
+
+    <button id="auth-submit"
+      style="width:100%; padding:14px; background:var(--color-gold); border:none; border-radius:var(--r-md); color:#000; font-family:var(--font-body); font-weight:700; font-size:var(--t-base); cursor:pointer; margin-bottom:10px;">
       Entrar
     </button>
-    <p id="cloud-setup-err" style="color:#ef4444; font-size:var(--t-xs); min-height:16px; margin:0;"></p>
-    <p style="color:var(--text-4); font-size:11px; margin:20px 0 0; opacity:.7;">Mentor24h v14</p>
+
+    <p id="auth-msg" style="color:#ef4444; font-size:var(--t-xs); min-height:18px; margin:0 0 8px; line-height:1.4;"></p>
+    <p id="auth-toggle-text" style="color:var(--text-3); font-size:var(--t-sm); margin:0;">Não tem conta? <a id="auth-toggle-link" href="#" style="color:var(--color-gold); text-decoration:none;">Criar agora</a></p>
+    <p style="color:var(--text-4); font-size:11px; margin:20px 0 0; opacity:.7;">Mentor24h v15</p>
   </div>
 </div>
 
@@ -750,8 +784,9 @@
 
 <!-- ═══ SCRIPTS (ordem importa) ═══ -->
 <script src="js/supabase.min.js"></script>
-<script src="js/cloud.js?v=14"></script>
-<script src="js/icons.js"></script>
+<script src="js/cloud.js?v=15"></script>
+<script src="js/auth.js?v=15"></script>
+<script src="js/icons.js?v=15"></script>
 <script src="js/utils.js"></script>
 <script src="js/avatars.js"></script>
 <script src="js/db.js"></script>
@@ -792,8 +827,8 @@
 <script src="js/clientes.js?v=8"></script>
 <script src="js/command-palette.js?v=8"></script>
 <script src="js/leo-data.js?v=8"></script>
-<script src="js/notifications.js?v=14"></script>
-<script src="js/app.js?v=14"></script>
+<script src="js/notifications.js?v=15"></script>
+<script src="js/app.js?v=15"></script>
 
 <!-- Sidebar dot indicator — carrega após app.js ter definido o item ativo -->
 <script src="js/sidebar-dot.js"></script>

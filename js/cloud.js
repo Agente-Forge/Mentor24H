@@ -1,73 +1,41 @@
 /* ═══════════════════════════════════════════════════════════
-   CLOUD — Supabase sync layer
-   Mentor24h | Multi-user sem login
+   CLOUD — Supabase sync layer (com Auth)
+   Mentor24h | Login real por email/senha
 ═══════════════════════════════════════════════════════════ */
 
 const Cloud = (() => {
   const SUPABASE_URL = 'https://qrnvykzozbnqmvicscbr.supabase.co';
   const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFybnZ5a3pvemJucW12aWNzY2JyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0Nzk5NDQsImV4cCI6MjA5NTA1NTk0NH0.j_2HUS_UFLbW57_LzEUplehRp1lmhQdiNS889KcR5lg';
 
-  const LS_USER_ID = 'mentor24h.cloud.userId';
-  const LS_NOME    = 'mentor24h.cloud.nome';
-
   const SKIP_KEYS = new Set([
     'mentor24h.schema-version',
     'mentor24h_modoAtivo',
-    'mentor24h.cloud.userId',
-    'mentor24h.cloud.nome',
     'finflow.leo-v1',
   ]);
 
-  let _userId = null;
   let _client = null;
-  let _ready   = false;
+  let _userId = null;
+  let _ready  = false;
 
-  function _db() {
-    if (!_client) _client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    return _client;
-  }
-
-  async function createUser(nome) {
-    const { data, error } = await _db()
-      .from('usuarios')
-      .insert({ nome })
-      .select()
-      .single();
-    if (error) throw error;
-    _userId = data.id;
-    localStorage.setItem(LS_USER_ID, _userId);
-    localStorage.setItem(LS_NOME, nome);
-    if (window.DB && DB.saveConfig) DB.saveConfig({ nomeUsuario: nome });
-    await _syncExistingData();
-    return data;
-  }
-
-  async function _syncExistingData() {
-    const promises = [];
-    for (let i = 0; i < localStorage.length; i++) {
-      const k = localStorage.key(i);
-      if (!k || SKIP_KEYS.has(k)) continue;
-      if (!k.startsWith('finflow.') && !k.startsWith('mentor24h.')) continue;
-      try {
-        const v = JSON.parse(localStorage.getItem(k));
-        promises.push(sync(k, v));
-      } catch {}
+  function db() {
+    if (!_client) {
+      _client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+        auth: { persistSession: true, autoRefreshToken: true },
+      });
     }
-    await Promise.all(promises);
+    return _client;
   }
 
   async function _loadFromCloud() {
     if (!_userId) return;
     try {
-      const { data, error } = await _db()
+      const { data, error } = await db()
         .from('colecoes')
         .select('chave, dados')
         .eq('user_id', _userId);
       if (error) throw error;
       if (data && data.length) {
-        data.forEach(row => {
-          localStorage.setItem(row.chave, JSON.stringify(row.dados));
-        });
+        data.forEach(row => localStorage.setItem(row.chave, JSON.stringify(row.dados)));
       }
     } catch (e) {
       console.warn('[Cloud] Load failed — usando dados locais:', e.message);
@@ -76,8 +44,9 @@ const Cloud = (() => {
 
   async function sync(chave, dados) {
     if (!_userId || SKIP_KEYS.has(chave)) return;
+    if (!chave.startsWith('finflow.') && !chave.startsWith('mentor24h.')) return;
     try {
-      const { error } = await _db().from('colecoes').upsert(
+      const { error } = await db().from('colecoes').upsert(
         { user_id: _userId, chave, dados, atualizado_em: new Date().toISOString() }
       );
       if (error) console.warn('[Cloud] Sync error —', chave, ':', error.message, error.code);
@@ -93,87 +62,33 @@ const Cloud = (() => {
       const k = localStorage.key(i);
       if (!k || SKIP_KEYS.has(k)) continue;
       if (!k.startsWith('finflow.') && !k.startsWith('mentor24h.')) continue;
-      try {
-        const v = JSON.parse(localStorage.getItem(k));
-        promises.push(sync(k, v));
-      } catch {}
+      try { promises.push(sync(k, JSON.parse(localStorage.getItem(k)))); } catch {}
     }
     await Promise.all(promises);
     console.log('[Cloud] syncAll completo para', _userId);
   }
 
-  function _showSetupScreen() {
-    return new Promise(resolve => {
-      const overlay = document.getElementById('cloud-setup-overlay');
-      if (!overlay) { resolve(); return; }
-
-      overlay.style.display = 'flex';
-
-      const input = document.getElementById('cloud-setup-nome');
-      const btn   = document.getElementById('cloud-setup-btn');
-      const err   = document.getElementById('cloud-setup-err');
-
-      if (input) setTimeout(() => input.focus(), 100);
-
-      async function onConfirm() {
-        const nome = (input?.value || '').trim();
-        if (!nome) { input?.focus(); return; }
-        btn.disabled    = true;
-        btn.textContent = 'Entrando...';
-        if (err) err.textContent = '';
-        try {
-          await createUser(nome);
-          overlay.style.display = 'none';
-          resolve();
-        } catch (e) {
-          btn.disabled    = false;
-          btn.textContent = 'Entrar';
-          if (err) err.textContent = 'Erro ao conectar. Tente novamente.';
-          console.error('[Cloud] createUser failed:', e);
-        }
-      }
-
-      btn?.addEventListener('click', onConfirm);
-      input?.addEventListener('keydown', e => { if (e.key === 'Enter') onConfirm(); });
-    });
-  }
-
-  async function _userExists(id) {
-    try {
-      const { data, error } = await _db()
-        .from('usuarios')
-        .select('id')
-        .eq('id', id)
-        .maybeSingle();
-      if (error) return true;   // erro de rede → não apagar (assume que existe)
-      return !!data;
-    } catch {
-      return true;              // offline → não apagar
-    }
-  }
-
+  /* Inicializa o cliente e detecta sessão existente. Retorna true se logado. */
   async function init() {
-    _userId = localStorage.getItem(LS_USER_ID);
+    const { data } = await db().auth.getSession();
+    _userId = data?.session?.user?.id || null;
 
-    // userId órfão (usuário removido da nuvem) → limpar e recriar
-    if (_userId && !(await _userExists(_userId))) {
-      console.warn('[Cloud] userId órfão, recriando:', _userId);
-      localStorage.removeItem(LS_USER_ID);
-      localStorage.removeItem(LS_NOME);
-      _userId = null;
-    }
+    db().auth.onAuthStateChange((_event, session) => {
+      _userId = session?.user?.id || null;
+    });
 
-    if (!_userId) {
-      await _showSetupScreen();
-    }
-
-    await _loadFromCloud();
     _ready = true;
+    return !!_userId;
+  }
+
+  /* Carrega os dados do usuário logado para o localStorage */
+  async function loadUserData() {
+    await _loadFromCloud();
   }
 
   function getUserId() { return _userId; }
-  function getNome()   { return localStorage.getItem(LS_NOME) || ''; }
-  function isReady()   { return _ready; }
+  function setUserId(id) { _userId = id; }
+  function isReady()    { return _ready; }
 
-  return { init, sync, syncAll, createUser, getUserId, getNome, isReady };
+  return { init, db, sync, syncAll, loadUserData, getUserId, setUserId, isReady };
 })();
