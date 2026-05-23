@@ -176,8 +176,10 @@ const App = (() => {
     };
   }
 
-  /* ─── Importação automática dos dados do Léo (única vez) ─── */
+  /* ─── Importação automática dos dados do Léo (única vez, só sem usuário cloud) ─── */
   function importarDadosLeo() {
+    /* Multi-usuário: com usuário na nuvem, os dados vêm do Cloud, nunca do seed do Léo */
+    if (window.Cloud && Cloud.getUserId()) return;
     const JA_IMPORTADO = 'finflow.leo-v1';
     if (localStorage.getItem(JA_IMPORTADO)) return;
     DB.clearAll();

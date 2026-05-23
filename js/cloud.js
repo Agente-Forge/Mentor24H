@@ -36,6 +36,7 @@ const Cloud = (() => {
     _userId = data.id;
     localStorage.setItem(LS_USER_ID, _userId);
     localStorage.setItem(LS_NOME, nome);
+    if (window.DB && DB.saveConfig) DB.saveConfig({ nomeUsuario: nome });
     await _syncExistingData();
     return data;
   }
