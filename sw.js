@@ -6,7 +6,7 @@
    (GitHub Pages /controle-financeiro-v2/ ou Live Server /)
 ═══════════════════════════════════════════════════════════ */
 
-const CACHE_NAME = 'mentor24h-v7';
+const CACHE_NAME = 'mentor24h-v8';
 
 const ASSETS = [
   './',
@@ -64,7 +64,6 @@ const ASSETS = [
   './js/estoque.js',
   './js/clientes.js',
   './js/command-palette.js',
-  './js/leo-data.js',
   './js/app.js',
   './js/notifications.js',
   './js/sidebar-dot.js',
@@ -72,11 +71,15 @@ const ASSETS = [
   './manifest.json',
 ];
 
-/* ─── Install: pré-cachear todos os assets ─── */
+/* ─── Install: pré-cachear assets (resiliente — 1 falha não derruba tudo) ─── */
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(ASSETS))
+      .then(cache => Promise.allSettled(
+        ASSETS.map(url => cache.add(url).catch(err => {
+          console.warn('[SW] Falha ao cachear (ignorado):', url, err.message);
+        }))
+      ))
       .then(() => self.skipWaiting())
   );
 });

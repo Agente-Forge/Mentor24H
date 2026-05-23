@@ -18,9 +18,17 @@ const Notifications = (() => {
     return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
   }
 
+  /* serviceWorker.ready trava para sempre se o SW não ativar — limita a 5s */
+  function _swReady(timeoutMs = 5000) {
+    return Promise.race([
+      navigator.serviceWorker.ready,
+      new Promise((_, rej) => setTimeout(() => rej(new Error('SW timeout')), timeoutMs)),
+    ]);
+  }
+
   async function status() {
     if (!supported()) return 'unsupported';
-    const reg = await navigator.serviceWorker.ready.catch(() => null);
+    const reg = await _swReady().catch(() => null);
     if (!reg) return 'no-sw';
     const sub = await reg.pushManager.getSubscription().catch(() => null);
     if (sub && Notification.permission === 'granted') return 'active';
@@ -38,7 +46,7 @@ const Notifications = (() => {
       return false;
     }
     try {
-      const reg = await navigator.serviceWorker.ready;
+      const reg = await _swReady(10000);
       const sub = await reg.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: _b64ToUint8(VAPID_PUBLIC_KEY),
