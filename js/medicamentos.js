@@ -32,7 +32,6 @@ const Medicamentos = (() => {
     '13:00','14:00','15:00','16:00','18:00','19:00','20:00','21:00','22:00',
   ];
 
-  const DRUM_MINS = ['00','05','10','15','20','25','30','35','40','45','50','55'];
   const DEFAULT_HORAS = ['08:00','12:00','16:00','19:00','22:00'];
 
   // ─── STATE ────────────────────────────────────────────────
@@ -447,44 +446,10 @@ const Medicamentos = (() => {
     `;
   }
 
-  // ─── DRUM PICKER ──────────────────────────────────────────
-  function _renderDrum(dose, i) {
-    const [hStr, mStr] = (dose.hora || '08:00').split(':');
-    const h    = parseInt(hStr, 10);
-    const mRaw = parseInt(mStr, 10);
-    let mIdx   = DRUM_MINS.indexOf(mStr.padStart(2, '0'));
-    if (mIdx < 0) mIdx = Math.min(Math.round(mRaw / 5), 11);
-
-    const pH = String((h + 23) % 24).padStart(2, '0');
-    const cH = String(h).padStart(2, '0');
-    const nH = String((h + 1)  % 24).padStart(2, '0');
-    const pM = DRUM_MINS[(mIdx + 11) % 12];
-    const cM = DRUM_MINS[mIdx];
-    const nM = DRUM_MINS[(mIdx + 1)  % 12];
-
-    return `
-      <div class="wiz-drum" data-dose-drum="${i}">
-        <div class="drum-col">
-          <button class="drum-arr" data-drum-h="up" data-drum-i="${i}" type="button">▲</button>
-          <div class="drum-win" data-drum-win-h="${i}">
-            <div class="drum-cell dim">${pH}</div>
-            <div class="drum-cell sel">${cH}</div>
-            <div class="drum-cell dim">${nH}</div>
-          </div>
-          <button class="drum-arr" data-drum-h="dn" data-drum-i="${i}" type="button">▼</button>
-        </div>
-        <span class="drum-colon">:</span>
-        <div class="drum-col">
-          <button class="drum-arr" data-drum-m="up" data-drum-i="${i}" type="button">▲</button>
-          <div class="drum-win" data-drum-win-m="${i}">
-            <div class="drum-cell dim">${pM}</div>
-            <div class="drum-cell sel">${cM}</div>
-            <div class="drum-cell dim">${nM}</div>
-          </div>
-          <button class="drum-arr" data-drum-m="dn" data-drum-i="${i}" type="button">▼</button>
-        </div>
-      </div>
-    `;
+  // ─── SELETOR DE HORA (input nativo do sistema) ────────────
+  function _renderHora(dose, i) {
+    const hora = (dose.hora || '08:00').slice(0, 5);
+    return `<input class="wiz-input wiz-hora" type="time" data-dose-hora="${i}" value="${hora}">`;
   }
 
   // ─── MED WIZARD ───────────────────────────────────────────
@@ -559,7 +524,7 @@ const Medicamentos = (() => {
               <div class="wiz-dose-fields">
                 <div class="wiz-dose-field">
                   <label class="wiz-label">Horário</label>
-                  ${_renderDrum(dose, i)}
+                  ${_renderHora(dose, i)}
                 </div>
                 <div class="wiz-dose-field">
                   <label class="wiz-label">${tipo.unit}</label>
@@ -993,49 +958,11 @@ const Medicamentos = (() => {
         container.querySelectorAll('[data-vpd]').forEach(b => b.classList.toggle('active', parseInt(b.dataset.vpd) === n));
       });
     });
-    // Drum picker — hora
-    container.querySelectorAll('[data-drum-h]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const up = btn.dataset.drumH === 'up';
-        const i  = parseInt(btn.dataset.drumI, 10);
-        if (!s.doses[i]) return;
-        const [hStr, mStr] = s.doses[i].hora.split(':');
-        let h = parseInt(hStr, 10);
-        h = up ? (h + 23) % 24 : (h + 1) % 24;
-        s.doses[i].hora = `${String(h).padStart(2, '0')}:${mStr}`;
-        const win = container.querySelector(`[data-drum-win-h="${i}"]`);
-        if (win) {
-          const cells = win.querySelectorAll('.drum-cell');
-          cells[0].textContent = String((h + 23) % 24).padStart(2, '0');
-          cells[1].textContent = String(h).padStart(2, '0');
-          cells[2].textContent = String((h + 1)  % 24).padStart(2, '0');
-          win.classList.remove('drum-bump-up', 'drum-bump-dn');
-          void win.offsetWidth;
-          win.classList.add(up ? 'drum-bump-up' : 'drum-bump-dn');
-        }
-      });
-    });
-    // Drum picker — minuto
-    container.querySelectorAll('[data-drum-m]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const up = btn.dataset.drumM === 'up';
-        const i  = parseInt(btn.dataset.drumI, 10);
-        if (!s.doses[i]) return;
-        const [hStr, mStr] = s.doses[i].hora.split(':');
-        let mIdx = DRUM_MINS.indexOf(mStr.padStart(2, '0'));
-        if (mIdx < 0) mIdx = 0;
-        mIdx = up ? (mIdx + 11) % 12 : (mIdx + 1) % 12;
-        s.doses[i].hora = `${hStr}:${DRUM_MINS[mIdx]}`;
-        const win = container.querySelector(`[data-drum-win-m="${i}"]`);
-        if (win) {
-          const cells = win.querySelectorAll('.drum-cell');
-          cells[0].textContent = DRUM_MINS[(mIdx + 11) % 12];
-          cells[1].textContent = DRUM_MINS[mIdx];
-          cells[2].textContent = DRUM_MINS[(mIdx + 1)  % 12];
-          win.classList.remove('drum-bump-up', 'drum-bump-dn');
-          void win.offsetWidth;
-          win.classList.add(up ? 'drum-bump-up' : 'drum-bump-dn');
-        }
+    // Seletor de hora — input nativo (aceita qualquer minuto)
+    container.querySelectorAll('[data-dose-hora]').forEach(inp => {
+      inp.addEventListener('change', () => {
+        const i = parseInt(inp.dataset.doseHora, 10);
+        if (s.doses[i] && inp.value) s.doses[i].hora = inp.value;
       });
     });
     // Dose qty
