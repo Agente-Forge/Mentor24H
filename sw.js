@@ -6,7 +6,7 @@
    (GitHub Pages /controle-financeiro-v2/ ou Live Server /)
 ═══════════════════════════════════════════════════════════ */
 
-const CACHE_NAME = 'mentor24h-v9';
+const CACHE_NAME = 'mentor24h-v10';
 
 const ASSETS = [
   './',
@@ -134,7 +134,6 @@ self.addEventListener('push', event => {
       actions: [
         { action: 'taken', title: '✅ Tomei' },
         { action: 'snooze', title: '⏰ +30min' },
-        { action: 'ignore', title: '✖ Ignorar' },
       ],
     })
   );
