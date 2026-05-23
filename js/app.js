@@ -550,4 +550,7 @@ const Alarm = (() => {
   return { init };
 })();
 
-document.addEventListener('DOMContentLoaded', App.init);
+document.addEventListener('DOMContentLoaded', async () => {
+  await Cloud.init();
+  App.init();
+});
