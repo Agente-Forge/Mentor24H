@@ -36,7 +36,22 @@ const Cloud = (() => {
     _userId = data.id;
     localStorage.setItem(LS_USER_ID, _userId);
     localStorage.setItem(LS_NOME, nome);
+    await _syncExistingData();
     return data;
+  }
+
+  async function _syncExistingData() {
+    const promises = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (!k || SKIP_KEYS.has(k)) continue;
+      if (!k.startsWith('finflow.') && !k.startsWith('mentor24h.')) continue;
+      try {
+        const v = JSON.parse(localStorage.getItem(k));
+        promises.push(sync(k, v));
+      } catch {}
+    }
+    await Promise.all(promises);
   }
 
   async function _loadFromCloud() {
