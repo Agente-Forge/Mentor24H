@@ -4,7 +4,7 @@
 ═══════════════════════════════════════════════════════════ */
 
 const Notifications = (() => {
-  const VAPID_PUBLIC_KEY = 'LZMhhj7o6AGJ5azEh8G5LLDnDAR1DAaPhJxevFtoWryxoV2BAyzwRCx2GNK5d9bRH5bci5-azXyU1lyNB9UZ0A';
+  const VAPID_PUBLIC_KEY = 'BLdSTOUqGlAuOTb5W55jq31OFxWJFfHvFVvgNp8PJBA6U5faLFwKErUglTcvLtAyK-0YSdgX5fX0s3OiRTaDX3A';
   const SB_URL = 'https://qrnvykzozbnqmvicscbr.supabase.co';
   const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFybnZ5a3pvemJucW12aWNzY2JyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0Nzk5NDQsImV4cCI6MjA5NTA1NTk0NH0.j_2HUS_UFLbW57_LzEUplehRp1lmhQdiNS889KcR5lg';
 
