@@ -14,12 +14,12 @@ const Notifications = (() => {
     return Uint8Array.from(raw, c => c.charCodeAt(0));
   }
 
-  async function supported() {
+  function supported() {
     return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
   }
 
   async function status() {
-    if (!await supported()) return 'unsupported';
+    if (!supported()) return 'unsupported';
     const reg = await navigator.serviceWorker.ready.catch(() => null);
     if (!reg) return 'no-sw';
     const sub = await reg.pushManager.getSubscription().catch(() => null);
@@ -28,7 +28,7 @@ const Notifications = (() => {
   }
 
   async function activate() {
-    if (!await supported()) {
+    if (!supported()) {
       Toast.error('Não suportado', 'Seu navegador não suporta notificações push.');
       return false;
     }
@@ -65,7 +65,7 @@ const Notifications = (() => {
       return true;
     } catch (e) {
       console.error('[Notifications] activate:', e);
-      Toast.error('Erro ao ativar', 'Tente novamente.');
+      Toast.error('Erro ao ativar', e.message || 'Tente novamente.');
       return false;
     }
   }
@@ -75,7 +75,6 @@ const Notifications = (() => {
       const reg = await navigator.serviceWorker.ready;
       const sub = await reg.pushManager.getSubscription();
       if (!sub) return;
-      const endpoint = sub.endpoint;
       await sub.unsubscribe();
       await fetch(`${SB_URL}/rest/v1/push_subscriptions?select=id`, {
         method: 'DELETE',
@@ -94,26 +93,42 @@ const Notifications = (() => {
   async function renderButton(containerId) {
     const el = document.getElementById(containerId);
     if (!el) return;
+
     const s = await status();
     const isActive = s === 'active';
     const isDenied = s === 'denied';
-    el.innerHTML = isDenied
-      ? `<div class="cfg-action-row" style="opacity:.6;cursor:default">
+    const isUnsupported = s === 'unsupported';
+
+    if (isUnsupported) {
+      el.innerHTML = `<div class="cfg-action-row" style="opacity:.6;cursor:default">
+           <span class="cfg-action-icon" style="background:rgba(239,68,68,.15)">🔕</span>
+           <div class="cfg-action-info">
+             <span class="cfg-action-label">Não suportado</span>
+             <span class="cfg-action-sub">Este navegador não suporta notificações push</span>
+           </div>
+         </div>`;
+    } else if (isDenied) {
+      el.innerHTML = `<div class="cfg-action-row" style="opacity:.6;cursor:default">
            <span class="cfg-action-icon" style="background:rgba(239,68,68,.15)">🔕</span>
            <div class="cfg-action-info">
              <span class="cfg-action-label">Notificações bloqueadas</span>
              <span class="cfg-action-sub">Permita nas configurações do navegador</span>
            </div>
-         </div>`
-      : isActive
-      ? `<button class="cfg-action-row" onclick="Notifications.deactivate().then(()=>Notifications.renderButton('notif-btn-area'))">
+         </div>`;
+    } else if (isActive) {
+      el.innerHTML = `<button id="notif-deactivate-btn" class="cfg-action-row">
            <span class="cfg-action-icon" style="background:rgba(212,165,116,.15)">🔔</span>
            <div class="cfg-action-info">
              <span class="cfg-action-label">Lembretes ativos</span>
              <span class="cfg-action-sub">Toque para desativar</span>
            </div>
-         </button>`
-      : `<button class="cfg-action-row" onclick="Notifications.activate().then(()=>Notifications.renderButton('notif-btn-area'))">
+         </button>`;
+      el.querySelector('#notif-deactivate-btn').addEventListener('click', async () => {
+        await deactivate();
+        renderButton(containerId);
+      });
+    } else {
+      el.innerHTML = `<button id="notif-activate-btn" class="cfg-action-row">
            <span class="cfg-action-icon cfg-icon-amber">🔔</span>
            <div class="cfg-action-info">
              <span class="cfg-action-label">Ativar lembretes de remédios</span>
@@ -121,7 +136,13 @@ const Notifications = (() => {
            </div>
            <span data-icon="chevron-right" data-size="14" class="cfg-action-arrow"></span>
          </button>`;
-    Icons.render();
+      el.querySelector('#notif-activate-btn').addEventListener('click', async () => {
+        const ok = await activate();
+        if (ok) renderButton(containerId);
+      });
+    }
+
+    Icons.render(el);
   }
 
   return { activate, deactivate, status, supported, renderButton };
