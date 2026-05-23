@@ -553,4 +553,5 @@ const Alarm = (() => {
 document.addEventListener('DOMContentLoaded', async () => {
   await Cloud.init();
   App.init();
+  Cloud.syncAll();
 });
