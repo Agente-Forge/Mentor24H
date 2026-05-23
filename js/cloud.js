@@ -15,6 +15,7 @@ const Cloud = (() => {
     'mentor24h_modoAtivo',
     'mentor24h.cloud.userId',
     'mentor24h.cloud.nome',
+    'finflow.leo-v1',
   ]);
 
   let _userId = null;

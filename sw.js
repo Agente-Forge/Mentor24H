@@ -6,7 +6,7 @@
    (GitHub Pages /controle-financeiro-v2/ ou Live Server /)
 ═══════════════════════════════════════════════════════════ */
 
-const CACHE_NAME = 'mentor24h-v13';
+const CACHE_NAME = 'mentor24h-v14';
 
 const ASSETS = [
   './',
