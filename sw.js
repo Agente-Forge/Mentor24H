@@ -6,7 +6,7 @@
    (GitHub Pages /controle-financeiro-v2/ ou Live Server /)
 ═══════════════════════════════════════════════════════════ */
 
-const CACHE_NAME = 'mentor24h-v5';
+const CACHE_NAME = 'mentor24h-v6';
 
 const ASSETS = [
   './',
@@ -66,6 +66,7 @@ const ASSETS = [
   './js/command-palette.js',
   './js/leo-data.js',
   './js/app.js',
+  './js/notifications.js',
   './js/sidebar-dot.js',
   /* Dados */
   './manifest.json',
@@ -110,19 +111,70 @@ self.addEventListener('fetch', event => {
   );
 });
 
-/* ─── Push: hook agnóstico (Supabase futuro) ─── */
+const SB_URL = 'https://qrnvykzozbnqmvicscbr.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFybnZ5a3pvemJucW12aWNzY2JyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0Nzk5NDQsImV4cCI6MjA5NTA1NTk0NH0.j_2HUS_UFLbW57_LzEUplehRp1lmhQdiNS889KcR5lg';
+
+/* ─── Push: notificação de medicamento com botões de ação ─── */
 self.addEventListener('push', event => {
-  let data = { title: 'Mentor24h', body: 'Nova notificação' };
-  try { data = event.data ? event.data.json() : data; } catch (_) {
-    try { data.body = event.data ? event.data.text() : data.body; } catch (_) {}
+  let data = { title: 'Mentor24h', body: 'Nova notificação', tag: 'default', data: {} };
+  try { if (event.data) data = { ...data, ...event.data.json() }; } catch (_) {
+    try { if (event.data) data.body = event.data.text(); } catch (_) {}
   }
   event.waitUntil(
     self.registration.showNotification(data.title, {
       body: data.body,
       icon: './favicon.svg',
       badge: './favicon.svg',
+      tag: data.tag,
+      renotify: true,
+      data: data.data || {},
+      actions: [
+        { action: 'taken', title: '✅ Tomei' },
+        { action: 'snooze', title: '⏰ +30min' },
+        { action: 'ignore', title: '✖ Ignorar' },
+      ],
     })
   );
+});
+
+/* ─── Clique na notificação ou em um botão de ação ─── */
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+  const action   = event.action;
+  const payload  = event.notification.data || {};
+  const doseId   = payload.dose_id;
+  const userId   = payload.user_id;
+  const medId    = payload.med_id;
+
+  if (action === 'taken' && doseId) {
+    event.waitUntil(
+      fetch(`${SB_URL}/rest/v1/dose_logs`, {
+        method: 'POST',
+        headers: {
+          'apikey': SB_KEY,
+          'Authorization': `Bearer ${SB_KEY}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'resolution=ignore-duplicates,return=minimal',
+        },
+        body: JSON.stringify({ dose_id: doseId, user_id: userId, med_id: medId, taken_at: new Date().toISOString() }),
+      }).catch(() => {})
+    );
+  } else if (action === 'snooze' && doseId) {
+    const snoozeUntil = new Date(Date.now() + 30 * 60 * 1000).toISOString();
+    event.waitUntil(
+      fetch(`${SB_URL}/rest/v1/dose_snoozes`, {
+        method: 'POST',
+        headers: {
+          'apikey': SB_KEY,
+          'Authorization': `Bearer ${SB_KEY}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'resolution=ignore-duplicates,return=minimal',
+        },
+        body: JSON.stringify({ dose_id: doseId, user_id: userId, snooze_until: snoozeUntil }),
+      }).catch(() => {})
+    );
+  }
+  /* ignore → apenas fecha a notificação (já feito acima) */
 });
 
 /* ─── Message: controle externo ─── */

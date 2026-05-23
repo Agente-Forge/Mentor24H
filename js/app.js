@@ -325,7 +325,7 @@ const App = (() => {
     Router.register('metas',      () => Metas.render());
     Router.register('kanban',     () => Kanban.render());
     Router.register('categorias', () => Categorias.render());
-    Router.register('config',     () => { Config.render(); LLM.renderConfig(); });
+    Router.register('config',     () => { Config.render(); LLM.renderConfig(); Notifications.renderButton('notif-btn-area'); });
     Router.register('chat-ai',    () => LLM.render());
     Router.register('chat-wa',    () => ChatWA.render());
     Router.register('agenda',     () => Agenda.render());
