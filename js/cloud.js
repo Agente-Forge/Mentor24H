@@ -75,13 +75,29 @@ const Cloud = (() => {
   async function sync(chave, dados) {
     if (!_userId || SKIP_KEYS.has(chave)) return;
     try {
-      await _db().from('colecoes').upsert(
-        { user_id: _userId, chave, dados, atualizado_em: new Date().toISOString() },
-        { onConflict: 'user_id,chave' }
+      const { error } = await _db().from('colecoes').upsert(
+        { user_id: _userId, chave, dados, atualizado_em: new Date().toISOString() }
       );
+      if (error) console.warn('[Cloud] Sync error —', chave, ':', error.message, error.code);
     } catch (e) {
-      console.warn('[Cloud] Sync error —', chave, ':', e.message);
+      console.warn('[Cloud] Sync exception —', chave, ':', e.message);
     }
+  }
+
+  async function syncAll() {
+    if (!_userId) return;
+    const promises = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (!k || SKIP_KEYS.has(k)) continue;
+      if (!k.startsWith('finflow.') && !k.startsWith('mentor24h.')) continue;
+      try {
+        const v = JSON.parse(localStorage.getItem(k));
+        promises.push(sync(k, v));
+      } catch {}
+    }
+    await Promise.all(promises);
+    console.log('[Cloud] syncAll completo para', _userId);
   }
 
   function _showSetupScreen() {
@@ -135,5 +151,5 @@ const Cloud = (() => {
   function getNome()   { return localStorage.getItem(LS_NOME) || ''; }
   function isReady()   { return _ready; }
 
-  return { init, sync, createUser, getUserId, getNome, isReady };
+  return { init, sync, syncAll, createUser, getUserId, getNome, isReady };
 })();

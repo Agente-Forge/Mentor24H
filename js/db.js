@@ -41,7 +41,7 @@ const DB = (() => {
     try {
       localStorage.setItem(k, JSON.stringify(v));
       if (window.Cloud && Cloud.getUserId()) {
-        Cloud.sync(k, v).catch(() => {});
+        Cloud.sync(k, v).catch(e => console.warn('[DB] sync error:', e));
       }
       return true;
     } catch (e) {
