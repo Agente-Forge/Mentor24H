@@ -136,8 +136,30 @@ const Cloud = (() => {
     });
   }
 
+  async function _userExists(id) {
+    try {
+      const { data, error } = await _db()
+        .from('usuarios')
+        .select('id')
+        .eq('id', id)
+        .maybeSingle();
+      if (error) return true;   // erro de rede → não apagar (assume que existe)
+      return !!data;
+    } catch {
+      return true;              // offline → não apagar
+    }
+  }
+
   async function init() {
     _userId = localStorage.getItem(LS_USER_ID);
+
+    // userId órfão (usuário removido da nuvem) → limpar e recriar
+    if (_userId && !(await _userExists(_userId))) {
+      console.warn('[Cloud] userId órfão, recriando:', _userId);
+      localStorage.removeItem(LS_USER_ID);
+      localStorage.removeItem(LS_NOME);
+      _userId = null;
+    }
 
     if (!_userId) {
       await _showSetupScreen();
