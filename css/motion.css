@@ -53,9 +53,10 @@
 .float { animation: float 3s ease-in-out infinite; }
 
 /* ─── Glow pulse ─── */
+/* box-shadow estático no seletor; só opacity anima (composite only, sem repaint) */
 @keyframes glow {
-  0%, 100% { box-shadow: 0 0 16px var(--color-gold-subtle); }
-  50%      { box-shadow: 0 0 32px var(--color-gold-glow); }
+  0%, 100% { opacity: 0.5; }
+  50%       { opacity: 1; }
 }
 
 /* ─── Confetti ─── */

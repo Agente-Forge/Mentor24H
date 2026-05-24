@@ -4,7 +4,6 @@
 
 const App = (() => {
   function init() {
-    importarDadosLeo();
     DB.updateStatusContas();
     Theme.init();
     initModoSwitcher();        /* Iniciá-lo ANTES de initSidebar */
@@ -174,19 +173,6 @@ const App = (() => {
       openGroupFor(page);
       return originalNavigate.call(Router, page);
     };
-  }
-
-  /* ─── Importação automática dos dados do Léo (única vez, só sem usuário cloud) ─── */
-  function importarDadosLeo() {
-    /* Multi-usuário: com usuário na nuvem, os dados vêm do Cloud, nunca do seed do Léo */
-    if (window.Cloud && Cloud.getUserId()) return;
-    const JA_IMPORTADO = 'finflow.leo-v1';
-    if (localStorage.getItem(JA_IMPORTADO)) return;
-    DB.clearAll();
-    if (typeof LEO_IMPORT_DATA !== 'undefined') {
-      DB.importAll(LEO_IMPORT_DATA);
-    }
-    localStorage.setItem(JA_IMPORTADO, '1');
   }
 
   function syncUserUI() {

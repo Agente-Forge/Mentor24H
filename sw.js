@@ -6,12 +6,12 @@
    (GitHub Pages /controle-financeiro-v2/ ou Live Server /)
 ═══════════════════════════════════════════════════════════ */
 
-const CACHE_NAME = 'mentor24h-v18';
+const CACHE_NAME = 'mentor24h-v19';
 
 const ASSETS = [
   './',
   './index.html',
-  /* CSS */
+  /* CSS — sem ?v= para garantir match com o que o browser requisita */
   './css/tokens.css',
   './css/base.css',
   './css/layout.css',
@@ -25,6 +25,8 @@ const ASSETS = [
   './css/dashboard-pessoal.css',
   './css/painel-negocio.css',
   './css/medicamentos.css',
+  './css/print.css',
+  './css/typography.css',
   /* JS — core */
   './js/supabase.min.js',
   './js/cloud.js',
@@ -39,13 +41,18 @@ const ASSETS = [
   './js/router.js',
   './js/charts.js',
   './js/modal.js',
-  /* JS — módulos Sprint 1 + 2 */
+  /* JS — módulos */
   './js/modules/painel.js',
   './js/modules/dashboard-pessoal.js',
   './js/modules/timeline.js',
   './js/modules/agenda-hibrida.js',
   './js/modules/habitos.js',
   './js/modules/notas.js',
+  './js/modules/datas-importantes.js',
+  './js/modules/rotinas.js',
+  './js/modules/estudos.js',
+  './js/modules/relatorios.js',
+  './js/modules/assistente.js',
   './js/dashboard.js',
   './js/contas.js',
   './js/transacoes.js',
@@ -70,6 +77,7 @@ const ASSETS = [
   './js/sidebar-dot.js',
   /* Dados */
   './manifest.json',
+  './sw.js',
 ];
 
 /* ─── Install: pré-cachear assets (resiliente — 1 falha não derruba tudo) ─── */
@@ -103,7 +111,7 @@ self.addEventListener('fetch', event => {
   if (!event.request.url.startsWith(self.location.origin)) return;
 
   event.respondWith(
-    caches.match(event.request).then(cached => {
+    caches.match(event.request, { ignoreSearch: true }).then(cached => {
       if (cached) return cached;
       return fetch(event.request).then(response => {
         if (!response || response.status !== 200 || response.type !== 'basic') return response;

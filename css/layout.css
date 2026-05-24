@@ -311,7 +311,6 @@
   max-height: 0;
   overflow: hidden;
   transition: max-height var(--d-slow) var(--ease-out);
-  will-change: max-height;
 }
 
 .nav-group.open .nav-group-items { max-height: 400px; }
