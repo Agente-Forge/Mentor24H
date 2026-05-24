@@ -35,11 +35,23 @@ const Cloud = (() => {
         .select('chave, dados')
         .eq('user_id', _userId);
       if (error) throw error;
+      console.log('[Cloud] loadFromCloud — user_id:', _userId, '| rows:', data?.length ?? 0, '| chaves:', data?.map(r => r.chave));
       if (data && data.length) {
         data.forEach(row => localStorage.setItem(row.chave, JSON.stringify(row.dados)));
       }
     } catch (e) {
       console.warn('[Cloud] Load failed — usando dados locais:', e.message);
+    }
+  }
+
+  async function deleteAll() {
+    if (!_userId) return;
+    try {
+      const { error } = await db().from('colecoes').delete().eq('user_id', _userId);
+      if (error) console.warn('[Cloud] deleteAll error:', error.message);
+      else console.log('[Cloud] deleteAll — dados removidos do Supabase para', _userId);
+    } catch (e) {
+      console.warn('[Cloud] deleteAll exception:', e.message);
     }
   }
 
@@ -103,5 +115,5 @@ const Cloud = (() => {
   function setUserId(id) { _userId = id; }
   function isReady()    { return _ready; }
 
-  return { init, db, sync, syncAll, loadUserData, getUserId, setUserId, isReady };
+  return { init, db, sync, syncAll, loadUserData, deleteAll, getUserId, setUserId, isReady };
 })();

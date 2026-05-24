@@ -151,9 +151,10 @@ const Config = (() => {
   function limparTudo() {
     Modal.confirm(
       'Apagar tudo?',
-      'TODOS os seus dados serão perdidos permanentemente.',
-      () => {
+      'TODOS os seus dados serão perdidos permanentemente (local e nuvem).',
+      async () => {
         DB.clearAll();
+        await Cloud.deleteAll();
         Toast.success('Dados apagados');
         setTimeout(() => location.reload(), 1000);
       },

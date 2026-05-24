@@ -146,6 +146,7 @@ const Auth = (() => {
       } else {
         const { data, error } = await Cloud.db().auth.signInWithPassword({ email, password: senha });
         if (error) throw error;
+        console.log('[Auth] login — user.id:', data.user.id, '| email:', data.user.email);
         Cloud.setUserId(data.user.id);
         if (window.DB && DB.clearAll) DB.clearAll();
         await Cloud.loadUserData();
