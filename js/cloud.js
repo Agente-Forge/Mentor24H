@@ -15,6 +15,7 @@ const Cloud = (() => {
 
   let _client = null;
   let _userId = null;
+  let _userName = null;
   let _ready  = false;
 
   function db() {
@@ -71,10 +72,12 @@ const Cloud = (() => {
   /* Inicializa o cliente e detecta sessão existente. Retorna true se logado. */
   async function init() {
     const { data } = await db().auth.getSession();
-    _userId = data?.session?.user?.id || null;
+    _userId   = data?.session?.user?.id || null;
+    _userName = data?.session?.user?.user_metadata?.nome || null;
 
     db().auth.onAuthStateChange((_event, session) => {
-      _userId = session?.user?.id || null;
+      _userId   = session?.user?.id || null;
+      _userName = session?.user?.user_metadata?.nome || null;
     });
 
     _ready = true;
@@ -84,6 +87,16 @@ const Cloud = (() => {
   /* Carrega os dados do usuário logado para o localStorage */
   async function loadUserData() {
     await _loadFromCloud();
+    _reconcileUserName();
+  }
+
+  /* Garante que o nome escolhido no cadastro apareça quando a config vier vazia */
+  function _reconcileUserName() {
+    if (!_userName || !window.DB || !DB.getConfig || !DB.saveConfig) return;
+    const cfg = DB.getConfig();
+    if (!cfg.nomeUsuario || cfg.nomeUsuario === 'Você') {
+      DB.saveConfig({ nomeUsuario: _userName });
+    }
   }
 
   function getUserId() { return _userId; }

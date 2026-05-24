@@ -15,7 +15,7 @@ const DashboardPessoal = (() => {
   function getSaudacao() {
     const h = new Date().getHours();
     const cfg = DB.getConfig ? DB.getConfig() : {};
-    const nome = cfg.nomeUsuario ? cfg.nomeUsuario.split(' ')[0] : 'Léo';
+    const nome = cfg.nomeUsuario ? cfg.nomeUsuario.split(' ')[0] : 'Você';
     if (h >= 5 && h < 12) return `Bom dia, ${nome}!`;
     if (h >= 12 && h < 18) return `Boa tarde, ${nome}!`;
     return `Boa noite, ${nome}!`;

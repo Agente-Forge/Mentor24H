@@ -566,7 +566,7 @@ const DB = (() => {
 
     saveConfig({
       tema: 'dark', moeda: 'BRL',
-      nomeUsuario: 'Léo', saldoInicial: 3500,
+      nomeUsuario: 'Você', saldoInicial: 3500,
       avatarCor: '#A78BFA',
     });
 

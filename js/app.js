@@ -199,7 +199,7 @@ const App = (() => {
     const updateGreeting = () => {
       const h = new Date().getHours();
       const cfg = DB.getConfig();
-      const nome = cfg.nomeUsuario ? cfg.nomeUsuario.split(' ')[0] : 'Léo';
+      const nome = cfg.nomeUsuario ? cfg.nomeUsuario.split(' ')[0] : 'Você';
       let saudacao;
       if (h >= 5 && h < 12) {
         saudacao = `Bom dia, ${nome}!`;
