@@ -130,7 +130,7 @@ const Auth = (() => {
       if (_mode === 'signup') {
         const { data, error } = await Cloud.db().auth.signUp({
           email, password: senha,
-          options: { data: { nome } },
+          options: { data: { nome, display_name: nome } },
         });
         if (error) throw error;
 

@@ -107,7 +107,7 @@ const Cloud = (() => {
     _reconcileUserName();
   }
 
-  /* Garante que o nome escolhido no cadastro apareça quando a config vier vazia */
+  /* Sincroniza o nome do Auth (fonte da verdade) para o config local */
   function _reconcileUserName() {
     if (!_userName || !window.DB || !DB.getConfig || !DB.saveConfig) return;
     const cfg = DB.getConfig();

@@ -102,7 +102,7 @@ const Config = (() => {
     if (picker) picker.style.display = 'none';
   }
 
-  function salvar() {
+  async function salvar() {
     const nome  = document.getElementById('cfg-nome').value.trim();
     const saldo = parseFloat(document.getElementById('cfg-saldo')?.value) || 0;
     const moeda = document.getElementById('cfg-moeda')?.value || 'BRL';
@@ -113,6 +113,11 @@ const Config = (() => {
       moeda,
       avatar: _selectedAvatar
     });
+    /* Atualiza o nome na fonte da verdade (Supabase Auth) para refletir em qualquer browser */
+    if (window.Cloud) {
+      Cloud.db().auth.updateUser({ data: { nome, display_name: nome } })
+        .catch(e => console.warn('[Config] updateUser error:', e.message));
+    }
     updatePreview();
     Toast.success('Preferências salvas');
   }
