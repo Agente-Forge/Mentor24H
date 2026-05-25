@@ -32,12 +32,20 @@ const Cloud = (() => {
     try {
       const { data, error } = await db()
         .from('colecoes')
-        .select('chave, dados')
-        .eq('user_id', _userId);
+        .select('chave, dados, atualizado_em')
+        .eq('user_id', _userId)
+        .order('atualizado_em', { ascending: false });
       if (error) throw error;
       console.log('[Cloud] loadFromCloud — user_id:', _userId, '| rows:', data?.length ?? 0, '| chaves:', data?.map(r => r.chave));
       if (data && data.length) {
-        data.forEach(row => DB._loadRow(row.chave, row.dados));
+        /* Só carrega a primeira ocorrência de cada chave (mais recente por causa do ORDER BY) */
+        const seen = new Set();
+        data.forEach(row => {
+          if (!seen.has(row.chave)) {
+            seen.add(row.chave);
+            DB._loadRow(row.chave, row.dados);
+          }
+        });
       }
     } catch (e) {
       console.warn('[Cloud] Load failed — usando dados locais:', e.message);
@@ -65,7 +73,8 @@ const Cloud = (() => {
     if (!chave.startsWith('finflow.') && !chave.startsWith('mentor24h.')) return;
     try {
       const { error } = await db().from('colecoes').upsert(
-        { user_id: _userId, chave, dados, atualizado_em: new Date().toISOString() }
+        { user_id: _userId, chave, dados, atualizado_em: new Date().toISOString() },
+        { onConflict: 'user_id,chave' }
       );
       if (error) console.warn('[Cloud] Sync error —', chave, ':', error.message, error.code);
     } catch (e) {
