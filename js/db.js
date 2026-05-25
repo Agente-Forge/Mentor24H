@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════
-   DB — LocalStorage data layer
+   DB — In-memory data layer (online-first, Supabase como fonte da verdade)
 ═══════════════════════════════════════════════════════════ */
 
 const DB = (() => {
@@ -28,10 +28,24 @@ const DB = (() => {
     schemaVersion:'mentor24h.schema-version',
   };
 
+  /* Metadados do app que ficam em localStorage (nunca sincronizados) */
+  const LOCALSTORAGE_ONLY = new Set([
+    'mentor24h.schema-version',
+    'finflow.seeded',
+    'mentor24h_nota_rapida',
+    'mentor24h.insights-dispensados',
+  ]);
+
+  /* Store em memória — populado do Supabase no login */
+  const _store = new Map();
+
   function read(k, def = []) {
     try {
-      const v = localStorage.getItem(k);
-      return v ? JSON.parse(v) : def;
+      if (LOCALSTORAGE_ONLY.has(k)) {
+        const v = localStorage.getItem(k);
+        return v ? JSON.parse(v) : def;
+      }
+      return _store.has(k) ? _store.get(k) : def;
     } catch {
       return def;
     }
@@ -39,7 +53,11 @@ const DB = (() => {
 
   function write(k, v) {
     try {
-      localStorage.setItem(k, JSON.stringify(v));
+      if (LOCALSTORAGE_ONLY.has(k)) {
+        localStorage.setItem(k, JSON.stringify(v));
+        return true;
+      }
+      _store.set(k, v);
       if (window.Cloud && Cloud.getUserId()) {
         Cloud.sync(k, v).catch(e => console.warn('[DB] sync error:', e));
       }
@@ -48,6 +66,16 @@ const DB = (() => {
       console.error('Storage error:', e);
       return false;
     }
+  }
+
+  /* Carrega uma linha do Supabase no store sem disparar Cloud.sync */
+  function _loadRow(k, v) {
+    _store.set(k, v);
+  }
+
+  /* Retorna todas as entradas do store para syncAll */
+  function getAllEntries() {
+    return Array.from(_store.entries());
   }
 
   /* ═══ CONFIG ═══ */
@@ -469,7 +497,7 @@ const DB = (() => {
       /* módulos via Repository */
       habitos:      read('mentor24h.habitos', []),
       notas:        read('mentor24h.notas', []),
-      notaRapida:   localStorage.getItem('mentor24h_nota_rapida') || '',
+      notaRapida:   localStorage.getItem('mentor24h_nota_rapida') || '', /* plain string, não JSON */
     };
   }
 
@@ -477,37 +505,40 @@ const DB = (() => {
     if (!data || typeof data !== 'object') return false;
     /* Limpa tudo antes para evitar merge com dados antigos */
     clearAll();
+    /* Usa _loadRow para não disparar Cloud.sync individual — syncAll() cuida disso depois */
     /* finflow.* */
-    if (data.config)       write(KEY.config, data.config);
-    if (data.categorias)   write(KEY.cats, data.categorias);
-    if (data.contas)       write(KEY.contas, data.contas);
-    if (data.transacoes)   write(KEY.txs, data.transacoes);
-    if (data.metas)        write(KEY.metas, data.metas);
-    if (data.movimentos)   write(KEY.movs, data.movimentos);
-    if (data.kanban)       write(KEY.kanban, data.kanban);
+    if (data.config)       _loadRow(KEY.config, data.config);
+    if (data.categorias)   _loadRow(KEY.cats, data.categorias);
+    if (data.contas)       _loadRow(KEY.contas, data.contas);
+    if (data.transacoes)   _loadRow(KEY.txs, data.transacoes);
+    if (data.metas)        _loadRow(KEY.metas, data.metas);
+    if (data.movimentos)   _loadRow(KEY.movs, data.movimentos);
+    if (data.kanban)       _loadRow(KEY.kanban, data.kanban);
     /* mentor24h.* — módulos principais */
-    if (data.agenda)       write(KEY.agenda, data.agenda);
-    if (data.medicamentos) write(KEY.medicamentos, data.medicamentos);
-    if (data.medDoses)     write(KEY.medDoses, data.medDoses);
-    if (data.consultas)    write(KEY.consultas, data.consultas);
-    if (data.tarefas)      write(KEY.tarefas, data.tarefas);
-    if (data.contatos)     write(KEY.contatos, data.contatos);
-    if (data.produtos)     write(KEY.produtos, data.produtos);
-    if (data.vendas)       write(KEY.vendas, data.vendas);
-    if (data.clientesNeg)  write(KEY.clientesNeg, data.clientesNeg);
-    if (data.chatContatos) write(KEY.chatContatos, data.chatContatos);
-    if (data.chatMsgs)     write(KEY.chatMsgs, data.chatMsgs);
-    if (data.llmConversas) write(KEY.llmConversas, data.llmConversas);
+    if (data.agenda)       _loadRow(KEY.agenda, data.agenda);
+    if (data.medicamentos) _loadRow(KEY.medicamentos, data.medicamentos);
+    if (data.medDoses)     _loadRow(KEY.medDoses, data.medDoses);
+    if (data.consultas)    _loadRow(KEY.consultas, data.consultas);
+    if (data.tarefas)      _loadRow(KEY.tarefas, data.tarefas);
+    if (data.contatos)     _loadRow(KEY.contatos, data.contatos);
+    if (data.produtos)     _loadRow(KEY.produtos, data.produtos);
+    if (data.vendas)       _loadRow(KEY.vendas, data.vendas);
+    if (data.clientesNeg)  _loadRow(KEY.clientesNeg, data.clientesNeg);
+    if (data.chatContatos) _loadRow(KEY.chatContatos, data.chatContatos);
+    if (data.chatMsgs)     _loadRow(KEY.chatMsgs, data.chatMsgs);
+    if (data.llmConversas) _loadRow(KEY.llmConversas, data.llmConversas);
     /* módulos via Repository */
-    if (data.habitos)      write('mentor24h.habitos', data.habitos);
-    if (data.notas)        write('mentor24h.notas', data.notas);
-    if (data.notaRapida)   localStorage.setItem('mentor24h_nota_rapida', data.notaRapida);
+    if (data.habitos)      _loadRow('mentor24h.habitos', data.habitos);
+    if (data.notas)        _loadRow('mentor24h.notas', data.notas);
+    if (data.notaRapida)   localStorage.setItem('mentor24h_nota_rapida', data.notaRapida); /* plain string */
     return true;
   }
 
   function clearAll() {
-    Object.values(KEY).forEach(k => localStorage.removeItem(k));
-    EXTRA_KEYS.forEach(k => localStorage.removeItem(k));
+    _store.clear();
+    /* dados de usuário que ficam em localStorage */
+    localStorage.removeItem('mentor24h_nota_rapida');
+    localStorage.removeItem('mentor24h.insights-dispensados');
   }
 
   /* ═══ SEED ═══ */
@@ -980,5 +1011,6 @@ const DB = (() => {
     seed, isSeeded,
     getAll, getById, save, remove,
     runMigrations,
+    _loadRow, getAllEntries,
   };
 })();

@@ -37,7 +37,7 @@ const Cloud = (() => {
       if (error) throw error;
       console.log('[Cloud] loadFromCloud — user_id:', _userId, '| rows:', data?.length ?? 0, '| chaves:', data?.map(r => r.chave));
       if (data && data.length) {
-        data.forEach(row => localStorage.setItem(row.chave, JSON.stringify(row.dados)));
+        data.forEach(row => DB._loadRow(row.chave, row.dados));
       }
     } catch (e) {
       console.warn('[Cloud] Load failed — usando dados locais:', e.message);
@@ -76,11 +76,9 @@ const Cloud = (() => {
   async function syncAll() {
     if (!_userId) return;
     const promises = [];
-    for (let i = 0; i < localStorage.length; i++) {
-      const k = localStorage.key(i);
-      if (!k || SKIP_KEYS.has(k)) continue;
-      if (!k.startsWith('finflow.') && !k.startsWith('mentor24h.')) continue;
-      try { promises.push(sync(k, JSON.parse(localStorage.getItem(k)))); } catch {}
+    for (const [k, v] of DB.getAllEntries()) {
+      if (SKIP_KEYS.has(k)) continue;
+      promises.push(sync(k, v));
     }
     await Promise.all(promises);
     console.log('[Cloud] syncAll completo para', _userId);
