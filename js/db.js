@@ -431,10 +431,19 @@ const DB = (() => {
     return Utils.clamp(Math.round(score), 0, 100);
   }
 
+  /* Chaves extras usadas por módulos via Repository (não estão no KEY object) */
+  const EXTRA_KEYS = [
+    'mentor24h.habitos',
+    'mentor24h.notas',
+    'mentor24h.consultas',
+    'mentor24h_nota_rapida',
+    'mentor24h.insights-dispensados',
+  ];
+
   /* ═══ EXPORT/IMPORT ═══ */
   function exportAll() {
     return {
-      version: 3,
+      version: 4,
       exportedAt: new Date().toISOString(),
       /* finflow.* */
       config:       getConfig(),
@@ -444,10 +453,11 @@ const DB = (() => {
       metas:        read(KEY.metas, []),
       movimentos:   read(KEY.movs, []),
       kanban:       read(KEY.kanban, []),
-      /* mentor24h.* */
+      /* mentor24h.* — módulos principais */
       agenda:       read(KEY.agenda, []),
       medicamentos: read(KEY.medicamentos, []),
       medDoses:     read(KEY.medDoses, []),
+      consultas:    read(KEY.consultas, []),
       tarefas:      read(KEY.tarefas, []),
       contatos:     read(KEY.contatos, []),
       produtos:     read(KEY.produtos, []),
@@ -456,11 +466,17 @@ const DB = (() => {
       chatContatos: read(KEY.chatContatos, []),
       chatMsgs:     read(KEY.chatMsgs, []),
       llmConversas: read(KEY.llmConversas, []),
+      /* módulos via Repository */
+      habitos:      read('mentor24h.habitos', []),
+      notas:        read('mentor24h.notas', []),
+      notaRapida:   localStorage.getItem('mentor24h_nota_rapida') || '',
     };
   }
 
   function importAll(data) {
     if (!data || typeof data !== 'object') return false;
+    /* Limpa tudo antes para evitar merge com dados antigos */
+    clearAll();
     /* finflow.* */
     if (data.config)       write(KEY.config, data.config);
     if (data.categorias)   write(KEY.cats, data.categorias);
@@ -469,10 +485,11 @@ const DB = (() => {
     if (data.metas)        write(KEY.metas, data.metas);
     if (data.movimentos)   write(KEY.movs, data.movimentos);
     if (data.kanban)       write(KEY.kanban, data.kanban);
-    /* mentor24h.* */
+    /* mentor24h.* — módulos principais */
     if (data.agenda)       write(KEY.agenda, data.agenda);
     if (data.medicamentos) write(KEY.medicamentos, data.medicamentos);
     if (data.medDoses)     write(KEY.medDoses, data.medDoses);
+    if (data.consultas)    write(KEY.consultas, data.consultas);
     if (data.tarefas)      write(KEY.tarefas, data.tarefas);
     if (data.contatos)     write(KEY.contatos, data.contatos);
     if (data.produtos)     write(KEY.produtos, data.produtos);
@@ -481,11 +498,16 @@ const DB = (() => {
     if (data.chatContatos) write(KEY.chatContatos, data.chatContatos);
     if (data.chatMsgs)     write(KEY.chatMsgs, data.chatMsgs);
     if (data.llmConversas) write(KEY.llmConversas, data.llmConversas);
+    /* módulos via Repository */
+    if (data.habitos)      write('mentor24h.habitos', data.habitos);
+    if (data.notas)        write('mentor24h.notas', data.notas);
+    if (data.notaRapida)   localStorage.setItem('mentor24h_nota_rapida', data.notaRapida);
     return true;
   }
 
   function clearAll() {
     Object.values(KEY).forEach(k => localStorage.removeItem(k));
+    EXTRA_KEYS.forEach(k => localStorage.removeItem(k));
   }
 
   /* ═══ SEED ═══ */

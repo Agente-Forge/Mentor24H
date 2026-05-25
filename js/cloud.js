@@ -47,9 +47,14 @@ const Cloud = (() => {
   async function deleteAll() {
     if (!_userId) return;
     try {
-      const { error } = await db().from('colecoes').delete().eq('user_id', _userId);
-      if (error) console.warn('[Cloud] deleteAll error:', error.message);
-      else console.log('[Cloud] deleteAll — dados removidos do Supabase para', _userId);
+      const [r1, r2, r3] = await Promise.all([
+        db().from('colecoes').delete().eq('user_id', _userId),
+        db().from('dose_logs').delete().eq('user_id', _userId),
+        db().from('dose_snoozes').delete().eq('user_id', _userId),
+      ]);
+      const err = r1.error || r2.error || r3.error;
+      if (err) console.warn('[Cloud] deleteAll error:', err.message);
+      else console.log('[Cloud] deleteAll — todas as tabelas limpas para', _userId);
     } catch (e) {
       console.warn('[Cloud] deleteAll exception:', e.message);
     }

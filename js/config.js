@@ -123,24 +123,31 @@ const Config = (() => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `finflow-backup-${todayISO()}.json`;
+    a.download = `mentor24h-backup-${todayISO()}.json`;
+    document.body.appendChild(a);
     a.click();
-    URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+    /* Revoga após um tick para garantir que o download iniciou */
+    setTimeout(() => URL.revokeObjectURL(url), 100);
     Toast.success('Backup exportado');
   }
 
   function importar(file) {
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       try {
         const data = JSON.parse(e.target.result);
-        if (DB.importAll(data)) {
-          Toast.success('Dados importados', 'Recarregando…');
-          setTimeout(() => location.reload(), 1200);
-        } else {
-          Toast.error('Arquivo inválido');
-        }
+        if (!DB.importAll(data)) { Toast.error('Arquivo inválido'); return; }
+
+        Toast.info('Importando…', 'Sincronizando com a nuvem…');
+
+        /* Apaga dados antigos do Supabase e envia os importados */
+        await Cloud.deleteAll();
+        await Cloud.syncAll();
+
+        Toast.success('Dados importados', 'Recarregando…');
+        setTimeout(() => location.reload(), 1200);
       } catch {
         Toast.error('Arquivo corrompido', 'JSON inválido');
       }
