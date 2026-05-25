@@ -11,11 +11,7 @@ const ChatWA = (() => {
     const container = document.getElementById('chat-wa-content');
     if (!container) return;
 
-    const contatos = DB.getChatContatos();
-
-    /* Seed de demo se vazio */
-    if (!contatos.length) seedDemo();
-
+    /* Sem auto-seed: chat vazio mostra estado vazio (não re-injeta dados demo) */
     const contatosAtualizados = DB.getChatContatos();
 
     container.innerHTML = `

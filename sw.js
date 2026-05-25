@@ -6,7 +6,7 @@
    (GitHub Pages /controle-financeiro-v2/ ou Live Server /)
 ═══════════════════════════════════════════════════════════ */
 
-const CACHE_NAME = 'mentor24h-v25';
+const CACHE_NAME = 'mentor24h-v26';
 
 const ASSETS = [
   './',
@@ -106,20 +106,26 @@ self.addEventListener('activate', event => {
   );
 });
 
-/* ─── Fetch: cache-first, fallback para rede ─── */
+/* ─── Fetch: network-first para código (sempre fresco), cache como fallback offline ───
+   Motivo: cache-first servia JS velho e ignorava os ?v= → fixes não chegavam ao usuário.
+   Agora: online sempre pega a versão mais nova; offline usa o cache. ─── */
 self.addEventListener('fetch', event => {
-  if (!event.request.url.startsWith(self.location.origin)) return;
+  const req = event.request;
+  /* Só intercepta same-origin (Supabase e outras APIs passam direto) */
+  if (!req.url.startsWith(self.location.origin)) return;
+  /* Só GET é cacheável */
+  if (req.method !== 'GET') return;
 
   event.respondWith(
-    caches.match(event.request, { ignoreSearch: true }).then(cached => {
-      if (cached) return cached;
-      return fetch(event.request).then(response => {
-        if (!response || response.status !== 200 || response.type !== 'basic') return response;
-        const clone = response.clone();
-        caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+    fetch(req)
+      .then(response => {
+        if (response && response.status === 200 && response.type === 'basic') {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(req, clone));
+        }
         return response;
-      });
-    })
+      })
+      .catch(() => caches.match(req, { ignoreSearch: true }))
   );
 });
 
