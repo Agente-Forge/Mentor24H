@@ -103,23 +103,28 @@ const Config = (() => {
   }
 
   async function salvar() {
-    const nome  = document.getElementById('cfg-nome').value.trim();
-    const saldo = parseFloat(document.getElementById('cfg-saldo')?.value) || 0;
-    const moeda = document.getElementById('cfg-moeda')?.value || 'BRL';
-    if (!nome) { Toast.error('Nome obrigatório'); return; }
-    DB.saveConfig({
-      nomeUsuario: nome,
-      saldoInicial: saldo,
-      moeda,
-      avatar: _selectedAvatar
-    });
-    /* Atualiza o nome na fonte da verdade (Supabase Auth) para refletir em qualquer browser */
-    if (window.Cloud) {
-      Cloud.db().auth.updateUser({ data: { nome, display_name: nome } })
-        .catch(e => console.warn('[Config] updateUser error:', e.message));
+    try {
+      const nome  = (document.getElementById('cfg-nome')?.value || '').trim();
+      const saldo = parseFloat(document.getElementById('cfg-saldo')?.value) || 0;
+      const moeda = document.getElementById('cfg-moeda')?.value || 'BRL';
+      if (!nome) { Toast.error('Nome obrigatório'); return; }
+      DB.saveConfig({
+        nomeUsuario: nome,
+        saldoInicial: saldo,
+        moeda,
+        avatar: _selectedAvatar,
+      });
+      /* Atualiza o nome na fonte da verdade (Supabase Auth) para refletir em qualquer browser */
+      if (window.Cloud && Cloud.getUserId()) {
+        Cloud.db().auth.updateUser({ data: { nome, display_name: nome } })
+          .catch(e => console.warn('[Config] updateUser error:', e.message));
+      }
+      updatePreview();
+      Toast.success('Preferências salvas');
+    } catch (e) {
+      console.error('[Config] salvar error:', e);
+      Toast.error('Erro ao salvar', e.message);
     }
-    updatePreview();
-    Toast.success('Preferências salvas');
   }
 
   function exportar() {
